@@ -475,7 +475,7 @@ Shanghai Innovation Institute</span>
               <div class="field">
                 <label class="label">Top-K Results</label>
                 <div class="control">
-                  <input class="input" type="number" id="rag-topk" value="5" min="1" max="20">
+                  <input class="input" type="number" id="rag-topk" value="20" readonly disabled>
                 </div>
               </div>
             </div>
@@ -483,29 +483,15 @@ Shanghai Innovation Institute</span>
               <div class="field">
                 <label class="label">Retrieval Model</label>
                 <div class="control">
-                  <div class="select is-fullwidth">
-                    <select id="rag-retriever">
-                      <option value="bge-m3">BGE-M3</option>
-                      <option value="bge-large">BGE-Large-zh</option>
-                      <option value="text-embedding-3-large">text-embedding-3-large</option>
-                      <option value="bm25">BM25</option>
-                    </select>
-                  </div>
+                  <input class="input" type="text" id="rag-retriever" value="Qwen3-Embedding-8B" readonly disabled>
                 </div>
               </div>
             </div>
             <div class="column">
               <div class="field">
-                <label class="label">Generation Model</label>
+                <label class="label">Reranker Model</label>
                 <div class="control">
-                  <div class="select is-fullwidth">
-                    <select id="rag-generator">
-                      <option value="deepseek-v3">DeepSeek-V3</option>
-                      <option value="gpt-4o">GPT-4o</option>
-                      <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                      <option value="qwen2.5-72b">Qwen2.5-72B</option>
-                    </select>
-                  </div>
+                  <input class="input" type="text" id="rag-reranker" value="Qwen3-Reranker-8B" readonly disabled>
                 </div>
               </div>
             </div>
