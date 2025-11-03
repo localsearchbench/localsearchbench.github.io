@@ -563,16 +563,53 @@ Shanghai Innovation Institute</span>
           <div class="field">
             <label class="label">Query</label>
             <div class="control">
-              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
+              <textarea class="textarea" id="agentic-query" placeholder="Enter your search query..."></textarea>
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">LRM Model</label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select id="agentic-model">
+                  <optgroup label="Proprietary LRMs">
+                    <option value="gpt-4.1">🟢 GPT-4.1</option>
+                    <option value="gemini-2.5-pro">🔵 Gemini-2.5-Pro</option>
+                    <option value="qwen-plus-latest">🔮 Qwen-Plus-Latest</option>
+                    <option value="longcat-large-32k">🟢 LongCat-Large-32K</option>
+                    <option value="hunyuan-t1">🌐 Hunyuan-T1</option>
+                  </optgroup>
+                  <optgroup label="Open-source LRMs">
+                    <option value="qwen3-235b-a22b">🔮 Qwen3-235B-A22B</option>
+                    <option value="qwen3-32b">🔮 Qwen3-32B</option>
+                    <option value="qwen3-14b">🔮 Qwen3-14B</option>
+                    <option value="glm-4.5">🔵 GLM-4.5</option>
+                    <option value="deepseek-v3.1" selected>🔷 Deepseek-V3.1</option>
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="field">
             <div class="control">
-              <button class="button is-primary is-fullwidth">
+              <button class="button is-primary is-fullwidth" onclick="runAgenticSearch()">
                 <span class="icon"><i class="fas fa-play"></i></span>
                 <span>Run Agentic Search</span>
               </button>
             </div>
+          </div>
+
+          <!-- Results Area -->
+          <div class="results-area" id="agentic-results" style="display: none;">
+            <h4 class="subtitle is-6">Search Process</h4>
+            <div class="search-process" id="search-process"></div>
+            
+            <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Final Answer</h4>
+            <div class="generated-answer" id="agentic-answer"></div>
+
+            <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Evaluation Metrics</h4>
+            <div class="metrics" id="agentic-metrics"></div>
           </div>
         </div>
       </div>

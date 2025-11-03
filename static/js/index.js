@@ -322,6 +322,194 @@ function displayRAGResults(response) {
     resultsArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Agentic Search Function
+async function runAgenticSearch() {
+    const query = document.getElementById('agentic-query').value;
+    const model = document.getElementById('agentic-model').value;
+    
+    if (!query.trim()) {
+        alert('Please enter a query first!');
+        return;
+    }
+    
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    button.disabled = true;
+    
+    try {
+        // Simulate API call (replace with actual API endpoint)
+        const response = await simulateAgenticSearch(query, model);
+        
+        // Display results
+        displayAgenticResults(response);
+        
+    } catch (error) {
+        console.error('Error running agentic search:', error);
+        alert('An error occurred while running the search. Please try again.');
+    } finally {
+        // Restore button state
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+    }
+}
+
+// Simulate Agentic search (replace with actual API call)
+async function simulateAgenticSearch(query, model) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Mock response data
+    return {
+        search_steps: [
+            {
+                step: 1,
+                action: "Query Analysis",
+                description: "Analyzing user query and extracting key requirements...",
+                result: "Extracted: location=五道口, type=火锅, requirements=[高评分, 营业晚, 停车位]"
+            },
+            {
+                step: 2,
+                action: "Merchant Search",
+                description: "Searching for hotpot restaurants in Wudaokou area...",
+                result: "Found 15 matching merchants"
+            },
+            {
+                step: 3,
+                action: "Filter by Operating Hours",
+                description: "Filtering restaurants that operate late (after 22:00)...",
+                result: "5 restaurants match the late-night requirement"
+            },
+            {
+                step: 4,
+                action: "Check Parking Availability",
+                description: "Verifying parking facilities for filtered restaurants...",
+                result: "3 restaurants have parking available"
+            },
+            {
+                step: 5,
+                action: "Rank by Rating",
+                description: "Sorting results by customer ratings...",
+                result: "Top 3 restaurants identified"
+            }
+        ],
+        final_answer: `基于多步推理和工具调用，我为您推荐以下火锅餐厅：
+
+**最佳推荐：海底捞火锅 (五道口店)**
+- 📍 位置：五道口地铁站A口步行3分钟
+- ⏰ 营业时间：10:00-02:00 ✅ 营业到凌晨
+- 🅿️ 停车：免费停车位60个
+- ⭐ 评分：4.8/5.0（共12,453条评价）
+- 💰 人均：120元
+- 🔥 特色：24小时服务、免费小食、排队管理系统
+
+**备选方案：**
+
+1. **小龙坎火锅 (清华店)**
+   - 📍 清华东路，距离五道口1.2公里
+   - ⏰ 10:30-23:30
+   - 🅿️ 免费停车2小时
+   - ⭐ 4.7/5.0
+   - 💰 150元
+
+2. **蜀大侠火锅**
+   - 📍 五道口购物中心3楼
+   - ⏰ 11:00-01:00 ✅ 营业到凌晨
+   - 🅿️ 地下停车场（与商场共享）
+   - ⭐ 4.7/5.0
+   - 💰 140元
+
+**推理过程：**
+通过5步搜索过程，从15家候选餐厅中筛选出符合"高评分+营业晚+有停车"的3家餐厅。海底捞因其最高评分(4.8)、最晚营业时间(02:00)和充足停车位(60个)被评为首选。`,
+        metrics: {
+            correctness: 0.92,
+            completeness: 0.94,
+            faithfulness: 0.89,
+            total_time: "2.87s",
+            steps_count: 5
+        },
+        model_used: model
+    };
+}
+
+function displayAgenticResults(response) {
+    const resultsArea = document.getElementById('agentic-results');
+    const processDiv = document.getElementById('search-process');
+    const answerDiv = document.getElementById('agentic-answer');
+    const metricsDiv = document.getElementById('agentic-metrics');
+    
+    // Display search process
+    processDiv.innerHTML = response.search_steps.map((step, index) => `
+        <div class="box" style="margin-bottom: 1rem; border-left: 4px solid ${index === response.search_steps.length - 1 ? '#48c774' : '#3273dc'};">
+            <div style="display: flex; align-items: start;">
+                <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
+                    ${step.step}
+                </div>
+                <div style="flex: 1;">
+                    <p class="has-text-weight-semibold" style="color: #363636;">${step.action}</p>
+                    <p class="is-size-7" style="margin-top: 0.25rem; color: #7a7a7a;">${step.description}</p>
+                    <p class="is-size-7" style="margin-top: 0.5rem; padding: 0.5rem; background-color: #f5f5f5; border-radius: 4px; font-family: monospace;">${step.result}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Display final answer
+    answerDiv.innerHTML = `
+        <div class="box" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea;">
+            <div class="content">
+                ${response.final_answer.replace(/\n/g, '<br>')}
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
+                <span class="tag is-info">Model: ${response.model_used}</span>
+            </div>
+        </div>
+    `;
+    
+    // Display metrics
+    metricsDiv.innerHTML = `
+        <div class="columns">
+            <div class="column">
+                <div class="box has-text-centered">
+                    <p class="heading">Correctness</p>
+                    <p class="title is-4" style="color: #48c774;">${(response.metrics.correctness * 100).toFixed(1)}%</p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-text-centered">
+                    <p class="heading">Completeness</p>
+                    <p class="title is-4" style="color: #3273dc;">${(response.metrics.completeness * 100).toFixed(1)}%</p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-text-centered">
+                    <p class="heading">Faithfulness</p>
+                    <p class="title is-4" style="color: #ffdd57;">${(response.metrics.faithfulness * 100).toFixed(1)}%</p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-text-centered">
+                    <p class="heading">Steps</p>
+                    <p class="title is-4">${response.metrics.steps_count}</p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Time</p>
+                    <p class="title is-4">${response.metrics.total_time}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Show results area
+    resultsArea.style.display = 'block';
+    
+    // Scroll to results
+    resultsArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 $(document).ready(function() {
     // Check for click events on the navbar burger icon
 
