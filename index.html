@@ -424,7 +424,7 @@ Shanghai Innovation Institute</span>
           </p>
           <div class="notification is-info is-light" style="margin-top: 1rem;">
             <p style="text-align: center; margin: 0;">
-              <strong>📍 Supported Cities:</strong> Currently supports Shanghai, Beijing, Guangzhou, Shenzhen, Wuhan, Chongqing, Chengdu, Suzhou, and Nanjing. Other cities are under development.
+              <strong>📍 Supported Cities:</strong> Currently supports <strong>Shanghai</strong>, <strong>Beijing</strong>, <strong>Guangzhou</strong>, <strong>Shenzhen</strong>, <strong>Wuhan</strong>, <strong>Chongqing</strong>, <strong>Chengdu</strong>, <strong>Suzhou</strong>, and <strong>Nanjing</strong>. Other cities are under development.
             </p>
           </div>
         </div>
@@ -438,22 +438,16 @@ Shanghai Innovation Institute</span>
         <h3 class="subtitle is-5">Select Search Method</h3>
         <div class="tabs is-centered is-boxed">
           <ul>
+            <li data-tab="web">
+              <a onclick="switchTool('web')">
+                <span class="icon is-small"><i class="fas fa-globe"></i></span>
+                <span>Web Search</span>
+              </a>
+            </li>
             <li class="is-active" data-tab="rag">
               <a onclick="switchTool('rag')">
                 <span class="icon is-small"><i class="fas fa-search"></i></span>
                 <span>RAG Search</span>
-              </a>
-            </li>
-            <li data-tab="semantic">
-              <a onclick="switchTool('semantic')">
-                <span class="icon is-small"><i class="fas fa-brain"></i></span>
-                <span>Semantic Search</span>
-              </a>
-            </li>
-            <li data-tab="hybrid">
-              <a onclick="switchTool('hybrid')">
-                <span class="icon is-small"><i class="fas fa-layer-group"></i></span>
-                <span>Hybrid Search</span>
               </a>
             </li>
             <li data-tab="agentic">
@@ -540,48 +534,36 @@ Shanghai Innovation Institute</span>
         </div>
       </div>
 
-      <!-- Semantic Search Panel -->
-      <div class="tool-panel" id="semantic-panel">
+      <!-- Web Search Panel -->
+      <div class="tool-panel" id="web-panel">
         <div class="panel-content">
           <div class="notification is-info is-light">
-            <p><strong>Semantic Search</strong> uses dense embeddings to find semantically similar merchants and products.</p>
+            <p><strong>Web Search</strong> performs traditional keyword-based search across local merchants and products.</p>
           </div>
           <div class="field">
             <label class="label">Query</label>
             <div class="control">
-              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
+              <textarea class="textarea" id="web-query" placeholder="e.g., hotpot restaurant in Wudaokou"></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Top-K Results</label>
+            <div class="control">
+              <input class="input" type="number" id="web-topk" value="10" min="1" max="50">
             </div>
           </div>
           <div class="field">
             <div class="control">
-              <button class="button is-primary is-fullwidth">
+              <button class="button is-primary is-fullwidth" onclick="runWebSearch()">
                 <span class="icon"><i class="fas fa-play"></i></span>
-                <span>Run Semantic Search</span>
+                <span>Run Web Search</span>
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Hybrid Search Panel -->
-      <div class="tool-panel" id="hybrid-panel">
-        <div class="panel-content">
-          <div class="notification is-info is-light">
-            <p><strong>Hybrid Search</strong> combines keyword-based and semantic search for better results.</p>
-          </div>
-          <div class="field">
-            <label class="label">Query</label>
-            <div class="control">
-              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
-            </div>
-          </div>
-          <div class="field">
-            <div class="control">
-              <button class="button is-primary is-fullwidth">
-                <span class="icon"><i class="fas fa-play"></i></span>
-                <span>Run Hybrid Search</span>
-              </button>
-            </div>
+          <!-- Results Area -->
+          <div class="results-area" id="web-results" style="display: none;">
+            <h4 class="subtitle is-6">Search Results</h4>
+            <div class="search-results" id="web-search-results"></div>
           </div>
         </div>
       </div>
