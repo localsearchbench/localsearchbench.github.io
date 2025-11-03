@@ -151,10 +151,35 @@ const exampleQueries = [
 
 function loadExample(index) {
     const query = exampleQueries[index];
-    const queryInput = document.getElementById('rag-query');
+    
+    // Find the currently active tab/panel
+    const activeTab = document.querySelector('.tabs li.is-active');
+    let queryInputId = 'rag-query'; // default to RAG
+    
+    if (activeTab) {
+        const tabText = activeTab.textContent.trim();
+        if (tabText.includes('Web Search')) {
+            queryInputId = 'web-query';
+        } else if (tabText.includes('Agentic Search')) {
+            queryInputId = 'agentic-query';
+        } else if (tabText.includes('RAG Search')) {
+            queryInputId = 'rag-query';
+        }
+    }
+    
+    const queryInput = document.getElementById(queryInputId);
     if (queryInput) {
         queryInput.value = query;
+        // Focus on the input
+        queryInput.focus();
+        // Scroll to the input
         queryInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Add a highlight effect
+        queryInput.style.transition = 'box-shadow 0.3s ease';
+        queryInput.style.boxShadow = '0 0 0 0.2em rgba(50, 115, 220, 0.25)';
+        setTimeout(() => {
+            queryInput.style.boxShadow = '';
+        }, 1000);
     }
 }
 
