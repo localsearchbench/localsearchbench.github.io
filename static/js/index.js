@@ -146,7 +146,10 @@ function switchTool(toolName) {
 const exampleQueries = [
     "I want to find a highly-rated hotpot restaurant near Wudaokou that's open late and has parking available.",
     "I need a hotel near Beijing West Railway Station with good reviews and breakfast included for under 500 RMB.",
-    "Looking for a movie theater showing the latest Marvel film in IMAX near Sanlitun."
+    "Looking for a movie theater showing the latest Marvel film in IMAX near Sanlitun.",
+    "I need to buy a birthday cake with fresh fruit decoration near Zhongguancun, preferably from a popular bakery.",
+    "Looking for a reliable dental clinic near Guomao with English-speaking doctors and good patient reviews.",
+    "Planning to visit the Great Wall this weekend, need recommendations for the best section and transportation options."
 ];
 
 function loadExample(index) {
