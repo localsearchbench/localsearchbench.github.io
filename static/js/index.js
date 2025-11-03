@@ -150,14 +150,18 @@ const exampleQueries = [
 ];
 
 function loadExample(index) {
+    console.log('loadExample called with index:', index);
     const query = exampleQueries[index];
+    console.log('Query:', query);
     
     // Find the currently active tab/panel
     const activeTab = document.querySelector('.tabs li.is-active');
+    console.log('Active tab:', activeTab);
     let queryInputId = 'rag-query'; // default to RAG
     
     if (activeTab) {
         const tabText = activeTab.textContent.trim();
+        console.log('Tab text:', tabText);
         if (tabText.includes('Web Search')) {
             queryInputId = 'web-query';
         } else if (tabText.includes('Agentic Search')) {
@@ -167,7 +171,10 @@ function loadExample(index) {
         }
     }
     
+    console.log('Query input ID:', queryInputId);
     const queryInput = document.getElementById(queryInputId);
+    console.log('Query input element:', queryInput);
+    
     if (queryInput) {
         queryInput.value = query;
         // Focus on the input
@@ -180,6 +187,8 @@ function loadExample(index) {
         setTimeout(() => {
             queryInput.style.boxShadow = '';
         }, 1000);
+    } else {
+        console.error('Query input not found for ID:', queryInputId);
     }
 }
 
