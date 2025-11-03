@@ -242,7 +242,7 @@
           <div class="column has-text-centered">
             <!-- TODO: Replace with your paper title -->
             <h1 class="title is-1 publication-title">
-              <img src="static/images/meituan.png" alt="Meituan Logo" style="height: 1.0em; vertical-align: middle; margin-right: 0.3em;">
+              <img src="static/images/meituan.png" alt="Meituan Logo" style="height: 0.9em; vertical-align: middle; margin-right: 0.3em;">
               LocalSearchBench: Benchmarking Agentic Search in Real-World
 Local Life Services</h1>
             <div class="is-size-5 publication-authors">
@@ -410,6 +410,309 @@ Shanghai Innovation Institute</span>
   </div>
 </section>
 <!-- End paper abstract -->
+
+<!-- Playground Section -->
+<section class="section" id="playground">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">🛠️ LocalPlayground</h2>
+        <div class="content has-text-justified">
+          <p style="text-align: center;">
+            Try our interactive playground to test different agentic search methods on LocalSearchBench.
+            Select tools, enter queries, and see how different approaches perform.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playground Interface -->
+    <div class="playground-container">
+      <!-- Tool Selection -->
+      <div class="tool-selection">
+        <h3 class="subtitle is-5">Select Search Method</h3>
+        <div class="tabs is-centered is-boxed">
+          <ul>
+            <li class="is-active" data-tab="rag">
+              <a onclick="switchTool('rag')">
+                <span class="icon is-small"><i class="fas fa-search"></i></span>
+                <span>RAG Search</span>
+              </a>
+            </li>
+            <li data-tab="semantic">
+              <a onclick="switchTool('semantic')">
+                <span class="icon is-small"><i class="fas fa-brain"></i></span>
+                <span>Semantic Search</span>
+              </a>
+            </li>
+            <li data-tab="hybrid">
+              <a onclick="switchTool('hybrid')">
+                <span class="icon is-small"><i class="fas fa-layer-group"></i></span>
+                <span>Hybrid Search</span>
+              </a>
+            </li>
+            <li data-tab="agentic">
+              <a onclick="switchTool('agentic')">
+                <span class="icon is-small"><i class="fas fa-robot"></i></span>
+                <span>Agentic Search</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RAG Search Panel -->
+      <div class="tool-panel active" id="rag-panel">
+        <div class="panel-content">
+          <div class="field">
+            <label class="label">Query</label>
+            <div class="control">
+              <textarea class="textarea" id="rag-query" placeholder="e.g., I want to find a highly-rated hotpot restaurant near Wudaokou that's open late and has parking..."></textarea>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">Top-K Results</label>
+                <div class="control">
+                  <input class="input" type="number" id="rag-topk" value="5" min="1" max="20">
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label">Retrieval Model</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="rag-retriever">
+                      <option value="bge-m3">BGE-M3</option>
+                      <option value="bge-large">BGE-Large-zh</option>
+                      <option value="text-embedding-3-large">text-embedding-3-large</option>
+                      <option value="bm25">BM25</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label">Generation Model</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="rag-generator">
+                      <option value="deepseek-v3">DeepSeek-V3</option>
+                      <option value="gpt-4o">GPT-4o</option>
+                      <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                      <option value="qwen2.5-72b">Qwen2.5-72B</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="control">
+              <button class="button is-primary is-fullwidth" onclick="runRAG()">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Run RAG Search</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Area -->
+          <div class="results-area" id="rag-results" style="display: none;">
+            <h4 class="subtitle is-6">Retrieved Documents</h4>
+            <div class="retrieved-docs" id="retrieved-docs"></div>
+            
+            <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Generated Answer</h4>
+            <div class="generated-answer" id="generated-answer"></div>
+
+            <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Evaluation Metrics</h4>
+            <div class="metrics" id="metrics"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Semantic Search Panel -->
+      <div class="tool-panel" id="semantic-panel">
+        <div class="panel-content">
+          <div class="notification is-info is-light">
+            <p><strong>Semantic Search</strong> uses dense embeddings to find semantically similar merchants and products.</p>
+          </div>
+          <div class="field">
+            <label class="label">Query</label>
+            <div class="control">
+              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <div class="control">
+              <button class="button is-primary is-fullwidth">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Run Semantic Search</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hybrid Search Panel -->
+      <div class="tool-panel" id="hybrid-panel">
+        <div class="panel-content">
+          <div class="notification is-info is-light">
+            <p><strong>Hybrid Search</strong> combines keyword-based and semantic search for better results.</p>
+          </div>
+          <div class="field">
+            <label class="label">Query</label>
+            <div class="control">
+              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <div class="control">
+              <button class="button is-primary is-fullwidth">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Run Hybrid Search</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agentic Search Panel -->
+      <div class="tool-panel" id="agentic-panel">
+        <div class="panel-content">
+          <div class="notification is-info is-light">
+            <p><strong>Agentic Search</strong> uses LLM-powered agents to perform multi-step reasoning and tool use.</p>
+          </div>
+          <div class="field">
+            <label class="label">Query</label>
+            <div class="control">
+              <textarea class="textarea" placeholder="Enter your search query..."></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <div class="control">
+              <button class="button is-primary is-fullwidth">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Run Agentic Search</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example Queries -->
+    <div class="example-queries" style="margin-top: 2rem;">
+      <h3 class="subtitle is-5 has-text-centered">Example Queries</h3>
+      <div class="columns is-multiline">
+        <div class="column is-4">
+          <div class="example-card" onclick="loadExample(0)">
+            <p class="has-text-weight-semibold">🍲 Restaurant Search</p>
+            <p class="is-size-7">Find a highly-rated hotpot restaurant near Wudaokou...</p>
+          </div>
+        </div>
+        <div class="column is-4">
+          <div class="example-card" onclick="loadExample(1)">
+            <p class="has-text-weight-semibold">🏨 Hotel Booking</p>
+            <p class="is-size-7">I need a hotel near Beijing West Railway Station...</p>
+          </div>
+        </div>
+        <div class="column is-4">
+          <div class="example-card" onclick="loadExample(2)">
+            <p class="has-text-weight-semibold">🎬 Entertainment</p>
+            <p class="is-size-7">Looking for a movie theater showing the latest films...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Playground -->
+
+<!-- Leaderboard Section -->
+<section class="section hero is-light" id="leaderboard">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">🏆 Leaderboard</h2>
+        <div class="content has-text-justified">
+          <p style="text-align: center;">
+            Performance of various models on LocalSearchBench. Evaluated on correctness, completeness, and faithfulness.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="table-container">
+      <table class="table is-striped is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Model</th>
+            <th>Correctness ↑</th>
+            <th>Completeness ↑</th>
+            <th>Faithfulness ↑</th>
+            <th>Average ↑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🥇 1</td>
+            <td><strong>DeepSeek-V3</strong></td>
+            <td>34.34%</td>
+            <td>82.15%</td>
+            <td>68.92%</td>
+            <td>61.80%</td>
+          </tr>
+          <tr>
+            <td>🥈 2</td>
+            <td><strong>GPT-4o</strong></td>
+            <td>31.22%</td>
+            <td>79.84%</td>
+            <td>65.43%</td>
+            <td>58.83%</td>
+          </tr>
+          <tr>
+            <td>🥉 3</td>
+            <td><strong>Claude 3.5 Sonnet</strong></td>
+            <td>29.87%</td>
+            <td>78.92%</td>
+            <td>63.21%</td>
+            <td>57.33%</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Qwen2.5-72B</td>
+            <td>28.45%</td>
+            <td>76.54%</td>
+            <td>61.87%</td>
+            <td>55.62%</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Llama-3.1-70B</td>
+            <td>25.91%</td>
+            <td>74.23%</td>
+            <td>58.76%</td>
+            <td>52.97%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content has-text-centered" style="margin-top: 1.5rem;">
+      <p class="is-size-7">
+        <em>Note: Results are based on our evaluation framework. See paper for detailed methodology.</em>
+      </p>
+    </div>
+  </div>
+</section>
+<!-- End Leaderboard -->
 
 <!--BibTex citation -->
   <section class="section" id="BibTeX">
