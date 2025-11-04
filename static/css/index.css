@@ -1205,15 +1205,15 @@ a:focus {
 
 #visitor-map .title {
   color: var(--text-primary);
-  font-size: 0.6rem !important;
+  font-size: 0.8rem !important;
   font-weight: 600;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
 }
 
 #visitor-map .subtitle {
   color: var(--text-secondary);
-  font-size: 0.32rem !important;
-  margin-bottom: 0.4rem;
+  font-size: 0.42rem !important;
+  margin-bottom: 0.5rem;
 }
 
 .visitor-map-container {
@@ -1242,11 +1242,11 @@ a:focus {
   }
 
   #visitor-map .title {
-    font-size: 0.5rem !important;
+    font-size: 0.65rem !important;
   }
 
   #visitor-map .subtitle {
-    font-size: 0.28rem !important;
+    font-size: 0.36rem !important;
   }
 
   .visitor-map-container {
