@@ -1196,4 +1196,62 @@ a:focus {
   }
 }
 
+/* Visitor Map Section Styles */
+#visitor-map {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 4rem 1.5rem;
+  margin-top: 2rem;
+}
+
+#visitor-map .title {
+  color: var(--text-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+#visitor-map .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.visitor-map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 800px;
+  transition: var(--transition);
+}
+
+.visitor-map-container:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments for visitor map */
+@media screen and (max-width: 768px) {
+  #visitor-map {
+    padding: 2rem 1rem;
+  }
+
+  #visitor-map .title {
+    font-size: 1.8rem;
+  }
+
+  #visitor-map .subtitle {
+    font-size: 1rem;
+  }
+
+  .visitor-map-container {
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+}
+
 
