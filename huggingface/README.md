@@ -82,7 +82,7 @@ license: apache-2.0
 - [项目主页](https://your-username.github.io/localsearchbench)
 - [GitHub 仓库](https://github.com/your-username/localsearchbench.github.io)
 - [论文](https://arxiv.org/abs/xxx)
-- [数据集](https://huggingface.co/datasets/your-username/localsearchbench)
+- [Hugging Face](https://huggingface.co/localsearchbench)
 
 ## 🙏 致谢
 
