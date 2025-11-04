@@ -1,14 +1,9 @@
-# LocalSearchBench - Gradio Playground Integration
+# LocalSearchBench - Gradio Playground 使用指南
 
-这个文档说明如何将现有的 Web/RAG/Agentic Search 部分改成 Gradio 界面。
+快速启动交互式 Gradio 界面来体验 LocalSearchBench 的搜索功能。
 
-## 📋 目录
-
-- [快速开始](#快速开始)
-- [功能特性](#功能特性)
-- [集成方式](#集成方式)
-- [部署选项](#部署选项)
-- [自定义开发](#自定义开发)
+> 📌 **使用模型**: [Qwen3-Embedding-8B 和 Qwen3-Reranker-8B](MODEL_SPEC.md)  
+> 📚 **服务器配置**: 查看 [RAG 服务器快速启动指南](server/README_QUICKSTART.md)
 
 ## 🚀 快速开始
 

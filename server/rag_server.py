@@ -23,13 +23,17 @@ from datetime import datetime
 # 如果使用 GPU 加载模型
 try:
     import torch
-    from sentence_transformers import SentenceTransformer
-    # from transformers import AutoTokenizer, AutoModel
+    from sentence_transformers import SentenceTransformer, CrossEncoder
+    import faiss
+    import json
+    import numpy as np
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"🚀 Using device: {DEVICE}")
-except ImportError:
+    HAS_GPU = torch.cuda.is_available()
+except ImportError as e:
     DEVICE = "cpu"
-    print("⚠️ PyTorch not found, using CPU mode")
+    HAS_GPU = False
+    print(f"⚠️ PyTorch/FAISS not found: {e}, using CPU mode")
 
 app = FastAPI(
     title="LocalSearchBench RAG API",
@@ -50,9 +54,10 @@ app.add_middleware(
 
 class RAGSearchRequest(BaseModel):
     query: str
+    city: str = "shanghai"  # 支持的城市
     top_k: int = 5
-    retriever: str = "qwen3-embedding-8b"
-    reranker: str = "qwen3-reranker-8b"
+    retriever: str = "qwen3-embedding-8b"  # 默认使用 Qwen3-Embedding-8B
+    reranker: str = "qwen3-reranker-8b"    # 默认使用 Qwen3-Reranker-8B
 
 class WebSearchRequest(BaseModel):
     query: str
@@ -70,15 +75,90 @@ class SearchResult(BaseModel):
     reasoning_steps: Optional[List[str]] = None
     processing_time: float
 
+# ==================== 城市向量数据库加载器 ====================
+
+class CityVectorDB:
+    """管理所有城市的FAISS向量数据库（1028版本）"""
+    
+    def __init__(self, data_dir: str):
+        self.data_dir = data_dir
+        self.cities = {
+            "shanghai": "上海",
+            "beijing": "北京",
+            "guangzhou": "广州",
+            "shenzhen": "深圳",
+            "hangzhou": "杭州",
+            "suzhou": "苏州",
+            "chengdu": "成都",
+            "chongqing": "重庆",
+            "wuhan": "武汉"
+        }
+        self.indexes = {}
+        self.metadata = {}
+        self.load_all_cities()
+    
+    def load_all_cities(self):
+        """加载所有城市的向量数据库"""
+        print(f"\n📦 Loading vector databases from: {self.data_dir}")
+        for city_en, city_cn in self.cities.items():
+            try:
+                # 加载 1028 版本的数据
+                index_path = os.path.join(self.data_dir, f"faiss_merchant_index_vllm_{city_en}_1028.faiss")
+                meta_path = os.path.join(self.data_dir, f"faiss_merchant_index_vllm_{city_en}_1028_metadata.json")
+                
+                if not os.path.exists(index_path) or not os.path.exists(meta_path):
+                    print(f"⚠️  {city_cn} ({city_en}): Files not found")
+                    continue
+                
+                # 加载 FAISS 索引
+                self.indexes[city_en] = faiss.read_index(index_path)
+                
+                # 加载元数据
+                with open(meta_path, "r", encoding="utf-8") as f:
+                    self.metadata[city_en] = json.load(f)
+                
+                print(f"✅ {city_cn} ({city_en}): {self.indexes[city_en].ntotal} vectors, {len(self.metadata[city_en])} merchants")
+            except Exception as e:
+                print(f"❌ Failed to load {city_cn} ({city_en}): {e}")
+        
+        print(f"\n🎉 Loaded {len(self.indexes)}/{len(self.cities)} cities successfully!\n")
+    
+    def search(self, query_embedding: np.ndarray, city: str = "shanghai", top_k: int = 20):
+        """在指定城市的向量数据库中搜索"""
+        if city not in self.indexes:
+            raise ValueError(f"City '{city}' not loaded. Available cities: {list(self.indexes.keys())}")
+        
+        # 使用 FAISS 进行向量检索
+        query_vec = query_embedding.reshape(1, -1).astype('float32')
+        distances, indices = self.indexes[city].search(query_vec, top_k)
+        
+        # 获取对应的元数据
+        results = []
+        for idx, dist in zip(indices[0], distances[0]):
+            if idx < len(self.metadata[city]):
+                merchant = self.metadata[city][idx].copy()
+                merchant["vector_score"] = float(dist)
+                results.append(merchant)
+        
+        return results
+
 # ==================== 模型加载（GPU）====================
 
 class RAGModels:
     """在服务器启动时加载模型到 GPU"""
     
-    def __init__(self):
+    def __init__(self, data_dir: str = None):
         self.embedding_model = None
         self.reranker_model = None
         self.llm = None
+        self.vector_db = None
+        
+        # 初始化向量数据库
+        if data_dir and os.path.exists(data_dir):
+            try:
+                self.vector_db = CityVectorDB(data_dir)
+            except Exception as e:
+                print(f"⚠️ Failed to load vector databases: {e}")
         
     def load_embedding_model(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         """加载 Embedding 模型到 GPU"""
@@ -120,71 +200,96 @@ class RAGModels:
             # Fallback: 使用简单的方法
             return None
 
-# 全局模型实例
-models = RAGModels()
+# 全局模型实例（稍后在 startup 时初始化）
+models = None
 
 # ==================== RAG 实现 ====================
 
-def perform_rag_search(query: str, top_k: int, retriever: str, reranker: str) -> Dict:
+def perform_rag_search(query: str, city: str, top_k: int, retriever: str, reranker: str) -> Dict:
     """
-    真实的 RAG 搜索实现
+    真实的 RAG 搜索实现（使用1028版本向量数据库）
     
-    替换这个函数为你的实际实现，例如：
-    - 使用 Qwen3-Embedding-8B 进行检索
-    - 使用 Qwen3-Reranker-8B 进行重排序
-    - 调用 LLM 生成答案
+    流程：
+    1. 使用 Embedding 模型编码查询
+    2. 在指定城市的 FAISS 索引中检索
+    3. 使用 Reranker 模型重排序
+    4. 返回 top_k 结果
     """
     start_time = time.time()
     
-    # 1. 使用 GPU 进行向量检索
-    query_embedding = models.encode_query(query)
+    # 检查向量数据库是否已加载
+    if not models.vector_db:
+        raise HTTPException(status_code=503, detail="Vector database not loaded. Please check server configuration.")
     
-    # 2. 从向量数据库检索（这里需要你的实现）
-    # 例如：使用 FAISS, Milvus, Qdrant 等
-    retrieved_docs = [
-        {
-            "merchant_name": "海底捞火锅(陆家嘴店)",
-            "address": "上海市浦东新区陆家嘴世纪大道100号",
-            "rating": 4.8,
-            "price": "人均150元",
-            "description": "知名火锅品牌，服务好，食材新鲜",
-            "score": 0.92
-        },
-        {
-            "merchant_name": "小辉哥火锅(南京西路店)", 
-            "address": "上海市静安区南京西路1618号",
-            "rating": 4.6,
-            "price": "人均120元",
-            "description": "潮汕牛肉火锅，肉质鲜美",
-            "score": 0.88
+    if city not in models.vector_db.indexes:
+        available_cities = list(models.vector_db.indexes.keys())
+        raise HTTPException(
+            status_code=400, 
+            detail=f"City '{city}' not available. Available cities: {available_cities}"
+        )
+    
+    try:
+        # 1. 使用 Embedding 模型编码查询
+        query_embedding = models.encode_query(query)
+        if query_embedding is None:
+            raise HTTPException(status_code=503, detail="Embedding model not loaded")
+        
+        # 2. 从 FAISS 向量数据库检索（检索更多用于重排序）
+        retrieval_k = top_k * 3  # 检索3倍数量用于重排序
+        retrieved_docs = models.vector_db.search(query_embedding, city=city, top_k=retrieval_k)
+        
+        if not retrieved_docs:
+            return {
+                "answer": f"未找到与「{query}」相关的商户信息",
+                "sources": [],
+                "metrics": {"latency_ms": (time.time() - start_time) * 1000},
+                "processing_time": time.time() - start_time
+            }
+        
+        # 3. 使用 Reranker 模型重排序
+        if models.reranker_model and len(retrieved_docs) > 1:
+            try:
+                # 构建查询-文档对
+                pairs = []
+                for doc in retrieved_docs:
+                    # 构建更丰富的文档表示
+                    doc_text = f"{doc.get('merchant_name', '')} {doc.get('description', '')} {doc.get('address', '')}"
+                    pairs.append([query, doc_text])
+                
+                # 使用 Reranker 重新打分
+                rerank_scores = models.reranker_model.predict(pairs)
+                
+                # 更新分数并排序
+                for doc, score in zip(retrieved_docs, rerank_scores):
+                    doc["rerank_score"] = float(score)
+                
+                retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("rerank_score", 0), reverse=True)
+                print(f"🔄 Reranked {len(retrieved_docs)} documents")
+            except Exception as e:
+                print(f"⚠️ Reranking failed: {e}, using vector scores only")
+        
+        # 4. 生成答案摘要
+        city_name = models.vector_db.cities.get(city, city)
+        answer = f"在{city_name}找到 {len(retrieved_docs)} 家相关商户，为您推荐以下 {min(top_k, len(retrieved_docs))} 家："
+        
+        # 5. 计算评估指标
+        metrics = {
+            "retrieved_count": len(retrieved_docs),
+            "returned_count": min(top_k, len(retrieved_docs)),
+            "city": city_name,
+            "latency_ms": (time.time() - start_time) * 1000
         }
-    ]
-    
-    # 3. 使用 GPU 进行重排序
-    if models.reranker_model:
-        pairs = [[query, doc["description"]] for doc in retrieved_docs]
-        rerank_scores = models.reranker_model.predict(pairs)
-        for doc, score in zip(retrieved_docs, rerank_scores):
-            doc["rerank_score"] = float(score)
-        retrieved_docs = sorted(retrieved_docs, key=lambda x: x["rerank_score"], reverse=True)
-    
-    # 4. 生成答案（调用 LLM）
-    answer = f"根据您的查询「{query}」，为您推荐以下{len(retrieved_docs)}家商户..."
-    
-    # 5. 计算评估指标
-    metrics = {
-        "precision": 0.85,
-        "recall": 0.78,
-        "ndcg": 0.82,
-        "latency_ms": (time.time() - start_time) * 1000
-    }
-    
-    return {
-        "answer": answer,
-        "sources": retrieved_docs[:top_k],
-        "metrics": metrics,
-        "processing_time": time.time() - start_time
-    }
+        
+        return {
+            "answer": answer,
+            "sources": retrieved_docs[:top_k],
+            "metrics": metrics,
+            "processing_time": time.time() - start_time
+        }
+        
+    except Exception as e:
+        print(f"❌ RAG search error: {e}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 def perform_web_search(query: str, top_k: int) -> Dict:
     """传统 Web 搜索"""
@@ -261,22 +366,38 @@ def root():
 @app.get("/health")
 def health_check():
     """健康检查"""
+    cities_loaded = {}
+    if models.vector_db:
+        cities_loaded = {
+            city_en: {
+                "name": city_cn,
+                "vectors": models.vector_db.indexes[city_en].ntotal if city_en in models.vector_db.indexes else 0,
+                "merchants": len(models.vector_db.metadata.get(city_en, []))
+            }
+            for city_en, city_cn in models.vector_db.cities.items()
+            if city_en in models.vector_db.indexes
+        }
+    
     return {
         "status": "healthy",
         "device": DEVICE,
         "gpu_available": torch.cuda.is_available() if 'torch' in globals() else False,
         "models_loaded": {
             "embedding": models.embedding_model is not None,
-            "reranker": models.reranker_model is not None
-        }
+            "reranker": models.reranker_model is not None,
+            "vector_db": models.vector_db is not None
+        },
+        "cities": cities_loaded,
+        "total_cities": len(cities_loaded)
     }
 
 @app.post("/api/rag/search", response_model=SearchResult)
 async def rag_search(request: RAGSearchRequest):
-    """RAG 搜索端点"""
+    """RAG 搜索端点（支持多城市）"""
     try:
         result = perform_rag_search(
             query=request.query,
+            city=request.city,
             top_k=request.top_k,
             retriever=request.retriever,
             reranker=request.reranker
@@ -312,18 +433,47 @@ async def agentic_search(request: AgenticSearchRequest):
 
 @app.on_event("startup")
 async def startup_event():
-    """服务启动时预加载模型"""
+    """服务启动时预加载模型和向量数据库"""
+    global models
+    
     print("🚀 Starting LocalSearchBench RAG Server...")
     print(f"📍 Device: {DEVICE}")
     
+    # 获取配置
+    data_dir = getattr(app.state, 'data_dir', None)
+    embedding_model_path = getattr(app.state, 'embedding_model_path', None)
+    reranker_model_path = getattr(app.state, 'reranker_model_path', None)
+    
+    # 初始化模型
+    models = RAGModels(data_dir=data_dir)
+    
     # 预加载模型到 GPU
     if DEVICE == "cuda":
-        print("📥 Pre-loading models to GPU...")
-        models.load_embedding_model()
-        models.load_reranker_model()
+        print("\n📥 Pre-loading models to GPU...")
+        
+        # 加载 Embedding 模型
+        if embedding_model_path:
+            models.load_embedding_model(embedding_model_path)
+        else:
+            print("⚠️  No embedding model path specified, using default")
+            models.load_embedding_model()
+        
+        # 加载 Reranker 模型
+        if reranker_model_path:
+            models.load_reranker_model(reranker_model_path)
+        else:
+            print("⚠️  No reranker model path specified, using default")
+            models.load_reranker_model()
+        
         print("✅ Models loaded successfully")
     else:
         print("⚠️ Running in CPU mode")
+    
+    # 检查向量数据库状态
+    if models.vector_db:
+        print(f"\n✅ Vector databases ready: {len(models.vector_db.indexes)} cities loaded")
+    else:
+        print("\n⚠️  No vector databases loaded. Please specify --data-dir")
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -339,17 +489,31 @@ def main():
     parser = argparse.ArgumentParser(description="LocalSearchBench RAG Server")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind")
+    parser.add_argument("--data-dir", type=str, default=None, help="Path to vector database directory (containing 1028 FAISS files)")
+    parser.add_argument("--embedding-model", type=str, default=None, help="Path to Qwen3-Embedding-8B model")
+    parser.add_argument("--reranker-model", type=str, default=None, help="Path to Qwen3-Reranker-8B model")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--workers", type=int, default=1, help="Number of workers")
     
     args = parser.parse_args()
     
+    # 从环境变量或命令行参数获取配置
+    data_dir = args.data_dir or os.getenv("RAG_DATA_DIR")
+    embedding_model_path = args.embedding_model or os.getenv("EMBEDDING_MODEL_PATH")
+    reranker_model_path = args.reranker_model or os.getenv("RERANKER_MODEL_PATH")
+    
+    # 将配置保存到全局变量供 startup_event 使用
+    app.state.data_dir = data_dir
+    app.state.embedding_model_path = embedding_model_path
+    app.state.reranker_model_path = reranker_model_path
+    
     print(f"""
 ╔═══════════════════════════════════════════════════════════╗
-║     LocalSearchBench RAG Server                           ║
+║     LocalSearchBench RAG Server (Multi-City Support)      ║
 ║     Device: {DEVICE:48s} ║
 ║     Host: {args.host:50s} ║
 ║     Port: {args.port:50d} ║
+║     Data Dir: {(data_dir or 'Not specified')[:45]:45s} ║
 ╚═══════════════════════════════════════════════════════════╝
     """)
     
