@@ -1064,22 +1064,39 @@ a:focus {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.9rem;
+  color: #b5b5b5;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.leaderboard-table thead th.sortable:hover .sort-arrow {
+  opacity: 1;
+  color: #888;
 }
 
 .leaderboard-table thead th.sortable .sort-arrow::before {
   content: "⇅";
 }
 
+.leaderboard-table thead th.sortable.asc .sort-arrow {
+  opacity: 1;
+}
+
 .leaderboard-table thead th.sortable.asc .sort-arrow::before {
   content: "↑";
   color: #3273dc;
+  font-weight: bold;
+}
+
+.leaderboard-table thead th.sortable.desc .sort-arrow {
+  opacity: 1;
 }
 
 .leaderboard-table thead th.sortable.desc .sort-arrow::before {
   content: "↓";
   color: #3273dc;
+  font-weight: bold;
 }
 
 .leaderboard-table tbody tr:not(.section-header):not(.average-row) {
