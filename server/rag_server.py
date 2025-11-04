@@ -80,8 +80,9 @@ class SearchResult(BaseModel):
 class CityVectorDB:
     """管理所有城市的FAISS向量数据库（1028版本）"""
     
-    def __init__(self, data_dir: str):
+    def __init__(self, data_dir: str, use_gpu: bool = True):
         self.data_dir = data_dir
+        self.use_gpu = use_gpu and torch.cuda.is_available()
         self.cities = {
             "shanghai": "上海",
             "beijing": "北京",
@@ -95,11 +96,25 @@ class CityVectorDB:
         }
         self.indexes = {}
         self.metadata = {}
+        self.gpu_resources = None
+        
+        # 初始化 GPU 资源
+        if self.use_gpu:
+            try:
+                self.gpu_resources = faiss.StandardGpuResources()
+                print(f"🚀 GPU resources initialized for FAISS")
+            except Exception as e:
+                print(f"⚠️  Failed to initialize GPU resources: {e}, falling back to CPU")
+                self.use_gpu = False
+        
         self.load_all_cities()
     
     def load_all_cities(self):
         """加载所有城市的向量数据库"""
+        device_info = "GPU" if self.use_gpu else "CPU"
         print(f"\n📦 Loading vector databases from: {self.data_dir}")
+        print(f"💻 Device: {device_info}")
+        
         for city_en, city_cn in self.cities.items():
             try:
                 # 加载 1028 版本的数据
@@ -110,18 +125,32 @@ class CityVectorDB:
                     print(f"⚠️  {city_cn} ({city_en}): Files not found")
                     continue
                 
-                # 加载 FAISS 索引
-                self.indexes[city_en] = faiss.read_index(index_path)
+                # 加载 FAISS 索引 (先加载到CPU)
+                cpu_index = faiss.read_index(index_path)
+                
+                # 如果启用GPU，将索引转移到GPU
+                if self.use_gpu:
+                    try:
+                        # 将CPU索引转换为GPU索引
+                        self.indexes[city_en] = faiss.index_cpu_to_gpu(self.gpu_resources, 0, cpu_index)
+                        device_tag = "🚀 GPU"
+                    except Exception as e:
+                        print(f"⚠️  {city_cn}: GPU transfer failed ({e}), using CPU")
+                        self.indexes[city_en] = cpu_index
+                        device_tag = "💻 CPU"
+                else:
+                    self.indexes[city_en] = cpu_index
+                    device_tag = "💻 CPU"
                 
                 # 加载元数据
                 with open(meta_path, "r", encoding="utf-8") as f:
                     self.metadata[city_en] = json.load(f)
                 
-                print(f"✅ {city_cn} ({city_en}): {self.indexes[city_en].ntotal} vectors, {len(self.metadata[city_en])} merchants")
+                print(f"✅ {city_cn} ({city_en}): {self.indexes[city_en].ntotal} vectors, {len(self.metadata[city_en])} merchants [{device_tag}]")
             except Exception as e:
                 print(f"❌ Failed to load {city_cn} ({city_en}): {e}")
         
-        print(f"\n🎉 Loaded {len(self.indexes)}/{len(self.cities)} cities successfully!\n")
+        print(f"\n🎉 Loaded {len(self.indexes)}/{len(self.cities)} cities successfully on {device_info}!\n")
     
     def search(self, query_embedding: np.ndarray, city: str = "shanghai", top_k: int = 20):
         """在指定城市的向量数据库中搜索"""
@@ -147,16 +176,16 @@ class CityVectorDB:
 class RAGModels:
     """在服务器启动时加载模型到 GPU"""
     
-    def __init__(self, data_dir: str = None):
+    def __init__(self, data_dir: str = None, use_gpu: bool = True):
         self.embedding_model = None
         self.reranker_model = None
         self.llm = None
         self.vector_db = None
         
-        # 初始化向量数据库
+        # 初始化向量数据库（支持 GPU 加速）
         if data_dir and os.path.exists(data_dir):
             try:
-                self.vector_db = CityVectorDB(data_dir)
+                self.vector_db = CityVectorDB(data_dir, use_gpu=use_gpu)
             except Exception as e:
                 print(f"⚠️ Failed to load vector databases: {e}")
         
@@ -443,9 +472,10 @@ async def startup_event():
     data_dir = getattr(app.state, 'data_dir', None)
     embedding_model_path = getattr(app.state, 'embedding_model_path', None)
     reranker_model_path = getattr(app.state, 'reranker_model_path', None)
+    use_gpu = getattr(app.state, 'use_gpu', True)  # 默认使用 GPU
     
-    # 初始化模型
-    models = RAGModels(data_dir=data_dir)
+    # 初始化模型（包括向量数据库，会根据 use_gpu 参数决定是否使用 GPU）
+    models = RAGModels(data_dir=data_dir, use_gpu=use_gpu)
     
     # 预加载模型到 GPU
     if DEVICE == "cuda":
@@ -492,6 +522,8 @@ def main():
     parser.add_argument("--data-dir", type=str, default=None, help="Path to vector database directory (containing 1028 FAISS files)")
     parser.add_argument("--embedding-model", type=str, default=None, help="Path to Qwen3-Embedding-8B model")
     parser.add_argument("--reranker-model", type=str, default=None, help="Path to Qwen3-Reranker-8B model")
+    parser.add_argument("--use-gpu", action="store_true", default=True, help="Use GPU for FAISS vector search (default: True)")
+    parser.add_argument("--no-gpu", action="store_true", help="Force CPU mode for FAISS vector search")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--workers", type=int, default=1, help="Number of workers")
     
@@ -502,10 +534,14 @@ def main():
     embedding_model_path = args.embedding_model or os.getenv("EMBEDDING_MODEL_PATH")
     reranker_model_path = args.reranker_model or os.getenv("RERANKER_MODEL_PATH")
     
+    # GPU 配置
+    use_gpu = args.use_gpu and not args.no_gpu
+    
     # 将配置保存到全局变量供 startup_event 使用
     app.state.data_dir = data_dir
     app.state.embedding_model_path = embedding_model_path
     app.state.reranker_model_path = reranker_model_path
+    app.state.use_gpu = use_gpu
     
     print(f"""
 ╔═══════════════════════════════════════════════════════════╗

@@ -23,12 +23,14 @@ DEFAULT_DATA_DIR="/path/to/rag_gpu"
 DEFAULT_HOST="0.0.0.0"
 DEFAULT_PORT="8000"
 DEFAULT_GPU="0"
+DEFAULT_USE_GPU="true"  # 默认使用 GPU 加载向量库
 
 # 从命令行参数或环境变量获取配置
 DATA_DIR="${1:-${RAG_DATA_DIR:-$DEFAULT_DATA_DIR}}"
 HOST="${2:-${RAG_HOST:-$DEFAULT_HOST}}"
 PORT="${3:-${RAG_PORT:-$DEFAULT_PORT}}"
 GPU_ID="${4:-${CUDA_VISIBLE_DEVICES:-$DEFAULT_GPU}}"
+USE_GPU="${RAG_USE_GPU:-$DEFAULT_USE_GPU}"
 
 # Embedding 模型路径（在数据目录下）
 EMBEDDING_MODEL="${DATA_DIR}/Qwen3-Embedding-8B"
@@ -119,11 +121,13 @@ show_usage() {
     echo -e "${BLUE}示例:${NC}"
     echo -e "  $0 /data/rag_gpu 0.0.0.0 8000 0"
     echo -e "  RAG_DATA_DIR=/data/rag_gpu $0"
+    echo -e "  RAG_USE_GPU=false $0  # 强制使用 CPU 模式"
     echo ""
     echo -e "${BLUE}环境变量:${NC}"
-    echo -e "  RAG_DATA_DIR       - 数据目录路径"
-    echo -e "  RAG_HOST           - 服务器主机地址"
-    echo -e "  RAG_PORT           - 服务器端口"
+    echo -e "  RAG_DATA_DIR         - 数据目录路径"
+    echo -e "  RAG_HOST             - 服务器主机地址"
+    echo -e "  RAG_PORT             - 服务器端口"
+    echo -e "  RAG_USE_GPU          - 是否使用 GPU 加载向量库 (true/false, 默认: true)"
     echo -e "  CUDA_VISIBLE_DEVICES - 使用的GPU编号"
     echo ""
 }
@@ -154,6 +158,14 @@ fi
 
 if [ -d "$RERANKER_MODEL" ]; then
     CMD="${CMD} --reranker-model ${RERANKER_MODEL}"
+fi
+
+# GPU 配置：如果 USE_GPU 为 false，添加 --no-gpu 标志
+if [ "$USE_GPU" = "false" ] || [ "$USE_GPU" = "0" ]; then
+    CMD="${CMD} --no-gpu"
+    echo -e "${YELLOW}⚠️  FAISS will run in CPU mode${NC}"
+else
+    echo -e "${GREEN}🚀 FAISS will use GPU acceleration${NC}"
 fi
 
 echo -e "${YELLOW}📝 Command: ${CMD}${NC}"
