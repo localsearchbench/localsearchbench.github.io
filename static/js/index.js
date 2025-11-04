@@ -584,22 +584,10 @@ function sortTable(table, column, direction) {
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     
-    // Separate different types of rows
-    const dataRows = [];
-    const sectionHeaders = [];
-    const averageRows = [];
+    // Get all data rows (rows with data-values attribute)
+    const dataRows = rows.filter(row => row.hasAttribute('data-values'));
     
-    rows.forEach(row => {
-        if (row.classList.contains('section-header')) {
-            sectionHeaders.push(row);
-        } else if (row.classList.contains('average-row')) {
-            averageRows.push(row);
-        } else {
-            dataRows.push(row);
-        }
-    });
-    
-    // Sort only data rows
+    // Sort data rows
     dataRows.sort((a, b) => {
         const aValues = JSON.parse(a.getAttribute('data-values') || '[]');
         const bValues = JSON.parse(b.getAttribute('data-values') || '[]');
@@ -617,35 +605,8 @@ function sortTable(table, column, direction) {
     // Clear tbody
     tbody.innerHTML = '';
     
-    // Group sorted rows by model type
-    const closedSourceModels = [
-        'GPT-4.1', 'Gemini-2.5-Pro', 'Qwen-Plus-Latest', 
-        'LongCat-Large-32K', 'Hunyuan-T1'
-    ];
-    
-    const closedSource = dataRows.filter(row => {
-        const modelName = row.querySelector('td strong')?.textContent || '';
-        return closedSourceModels.includes(modelName);
-    });
-    
-    const openSource = dataRows.filter(row => {
-        const modelName = row.querySelector('td strong')?.textContent || '';
-        return !closedSourceModels.includes(modelName);
-    });
-    
-    // Rebuild table with sections
-    if (closedSource.length > 0) {
-        tbody.appendChild(sectionHeaders[0]);
-        closedSource.forEach(row => tbody.appendChild(row));
-    }
-    
-    if (openSource.length > 0) {
-        tbody.appendChild(sectionHeaders[1]);
-        openSource.forEach(row => tbody.appendChild(row));
-    }
-    
-    // Add average rows at the end
-    averageRows.forEach(row => tbody.appendChild(row));
+    // Re-append sorted rows
+    dataRows.forEach(row => tbody.appendChild(row));
     
     // Add animation
     dataRows.forEach((row, index) => {
