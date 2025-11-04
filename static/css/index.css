@@ -1047,6 +1047,15 @@ a:focus {
 }
 
 /* Make the model column wider */
+.leaderboard-table thead th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  padding: 1rem 0.75rem;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: center !important;
+}
+
 .leaderboard-table thead th:first-child,
 .leaderboard-table tbody td:first-child {
   width: 18%;
@@ -1054,16 +1063,7 @@ a:focus {
 }
 
 .leaderboard-table thead th:first-child {
-  text-align: center;
-}
-
-.leaderboard-table thead th {
-  background-color: #f5f5f5;
-  font-weight: 600;
-  padding: 1rem 0.75rem;
-  white-space: nowrap;
-  vertical-align: middle;
-  text-align: center;
+  text-align: center !important;
 }
 
 .leaderboard-table thead th.sortable {
