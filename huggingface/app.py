@@ -17,7 +17,7 @@ import os
 # ==================== 配置 ====================
 
 # RAG 服务器地址（部署在你的 GPU 服务器上）
-RAG_SERVER_URL = os.getenv("RAG_SERVER_URL", "http://your-gpu-server.com:8000")
+RAG_SERVER_URL = os.getenv("RAG_SERVER_URL", "http://10.164.243.10:8000")
 
 # 如果你的 GPU 服务器需要认证
 API_KEY = os.getenv("RAG_API_KEY", "")
