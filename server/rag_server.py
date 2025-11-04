@@ -518,7 +518,7 @@ def main():
     """)
     
     uvicorn.run(
-        "rag_server:app",
+        app,  # 直接传入 app 对象，而不是字符串
         host=args.host,
         port=args.port,
         reload=args.reload,
