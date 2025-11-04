@@ -1199,31 +1199,31 @@ a:focus {
 /* Visitor Map Section Styles */
 #visitor-map {
   background: transparent;
-  padding: 3rem 1.5rem;
-  margin-top: 2rem;
+  padding: 0.6rem 0.3rem;
+  margin-top: 0.4rem;
 }
 
 #visitor-map .title {
   color: var(--text-primary);
-  font-size: 1.8rem;
+  font-size: 0.36rem !important;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
 }
 
 #visitor-map .subtitle {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  font-size: 0.19rem !important;
+  margin-bottom: 0.3rem;
 }
 
 .visitor-map-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1rem auto;
+  margin: 0.2rem auto;
   padding: 0;
   border-radius: var(--border-radius-lg);
-  max-width: 500px;
+  max-width: 100px;
   transition: var(--transition);
 }
 
@@ -1232,32 +1232,32 @@ a:focus {
   max-width: 100%;
   height: auto;
   border-radius: var(--border-radius);
-  transform: scale(0.8);
+  transform: scale(0.16);
 }
 
 /* Responsive adjustments for visitor map */
 @media screen and (max-width: 768px) {
   #visitor-map {
-    padding: 2rem 1rem;
+    padding: 0.4rem 0.2rem;
   }
 
   #visitor-map .title {
-    font-size: 1.5rem;
+    font-size: 0.3rem !important;
   }
 
   #visitor-map .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.18rem !important;
   }
 
   .visitor-map-container {
     padding: 0;
-    margin: 1rem auto;
+    margin: 0.2rem auto;
     max-width: 100%;
   }
   
   .visitor-map-container img,
   .visitor-map-container #clustrmaps {
-    transform: scale(0.7);
+    transform: scale(0.14);
   }
 }
 
