@@ -1065,7 +1065,6 @@ a:focus {
   cursor: pointer;
   user-select: none;
   position: relative;
-  padding-right: 2rem;
   transition: background-color 0.2s;
 }
 
@@ -1074,10 +1073,8 @@ a:focus {
 }
 
 .leaderboard-table thead th.sortable .sort-arrow {
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
+  display: inline-block;
+  margin-left: 0.3rem;
   font-size: 0.9rem;
   color: #b5b5b5;
   opacity: 0.6;
@@ -1177,10 +1174,6 @@ a:focus {
   
   .leaderboard-table {
     font-size: 0.8rem;
-  }
-  
-  .leaderboard-table thead th.sortable {
-    padding-right: 1.5rem;
   }
 }
 
