@@ -13,9 +13,9 @@ const CONFIG = {
     
     // API Endpoints
     API_ENDPOINTS: {
-        RAG_SEARCH: '/api/v1/rag/search',
-        WEB_SEARCH: '/api/v1/search',
-        AGENTIC_SEARCH: '/api/v1/agent/search',
+        RAG_SEARCH: '/api/rag/search',
+        WEB_SEARCH: '/api/web/search',
+        AGENTIC_SEARCH: '/api/agentic/search',
         HEALTH_CHECK: '/health'
     },
     
