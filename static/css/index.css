@@ -1229,6 +1229,16 @@ a:focus {
   transition: var(--transition);
 }
 
+.visitor-map-container #clstr_globe {
+  transform: scale(0.4);
+  transform-origin: center;
+}
+
+.visitor-map-container canvas {
+  max-width: 250px !important;
+  max-height: 250px !important;
+}
+
 .visitor-map-container:hover {
   box-shadow: var(--shadow-xl);
   transform: translateY(-2px);
