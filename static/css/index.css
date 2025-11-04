@@ -1050,8 +1050,11 @@ a:focus {
 .leaderboard-table tbody td:first-child {
   width: 20%;
   min-width: 220px;
-  text-align: left;
   padding-left: 1.5rem;
+}
+
+.leaderboard-table tbody td:first-child {
+  text-align: left;
 }
 
 .leaderboard-table thead th {
