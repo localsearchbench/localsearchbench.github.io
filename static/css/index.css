@@ -1205,25 +1205,25 @@ a:focus {
 
 #visitor-map .title {
   color: var(--text-primary);
-  font-size: 0.36rem !important;
+  font-size: 0.6rem !important;
   font-weight: 600;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
 }
 
 #visitor-map .subtitle {
   color: var(--text-secondary);
-  font-size: 0.19rem !important;
-  margin-bottom: 0.3rem;
+  font-size: 0.32rem !important;
+  margin-bottom: 0.4rem;
 }
 
 .visitor-map-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0.2rem auto;
+  margin: 0.3rem auto;
   padding: 0;
   border-radius: var(--border-radius-lg);
-  max-width: 100px;
+  max-width: 170px;
   transition: var(--transition);
 }
 
@@ -1232,7 +1232,7 @@ a:focus {
   max-width: 100%;
   height: auto;
   border-radius: var(--border-radius);
-  transform: scale(0.16);
+  transform: scale(0.28);
 }
 
 /* Responsive adjustments for visitor map */
@@ -1242,22 +1242,22 @@ a:focus {
   }
 
   #visitor-map .title {
-    font-size: 0.3rem !important;
+    font-size: 0.5rem !important;
   }
 
   #visitor-map .subtitle {
-    font-size: 0.18rem !important;
+    font-size: 0.28rem !important;
   }
 
   .visitor-map-container {
     padding: 0;
-    margin: 0.2rem auto;
+    margin: 0.25rem auto;
     max-width: 100%;
   }
   
   .visitor-map-container img,
   .visitor-map-container #clustrmaps {
-    transform: scale(0.14);
+    transform: scale(0.24);
   }
 }
 
