@@ -46,12 +46,12 @@ export CUDA_VISIBLE_DEVICES="$GPU_ID"
 echo -e "${YELLOW}🔍 Checking environment...${NC}"
 
 # 检查 Python
-if ! command -v python &> /dev/null; then
-    echo -e "${RED}❌ Python not found. Please install Python 3.8+${NC}"
+if ! command -v python3 &> /dev/null; then
+    echo -e "${RED}❌ Python3 not found. Please install Python 3.8+${NC}"
     exit 1
 fi
 
-PYTHON_VERSION=$(python --version 2>&1 | awk '{print $2}')
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
 echo -e "${GREEN}✅ Python version: ${PYTHON_VERSION}${NC}"
 
 # 检查 CUDA
@@ -150,7 +150,7 @@ echo ""
 cd "$(dirname "$0")" || exit 1
 
 # 构建启动命令
-CMD="python rag_server.py --host ${HOST} --port ${PORT} --data-dir ${DATA_DIR}"
+CMD="python3 rag_server.py --host ${HOST} --port ${PORT} --data-dir ${DATA_DIR}"
 
 if [ -d "$EMBEDDING_MODEL" ]; then
     CMD="${CMD} --embedding-model ${EMBEDDING_MODEL}"
