@@ -1222,26 +1222,15 @@ a:focus {
   align-items: center;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
   max-width: 800px;
   transition: var(--transition);
 }
 
-.visitor-map-container #clstr_globe {
-  transform: scale(0.4);
-  transform-origin: center;
-}
-
-.visitor-map-container canvas {
-  max-width: 250px !important;
-  max-height: 250px !important;
-}
-
-.visitor-map-container:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
+.visitor-map-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-md);
 }
 
 /* Responsive adjustments for visitor map */
