@@ -1049,8 +1049,8 @@ a:focus {
 /* Make the model column wider */
 .leaderboard-table thead th:first-child,
 .leaderboard-table tbody td:first-child {
-  width: 20%;
-  min-width: 220px;
+  width: 18%;
+  min-width: 200px;
 }
 
 .leaderboard-table thead th:first-child {
