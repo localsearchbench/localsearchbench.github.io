@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # RAG 后端服务（GPU 加速）
+  rag-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: localsearch-rag
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - RAG_SERVER_URL=${RAG_SERVER_URL:-http://localhost:8000}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+    volumes:
+      - ./models:/app/models  # 模型缓存
+      - ./data:/app/data      # 数据存储
+      - ./logs:/app/logs      # 日志
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - localsearch-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx 反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: localsearch-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # SSL 证书
+    depends_on:
+      - rag-server
+    networks:
+      - localsearch-network
+
+networks:
+  localsearch-network:
+    driver: bridge
+
+volumes:
+  models:
+  data:
+  logs:
+

@@ -198,9 +198,9 @@ function loadExample(index) {
 // RAG Search Function
 async function runRAG() {
     const query = document.getElementById('rag-query').value;
-    const topK = document.getElementById('rag-topk').value;
+    const topK = parseInt(document.getElementById('rag-topk').value);
     const retriever = document.getElementById('rag-retriever').value;
-    const generator = document.getElementById('rag-generator').value;
+    const reranker = document.getElementById('rag-reranker').value;
     
     if (!query.trim()) {
         alert('Please enter a query first!');
@@ -214,20 +214,79 @@ async function runRAG() {
     button.disabled = true;
     
     try {
-        // Simulate API call (replace with actual API endpoint)
-        const response = await simulateRAGSearch(query, topK, retriever, generator);
+        // Call actual RAG API endpoint
+        const response = await callRAGAPI(query, topK, retriever, reranker);
         
         // Display results
         displayRAGResults(response);
         
     } catch (error) {
         console.error('Error running RAG search:', error);
-        alert('An error occurred while running the search. Please try again.');
+        
+        // Check if it's a network error
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000' };
+            alert(`无法连接到 RAG 服务器。请确保:\n1. RAG 服务器正在运行 (${config.RAG_SERVER_URL})\n2. 已配置 CORS 允许跨域访问\n3. 检查浏览器控制台查看详细错误`);
+        } else {
+            alert('运行搜索时发生错误: ' + error.message);
+        }
     } finally {
         // Restore button state
         button.innerHTML = originalHTML;
         button.disabled = false;
     }
+}
+
+// Call RAG API
+async function callRAGAPI(query, topK, retriever, reranker) {
+    const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000', API_ENDPOINTS: { RAG_SEARCH: '/api/v1/rag/search' } };
+    const url = `${config.RAG_SERVER_URL}${config.API_ENDPOINTS.RAG_SEARCH}`;
+    
+    const requestBody = {
+        query: query,
+        top_k: topK,
+        retriever_model: retriever,
+        reranker_model: reranker,
+        use_reranker: true,
+        generate_answer: true
+    };
+    
+    console.log('Calling RAG API:', url);
+    console.log('Request body:', requestBody);
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed (${response.status}): ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('RAG API response:', data);
+    
+    // Transform API response to match display format
+    return {
+        retrieved_docs: data.retrieved_documents.map(doc => ({
+            title: doc.title || doc.merchant_name || 'Untitled',
+            score: doc.score || doc.similarity_score || 0,
+            content: doc.content || doc.description || '',
+            type: doc.type || 'merchant'
+        })),
+        generated_answer: data.generated_answer || '暂无生成的答案',
+        metrics: {
+            correctness: data.metrics?.correctness || 0,
+            completeness: data.metrics?.completeness || 0,
+            faithfulness: data.metrics?.faithfulness || 0,
+            retrieval_time: data.timing?.retrieval_time || '0s',
+            generation_time: data.timing?.generation_time || '0s'
+        }
+    };
 }
 
 // Simulate RAG search (replace with actual API call)

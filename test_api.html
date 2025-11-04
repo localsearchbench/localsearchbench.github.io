@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG API 测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-success {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+        }
+        
+        .result-error {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+        
+        .result-info {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            color: #1565c0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status-error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 RAG API 测试工具</h1>
+            <p>测试你的 LocalSearchBench RAG 服务器连接</p>
+        </div>
+        
+        <div class="content">
+            <!-- Server Configuration -->
+            <div class="section">
+                <div class="section-title">服务器配置</div>
+                <label for="serverUrl">RAG 服务器 URL</label>
+                <input type="text" id="serverUrl" value="http://localhost:8000" placeholder="例如: http://localhost:8000">
+            </div>
+            
+            <!-- Health Check -->
+            <div class="section">
+                <div class="section-title">健康检查</div>
+                <button class="btn-secondary" onclick="checkHealth()">
+                    <span>🩺</span>
+                    <span>检查服务器状态</span>
+                </button>
+                <div id="healthResult"></div>
+            </div>
+            
+            <!-- Query Parameters -->
+            <div class="section">
+                <div class="section-title">查询参数</div>
+                
+                <label for="query">查询内容</label>
+                <textarea id="query" placeholder="例如: 浦东新区附近有什么好吃的火锅店？">浦东新区附近有什么好吃的火锅店？</textarea>
+                
+                <div class="grid">
+                    <div>
+                        <label for="topK">Top-K 结果数</label>
+                        <input type="number" id="topK" value="5" min="1" max="100">
+                    </div>
+                    <div>
+                        <label for="useReranker">使用 Reranker</label>
+                        <select id="useReranker" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                            <option value="true">是</option>
+                            <option value="false">否</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="button-group">
+                <button class="btn-primary" id="searchBtn" onclick="runSearch()">
+                    <span>🚀</span>
+                    <span>执行 RAG 搜索</span>
+                </button>
+                <button class="btn-secondary" onclick="clearResults()">
+                    <span>🗑️</span>
+                    <span>清空结果</span>
+                </button>
+            </div>
+            
+            <!-- Results -->
+            <div id="results"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Health Check
+        async function checkHealth() {
+            const serverUrl = document.getElementById('serverUrl').value.trim();
+            const resultDiv = document.getElementById('healthResult');
+            
+            resultDiv.innerHTML = '<div class="result-box result-info">正在检查...</div>';
+            
+            try {
+                const response = await fetch(`${serverUrl}/health`, {
+                    method: 'GET',
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result-box result-success">
+                        ✅ 服务器运行正常
+                        <span class="status-badge status-success">在线</span>
+                        <br><br>
+                        <strong>响应内容:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result-box result-error">
+                        ❌ 连接失败
+                        <span class="status-badge status-error">离线</span>
+                        <br><br>
+                        <strong>错误信息:</strong> ${error.message}
+                        <br><br>
+                        <strong>可能的原因:</strong>
+                        <br>1. RAG 服务器未启动
+                        <br>2. URL 配置错误
+                        <br>3. CORS 未配置
+                        <br>4. 防火墙阻止连接
+                    </div>
+                `;
+            }
+        }
+        
+        // Run RAG Search
+        async function runSearch() {
+            const serverUrl = document.getElementById('serverUrl').value.trim();
+            const query = document.getElementById('query').value.trim();
+            const topK = parseInt(document.getElementById('topK').value);
+            const useReranker = document.getElementById('useReranker').value === 'true';
+            const resultDiv = document.getElementById('results');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!query) {
+                alert('请输入查询内容！');
+                return;
+            }
+            
+            // Show loading
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<div class="spinner"></div><span>搜索中...</span>';
+            resultDiv.innerHTML = '<div class="result-box result-info">正在执行 RAG 搜索...</div>';
+            
+            try {
+                const requestBody = {
+                    query: query,
+                    top_k: topK,
+                    use_reranker: useReranker,
+                    generate_answer: true
+                };
+                
+                console.log('Request:', requestBody);
+                
+                const startTime = Date.now();
+                const response = await fetch(`${serverUrl}/api/v1/rag/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                const endTime = Date.now();
+                const elapsed = ((endTime - startTime) / 1000).toFixed(2);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                // Format results
+                let html = `<div class="result-box result-success">`;
+                html += `<strong>✅ 搜索成功</strong> <span class="status-badge status-success">耗时 ${elapsed}s</span><br><br>`;
+                
+                // Retrieved documents
+                if (data.retrieved_documents && data.retrieved_documents.length > 0) {
+                    html += `<strong>📚 检索到的文档 (${data.retrieved_documents.length}):</strong><br>`;
+                    data.retrieved_documents.slice(0, 5).forEach((doc, idx) => {
+                        html += `<br>${idx + 1}. ${doc.title || doc.merchant_name || 'Untitled'}`;
+                        html += ` (相似度: ${(doc.score || doc.similarity_score || 0).toFixed(3)})`;
+                        if (doc.content || doc.description) {
+                            html += `<br>   ${(doc.content || doc.description).substring(0, 100)}...`;
+                        }
+                    });
+                    html += `<br>`;
+                }
+                
+                // Generated answer
+                if (data.generated_answer) {
+                    html += `<br><strong>🤖 生成的答案:</strong><br>${data.generated_answer}`;
+                }
+                
+                // Full response
+                html += `<br><br><strong>📋 完整响应:</strong>`;
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                html += `</div>`;
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result-box result-error">
+                        <strong>❌ 搜索失败</strong> <span class="status-badge status-error">错误</span>
+                        <br><br>
+                        <strong>错误信息:</strong> ${error.message}
+                        <br><br>
+                        <strong>排查步骤:</strong>
+                        <br>1. 确认服务器正在运行（点击上方"检查服务器状态"）
+                        <br>2. 检查浏览器控制台的详细错误
+                        <br>3. 确认 API 端点正确: ${serverUrl}/api/v1/rag/search
+                        <br>4. 检查 CORS 配置
+                    </div>
+                `;
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '<span>🚀</span><span>执行 RAG 搜索</span>';
+            }
+        }
+        
+        // Clear results
+        function clearResults() {
+            document.getElementById('healthResult').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(checkHealth, 500);
+        });
+    </script>
+</body>
+</html>
+

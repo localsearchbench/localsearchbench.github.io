@@ -1,0 +1,125 @@
+<!-- 
+  This is an example of how to integrate Gradio into the existing HTML page.
+  
+  Usage:
+  1. Start the Gradio app: python playground_app.py
+  2. Replace the playground section in index.html with the code below
+  
+  OR simply rename this file to index.html (backup the original first)
+-->
+
+<!-- Add this in the <head> section for Gradio web component support -->
+<script type="module" src="https://gradio.s3-us-west-2.amazonaws.com/4.0.0/gradio.js"></script>
+
+<!-- Replace the entire Playground Section (starting from line 414 in index.html) with: -->
+
+<!-- Playground Section with Gradio -->
+<section class="section" id="playground">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">🛠️ LocalPlayground</h2>
+        <div class="content has-text-justified">
+          <p style="text-align: center;">
+            Try our interactive playground to test different agentic search methods on LocalSearchBench.
+            Select tools, enter queries, and see how different approaches perform.
+          </p>
+          <div class="notification is-info is-light" style="margin-top: 1rem;">
+            <p style="text-align: center; margin: 0;">
+              <strong>📍 Supported Cities:</strong> Currently supports <strong>Shanghai</strong>, <strong>Beijing</strong>, <strong>Guangzhou</strong>, <strong>Shenzhen</strong>, <strong>Wuhan</strong>, <strong>Chongqing</strong>, <strong>Chengdu</strong>, <strong>Suzhou</strong>, and <strong>Nanjing</strong>. Other cities are under development.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gradio Interface Embedded -->
+    <div class="gradio-wrapper" style="margin-top: 2rem;">
+      <!-- Option 1: Using iframe (works immediately) -->
+      <iframe 
+        id="gradio-playground"
+        src="http://localhost:7860" 
+        frameborder="0" 
+        width="100%" 
+        height="1400px"
+        style="border: 2px solid #e8e8e8; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+      ></iframe>
+
+      <!-- Option 2: Using Gradio Web Component (uncomment to use, comment out iframe above) -->
+      <!-- 
+      <gradio-app 
+        src="http://localhost:7860"
+        style="display: block; width: 100%; min-height: 1400px;"
+      ></gradio-app>
+      -->
+
+      <!-- Option 3: For production with Hugging Face Spaces deployment -->
+      <!-- 
+      <iframe 
+        src="https://huggingface.co/spaces/YOUR_USERNAME/localsearchbench-playground" 
+        frameborder="0" 
+        width="100%" 
+        height="1400px"
+        style="border: 2px solid #e8e8e8; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+      ></iframe>
+      -->
+    </div>
+
+    <!-- Instructions -->
+    <div class="notification is-warning is-light" style="margin-top: 2rem;">
+      <p class="has-text-centered">
+        <strong>⚠️ Note:</strong> Make sure to run <code>python playground_app.py</code> before accessing this page.
+        <br>
+        The Gradio interface should be running at <a href="http://localhost:7860" target="_blank">http://localhost:7860</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Optional: Add responsive styling for the Gradio iframe -->
+<style>
+  .gradio-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  @media screen and (max-width: 768px) {
+    #gradio-playground {
+      height: 1600px; /* Increase height for mobile */
+    }
+  }
+
+  /* Ensure Gradio iframe is responsive */
+  .gradio-wrapper iframe,
+  .gradio-wrapper gradio-app {
+    max-width: 100%;
+  }
+</style>
+
+<!-- Optional: Add JavaScript to handle iframe communication -->
+<script>
+  // Listen for messages from Gradio iframe (if needed)
+  window.addEventListener('message', function(event) {
+    // Handle messages from Gradio if you need custom integration
+    console.log('Message from Gradio:', event.data);
+  });
+
+  // Optional: Auto-adjust iframe height based on content
+  function resizeGradioIframe() {
+    const iframe = document.getElementById('gradio-playground');
+    if (iframe) {
+      try {
+        // This might not work due to CORS, but worth trying
+        const iframeHeight = iframe.contentWindow.document.body.scrollHeight;
+        iframe.style.height = iframeHeight + 'px';
+      } catch (e) {
+        // CORS restriction - use fixed height
+        console.log('Cannot auto-resize iframe due to CORS');
+      }
+    }
+  }
+
+  // Try to resize on load
+  window.addEventListener('load', resizeGradioIframe);
+</script>
+
