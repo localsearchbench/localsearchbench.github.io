@@ -547,6 +547,114 @@ function displayAgenticResults(response) {
     resultsArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Leaderboard Table Sorting
+function initLeaderboardSorting() {
+    const table = document.getElementById('leaderboard-table');
+    if (!table) return;
+    
+    const headers = table.querySelectorAll('thead th.sortable');
+    let currentSort = { column: null, direction: null };
+    
+    headers.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = parseInt(this.getAttribute('data-column'));
+            
+            // Determine sort direction
+            let direction = 'desc'; // Default to descending (higher values first)
+            if (currentSort.column === column) {
+                direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
+            }
+            
+            // Update current sort state
+            currentSort = { column, direction };
+            
+            // Update header styles
+            headers.forEach(h => {
+                h.classList.remove('asc', 'desc');
+            });
+            this.classList.add(direction);
+            
+            // Sort the table
+            sortTable(table, column, direction);
+        });
+    });
+}
+
+function sortTable(table, column, direction) {
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Separate different types of rows
+    const dataRows = [];
+    const sectionHeaders = [];
+    const averageRows = [];
+    
+    rows.forEach(row => {
+        if (row.classList.contains('section-header')) {
+            sectionHeaders.push(row);
+        } else if (row.classList.contains('average-row')) {
+            averageRows.push(row);
+        } else {
+            dataRows.push(row);
+        }
+    });
+    
+    // Sort only data rows
+    dataRows.sort((a, b) => {
+        const aValues = JSON.parse(a.getAttribute('data-values') || '[]');
+        const bValues = JSON.parse(b.getAttribute('data-values') || '[]');
+        
+        const aValue = aValues[column] || 0;
+        const bValue = bValues[column] || 0;
+        
+        if (direction === 'asc') {
+            return aValue - bValue;
+        } else {
+            return bValue - aValue;
+        }
+    });
+    
+    // Clear tbody
+    tbody.innerHTML = '';
+    
+    // Group sorted rows by model type
+    const closedSourceModels = [
+        'GPT-4.1', 'Gemini-2.5-Pro', 'Qwen-Plus-Latest', 
+        'LongCat-Large-32K', 'Hunyuan-T1'
+    ];
+    
+    const closedSource = dataRows.filter(row => {
+        const modelName = row.querySelector('td strong')?.textContent || '';
+        return closedSourceModels.includes(modelName);
+    });
+    
+    const openSource = dataRows.filter(row => {
+        const modelName = row.querySelector('td strong')?.textContent || '';
+        return !closedSourceModels.includes(modelName);
+    });
+    
+    // Rebuild table with sections
+    if (closedSource.length > 0) {
+        tbody.appendChild(sectionHeaders[0]);
+        closedSource.forEach(row => tbody.appendChild(row));
+    }
+    
+    if (openSource.length > 0) {
+        tbody.appendChild(sectionHeaders[1]);
+        openSource.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Add average rows at the end
+    averageRows.forEach(row => tbody.appendChild(row));
+    
+    // Add animation
+    dataRows.forEach((row, index) => {
+        setTimeout(() => {
+            row.style.animation = 'fadeIn 0.3s ease-in';
+        }, index * 20);
+    });
+}
+
 $(document).ready(function() {
     // Check for click events on the navbar burger icon
 
@@ -566,5 +674,8 @@ $(document).ready(function() {
     
     // Setup video autoplay for carousel
     setupVideoCarouselAutoplay();
+    
+    // Initialize leaderboard sorting
+    initLeaderboardSorting();
 
 })
