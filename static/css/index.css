@@ -1071,6 +1071,10 @@ a:focus {
   user-select: none;
   position: relative;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 }
 
 .leaderboard-table thead th.sortable:hover {
@@ -1079,11 +1083,11 @@ a:focus {
 
 .leaderboard-table thead th.sortable .sort-arrow {
   display: inline-block;
-  margin-left: 0.3rem;
   font-size: 0.9rem;
   color: #b5b5b5;
   opacity: 0.6;
   transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .leaderboard-table thead th.sortable:hover .sort-arrow {
