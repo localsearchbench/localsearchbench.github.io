@@ -1045,6 +1045,7 @@ a:focus {
   padding: 1rem 0.75rem;
   white-space: nowrap;
   vertical-align: middle;
+  text-align: center;
 }
 
 .leaderboard-table thead th.sortable {
@@ -1097,6 +1098,10 @@ a:focus {
   content: "↓";
   color: #3273dc;
   font-weight: bold;
+}
+
+.leaderboard-table tbody td {
+  text-align: center;
 }
 
 .leaderboard-table tbody tr:not(.section-header):not(.average-row) {
