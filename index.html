@@ -423,7 +423,18 @@ Shanghai Innovation Institute</span>
             Try our interactive playground to test different agentic search methods on LocalSearchBench.
             Select tools, enter queries, and see how different approaches perform.
           </p>
-          <div class="notification is-info is-light" style="margin-top: 1rem;">
+          
+          <!-- Backend Setup Notice -->
+          <div class="notification is-warning is-light" style="margin-top: 1rem; margin-bottom: 1rem;">
+            <p style="text-align: center; margin: 0;">
+              <strong>⚠️ Interactive Feature:</strong> This playground requires a backend server. 
+              <a href="QUICK_START.md" target="_blank">Quick Start Guide</a> | 
+              <a href="DEPLOYMENT.md" target="_blank">Full Deployment</a> | 
+              <a href="javascript:void(0)" onclick="alert('Run: cd server && ./deploy.sh --dev\n\nOr try Gradio version: ./run_gradio.sh')">Quick Setup</a>
+            </p>
+          </div>
+          
+          <div class="notification is-info is-light">
             <p style="text-align: center; margin: 0;">
               <strong>📍 Supported Cities:</strong> Currently supports <strong>Shanghai</strong>, <strong>Beijing</strong>, <strong>Guangzhou</strong>, <strong>Shenzhen</strong>, <strong>Wuhan</strong>, <strong>Chongqing</strong>, <strong>Chengdu</strong>, <strong>Suzhou</strong>, and <strong>Nanjing</strong>. Other cities are under development.
             </p>

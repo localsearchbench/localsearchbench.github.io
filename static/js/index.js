@@ -226,7 +226,31 @@ async function runRAG() {
         // Check if it's a network error
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000' };
-            alert(`无法连接到 RAG 服务器。请确保:\n1. RAG 服务器正在运行 (${config.RAG_SERVER_URL})\n2. 已配置 CORS 允许跨域访问\n3. 检查浏览器控制台查看详细错误`);
+            const errorMsg = `
+🚧 RAG 服务器未连接
+
+当前配置的服务器: ${config.RAG_SERVER_URL}
+
+快速开始指南:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1️⃣ 本地测试（推荐）
+   cd server && ./deploy.sh --dev
+
+2️⃣ 使用 Gradio 版本
+   ./run_gradio.sh
+   
+3️⃣ 使用在线演示
+   访问 Hugging Face Space (见项目 README)
+
+详细文档: 
+📖 QUICK_START.md - 5分钟快速开始
+📖 DEPLOYMENT.md - 完整部署指南
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+提示: 这是一个需要后端支持的交互式演示。
+您可以查看页面其他部分了解 LocalSearchBench！
+            `.trim();
+            alert(errorMsg);
         } else {
             alert('运行搜索时发生错误: ' + error.message);
         }
