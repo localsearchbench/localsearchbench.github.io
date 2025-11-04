@@ -584,8 +584,11 @@ function sortTable(table, column, direction) {
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
     
-    // Get all data rows (rows with data-values attribute)
-    const dataRows = rows.filter(row => row.hasAttribute('data-values'));
+    // Separate average row from data rows
+    const averageRow = rows.find(row => row.classList.contains('average-row'));
+    const dataRows = rows.filter(row => 
+        row.hasAttribute('data-values') && !row.classList.contains('average-row')
+    );
     
     // Sort data rows
     dataRows.sort((a, b) => {
@@ -605,8 +608,13 @@ function sortTable(table, column, direction) {
     // Clear tbody
     tbody.innerHTML = '';
     
-    // Re-append sorted rows
+    // Re-append sorted data rows
     dataRows.forEach(row => tbody.appendChild(row));
+    
+    // Always keep average row at the end
+    if (averageRow) {
+        tbody.appendChild(averageRow);
+    }
     
     // Add animation
     dataRows.forEach((row, index) => {
