@@ -1130,8 +1130,8 @@ a:focus {
 }
 
 .leaderboard-table .model-logo {
-  width: 5px;
-  height: 5px;
+  width: 24px;
+  height: 24px;
   margin-right: 0.5rem;
   vertical-align: middle;
   object-fit: contain;
