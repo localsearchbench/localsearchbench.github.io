@@ -99,13 +99,17 @@ class CityVectorDB:
         self.gpu_resources = None
         
         # 初始化 GPU 资源
+        # 注意：GPU 兼容性检查应该在启动脚本中完成（start_rag_server.sh）
+        # 因为 FAISS 的 C++ 断言失败会导致进程崩溃，Python 无法捕获
         if self.use_gpu:
             try:
                 self.gpu_resources = faiss.StandardGpuResources()
                 print(f"🚀 GPU resources initialized for FAISS")
             except Exception as e:
-                print(f"⚠️  Failed to initialize GPU resources: {e}, falling back to CPU")
+                print(f"⚠️  Failed to initialize GPU resources: {e}")
+                print(f"⚠️  Falling back to CPU mode")
                 self.use_gpu = False
+                self.gpu_resources = None
         
         self.load_all_cities()
     
