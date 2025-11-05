@@ -298,6 +298,11 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
                 
                 retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("rerank_score", 0), reverse=True)
                 print(f"🔄 Reranked {len(retrieved_docs)} documents")
+                
+                # 调试：打印第一个文档的字段
+                if retrieved_docs:
+                    print(f"📋 First document fields: {list(retrieved_docs[0].keys())}")
+                    print(f"📋 Merchant name: {retrieved_docs[0].get('merchant_name', 'NOT FOUND')}")
             except Exception as e:
                 print(f"⚠️ Reranking failed: {e}, using vector scores only")
         
@@ -312,6 +317,12 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
             "city": city_name,
             "latency_ms": (time.time() - start_time) * 1000
         }
+        
+        # 调试：打印返回的商店名称
+        top_merchants = retrieved_docs[:top_k]
+        print(f"📦 Returning top {len(top_merchants)} merchants:")
+        for i, doc in enumerate(top_merchants[:3], 1):  # 只打印前3个
+            print(f"   {i}. {doc.get('merchant_name', 'NO_NAME')} (score: {doc.get('rerank_score', doc.get('vector_score', 0)):.4f})")
         
         return {
             "answer": answer,

@@ -294,15 +294,31 @@ async function callRAGAPI(query, topK, retriever, reranker) {
     const data = await response.json();
     console.log('RAG API response:', data);
     
+    // 调试：打印第一个 source 的字段
+    if (data.sources && data.sources.length > 0) {
+        console.log('First source fields:', Object.keys(data.sources[0]));
+        console.log('First source merchant_name:', data.sources[0].merchant_name);
+        console.log('First source data:', data.sources[0]);
+    }
+    
     // Transform API response to match display format
     // 后端返回: answer, sources, metrics, processing_time
     return {
-        retrieved_docs: (data.sources || []).map(doc => ({
-            title: doc.title || doc.merchant_name || 'Untitled',
-            score: doc.score || doc.similarity_score || doc.rerank_score || doc.vector_score || 0,
-            content: doc.content || doc.description || '',
-            type: doc.type || 'merchant'
-        })),
+        retrieved_docs: (data.sources || []).map(doc => {
+            // 优先使用 merchant_name，如果没有再用 title
+            const title = doc.merchant_name || doc.title || 'Untitled';
+            const score = doc.rerank_score || doc.vector_score || doc.score || doc.similarity_score || 0;
+            const content = doc.description || doc.content || '';
+            
+            console.log(`Mapping doc: merchant_name="${doc.merchant_name}", title="${title}"`);
+            
+            return {
+                title: title,
+                score: score,
+                content: content,
+                type: doc.type || 'merchant'
+            };
+        }),
         generated_answer: data.answer || '暂无生成的答案',
         metrics: {
             correctness: data.metrics?.correctness || 0,
