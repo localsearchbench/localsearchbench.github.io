@@ -9,7 +9,7 @@
 
 const CONFIG = {
     // RAG Server Configuration
-    RAG_SERVER_URL: 'http://10.164.243.10:8000',
+    RAG_SERVER_URL: 'http://10.131.27.205:8000',
     
     // API Endpoints
     API_ENDPOINTS: {
