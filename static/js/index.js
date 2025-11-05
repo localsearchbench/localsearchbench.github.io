@@ -418,9 +418,25 @@ function displayRAGResults(response) {
                 if (value.length === 0) return '<span class="has-text-grey-light">N/A</span>';
                 // 检查数组中是否包含对象
                 if (value.some(item => typeof item === 'object' && item !== null)) {
-                    // 对于对象数组，使用JSON格式化
-                    return '<pre style="background: #f9f9f9; padding: 0.5rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.85rem; overflow-x: auto;">' + 
-                           JSON.stringify(value, null, 2) + '</pre>';
+                    // 对于对象数组，使用卡片式展示
+                    return '<div style="margin-top: 0.5rem;">' + 
+                           value.map((item, idx) => {
+                               const entries = Object.entries(item);
+                               return `
+                                   <div style="background: #f9f9f9; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 3px solid #3273dc;">
+                                       <div style="font-weight: 600; color: #363636; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                           ${key === 'products' ? '📦 产品' : '🎁 团购'} ${idx + 1}
+                                       </div>
+                                       ${entries.map(([k, v]) => `
+                                           <div style="display: flex; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                               <span style="color: #7a7a7a; min-width: 100px;">${k}:</span>
+                                               <span style="color: #363636; flex: 1;">${v}</span>
+                                           </div>
+                                       `).join('')}
+                                   </div>
+                               `;
+                           }).join('') + 
+                           '</div>';
                 }
                 // 对于简单类型数组，使用join
                 return value.join(', ');
