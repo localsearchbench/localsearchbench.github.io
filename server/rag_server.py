@@ -119,7 +119,20 @@ class CityVectorDB:
         print(f"\n📦 Loading vector databases from: {self.data_dir}")
         print(f"💻 Device: {device_info}")
         
-        for city_en, city_cn in self.cities.items():
+        # 只加载上海的索引，其他城市暂时注释
+        cities_to_load = {
+            "shanghai": "上海",
+            # "beijing": "北京",
+            # "guangzhou": "广州",
+            # "shenzhen": "深圳",
+            # "hangzhou": "杭州",
+            # "suzhou": "苏州",
+            # "chengdu": "成都",
+            # "chongqing": "重庆",
+            # "wuhan": "武汉"
+        }
+        
+        for city_en, city_cn in cities_to_load.items():
             try:
                 # 加载 1028 版本的数据
                 index_path = os.path.join(self.data_dir, f"faiss_merchant_index_vllm_{city_en}_1028.faiss")
@@ -154,7 +167,7 @@ class CityVectorDB:
             except Exception as e:
                 print(f"❌ Failed to load {city_cn} ({city_en}): {e}")
         
-        print(f"\n🎉 Loaded {len(self.indexes)}/{len(self.cities)} cities successfully on {device_info}!\n")
+        print(f"\n🎉 Loaded {len(self.indexes)}/{len(cities_to_load)} cities successfully on {device_info}!\n")
     
     def search(self, query_embedding: np.ndarray, city: str = "shanghai", top_k: int = 20):
         """在指定城市的向量数据库中搜索"""
