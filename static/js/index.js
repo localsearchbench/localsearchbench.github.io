@@ -297,7 +297,7 @@ async function callRAGAPI(query, topK, retriever, reranker) {
     // 调试：打印第一个 source 的字段
     if (data.sources && data.sources.length > 0) {
         console.log('First source fields:', Object.keys(data.sources[0]));
-        console.log('First source merchant_name:', data.sources[0].merchant_name);
+        console.log('First source name:', data.sources[0].name);
         console.log('First source data:', data.sources[0]);
     }
     
@@ -305,18 +305,17 @@ async function callRAGAPI(query, topK, retriever, reranker) {
     // 后端返回: answer, sources, metrics, processing_time
     return {
         retrieved_docs: (data.sources || []).map(doc => {
-            // 优先使用 merchant_name，如果没有再用 title
-            const title = doc.merchant_name || doc.title || 'Untitled';
+            // 保留所有原始字段
+            const title = doc.name || doc.title || 'Untitled';
             const score = doc.rerank_score || doc.vector_score || doc.score || doc.similarity_score || 0;
-            const content = doc.description || doc.content || '';
             
-            console.log(`Mapping doc: merchant_name="${doc.merchant_name}", title="${title}"`);
+            console.log(`Mapping doc: name="${doc.name}", title="${title}"`);
             
+            // 返回所有字段
             return {
-                title: title,
-                score: score,
-                content: content,
-                type: doc.type || 'merchant'
+                ...doc,  // 保留所有原始字段
+                title: title,  // 添加 title 字段方便显示
+                score: score   // 统一的 score 字段
             };
         }),
         generated_answer: data.answer || '暂无生成的答案',
@@ -400,18 +399,74 @@ function displayRAGResults(response) {
     const generatedAnswerDiv = document.getElementById('generated-answer');
     const metricsDiv = document.getElementById('metrics');
     
-    // Display retrieved documents
-    retrievedDocsDiv.innerHTML = response.retrieved_docs.map((doc, index) => `
-        <div class="box" style="margin-bottom: 1rem; border-left: 3px solid #3273dc;">
-            <div style="display: flex; justify-content: space-between; align-items: start;">
-                <div style="flex: 1;">
-                    <p class="has-text-weight-semibold">${index + 1}. ${doc.title}</p>
-                    <p class="is-size-7" style="margin-top: 0.5rem;">${doc.content}</p>
+    // Display retrieved documents with all fields
+    retrievedDocsDiv.innerHTML = response.retrieved_docs.map((doc, index) => {
+        // 定义字段显示的顺序和分组
+        const mainFields = ['name', 'category', 'subcategory', 'description'];
+        const locationFields = ['address', 'city', 'district', 'business_area', 'landmark', 'latitude', 'longitude'];
+        const businessFields = ['business_hours', 'price_range', 'avg_price', 'rating', 'review_count', 'phone', 'mobile', 'email'];
+        const serviceFields = ['delivery_available', 'delivery_range', 'delivery_fee', 'min_order_amount'];
+        const extraFields = ['tags', 'facilities', 'promotions', 'products', 'group_deals'];
+        const scoreFields = ['vector_score', 'rerank_score'];
+        
+        // 格式化字段值
+        const formatValue = (key, value) => {
+            if (value === null || value === undefined || value === '') return '<span class="has-text-grey-light">N/A</span>';
+            if (typeof value === 'boolean') return value ? '✓' : '✗';
+            if (typeof value === 'number') return value.toFixed(4);
+            if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : '<span class="has-text-grey-light">N/A</span>';
+            if (typeof value === 'string' && value.length > 100) return value.substring(0, 100) + '...';
+            return value;
+        };
+        
+        // 生成字段组HTML
+        const renderFieldGroup = (title, fields) => {
+            const fieldsHtml = fields.map(key => {
+                if (doc.hasOwnProperty(key)) {
+                    return `
+                        <div style="display: flex; margin-bottom: 0.3rem;">
+                            <span class="has-text-weight-semibold" style="min-width: 150px; color: #363636;">${key}:</span>
+                            <span style="flex: 1;">${formatValue(key, doc[key])}</span>
+                        </div>
+                    `;
+                }
+                return '';
+            }).filter(h => h).join('');
+            
+            return fieldsHtml ? `
+                <div style="margin-bottom: 1rem;">
+                    <p class="has-text-weight-bold is-size-6" style="color: #3273dc; margin-bottom: 0.5rem;">${title}</p>
+                    ${fieldsHtml}
                 </div>
-                <span class="tag is-primary" style="margin-left: 1rem;">Score: ${doc.score.toFixed(2)}</span>
+            ` : '';
+        };
+        
+        return `
+            <div class="box" style="margin-bottom: 1.5rem; border-left: 4px solid #3273dc; position: relative;">
+                <div style="position: absolute; top: 10px; right: 10px;">
+                    <span class="tag is-primary is-medium">Score: ${doc.score.toFixed(4)}</span>
+                </div>
+                
+                <p class="title is-5" style="margin-bottom: 1rem; padding-right: 120px;">
+                    ${index + 1}. ${doc.name || 'Untitled'}
+                </p>
+                
+                ${renderFieldGroup('📋 基本信息', mainFields)}
+                ${renderFieldGroup('📍 位置信息', locationFields)}
+                ${renderFieldGroup('💼 营业信息', businessFields)}
+                ${renderFieldGroup('🚚 配送服务', serviceFields)}
+                ${renderFieldGroup('🏷️ 标签与设施', extraFields)}
+                ${renderFieldGroup('📊 评分详情', scoreFields)}
+                
+                <details style="margin-top: 1rem;">
+                    <summary class="has-text-grey" style="cursor: pointer; user-select: none;">
+                        查看完整JSON数据
+                    </summary>
+                    <pre style="background: #f5f5f5; padding: 1rem; margin-top: 0.5rem; border-radius: 4px; font-size: 0.85rem; overflow-x: auto;">${JSON.stringify(doc, null, 2)}</pre>
+                </details>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
     
     // Display generated answer
     generatedAnswerDiv.innerHTML = `
