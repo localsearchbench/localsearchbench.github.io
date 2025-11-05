@@ -414,7 +414,17 @@ function displayRAGResults(response) {
             if (value === null || value === undefined || value === '') return '<span class="has-text-grey-light">N/A</span>';
             if (typeof value === 'boolean') return value ? '✓' : '✗';
             if (typeof value === 'number') return value.toFixed(4);
-            if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : '<span class="has-text-grey-light">N/A</span>';
+            if (Array.isArray(value)) {
+                if (value.length === 0) return '<span class="has-text-grey-light">N/A</span>';
+                // 检查数组中是否包含对象
+                if (value.some(item => typeof item === 'object' && item !== null)) {
+                    // 对于对象数组，使用JSON格式化
+                    return '<pre style="background: #f9f9f9; padding: 0.5rem; margin: 0.5rem 0; border-radius: 4px; font-size: 0.85rem; overflow-x: auto;">' + 
+                           JSON.stringify(value, null, 2) + '</pre>';
+                }
+                // 对于简单类型数组，使用join
+                return value.join(', ');
+            }
             if (typeof value === 'string' && value.length > 100) return value.substring(0, 100) + '...';
             return value;
         };
