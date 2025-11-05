@@ -9,7 +9,7 @@
 
 const CONFIG = {
     // RAG Server Configuration
-    RAG_SERVER_URL: 'http://11.45.22.196:8000',
+    RAG_SERVER_URL: 'https://qui-shaved-yukon-batch.trycloudflare.com',
     
     // API Endpoints
     API_ENDPOINTS: {
