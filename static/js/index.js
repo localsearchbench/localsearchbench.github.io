@@ -397,7 +397,6 @@ function displayRAGResults(response) {
     const resultsArea = document.getElementById('rag-results');
     const retrievedDocsDiv = document.getElementById('retrieved-docs');
     const generatedAnswerDiv = document.getElementById('generated-answer');
-    const metricsDiv = document.getElementById('metrics');
     
     // Display retrieved documents with all fields
     retrievedDocsDiv.innerHTML = response.retrieved_docs.map((doc, index) => {
@@ -499,36 +498,6 @@ function displayRAGResults(response) {
         <div class="box" style="background-color: #f5f5f5;">
             <div class="content">
                 ${response.generated_answer.replace(/\n/g, '<br>')}
-            </div>
-        </div>
-    `;
-    
-    // Display metrics
-    metricsDiv.innerHTML = `
-        <div class="columns">
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Correctness</p>
-                    <p class="title is-4" style="color: #48c774;">${(response.metrics.correctness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Completeness</p>
-                    <p class="title is-4" style="color: #3273dc;">${(response.metrics.completeness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Faithfulness</p>
-                    <p class="title is-4" style="color: #ffdd57;">${(response.metrics.faithfulness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Total Time</p>
-                    <p class="title is-4">${(parseFloat(response.metrics.retrieval_time) + parseFloat(response.metrics.generation_time)).toFixed(2)}s</p>
-                </div>
             </div>
         </div>
     `;
@@ -655,7 +624,6 @@ function displayAgenticResults(response) {
     const resultsArea = document.getElementById('agentic-results');
     const processDiv = document.getElementById('search-process');
     const answerDiv = document.getElementById('agentic-answer');
-    const metricsDiv = document.getElementById('agentic-metrics');
     
     // Display search process
     processDiv.innerHTML = response.search_steps.map((step, index) => `
@@ -681,42 +649,6 @@ function displayAgenticResults(response) {
             </div>
             <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e0e0e0;">
                 <span class="tag is-info">Model: ${response.model_used}</span>
-            </div>
-        </div>
-    `;
-    
-    // Display metrics
-    metricsDiv.innerHTML = `
-        <div class="columns">
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Correctness</p>
-                    <p class="title is-4" style="color: #48c774;">${(response.metrics.correctness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Completeness</p>
-                    <p class="title is-4" style="color: #3273dc;">${(response.metrics.completeness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Faithfulness</p>
-                    <p class="title is-4" style="color: #ffdd57;">${(response.metrics.faithfulness * 100).toFixed(1)}%</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Steps</p>
-                    <p class="title is-4">${response.metrics.steps_count}</p>
-                </div>
-            </div>
-            <div class="column">
-                <div class="box has-text-centered">
-                    <p class="heading">Total Time</p>
-                    <p class="title is-4">${response.metrics.total_time}</p>
-                </div>
             </div>
         </div>
     `;
