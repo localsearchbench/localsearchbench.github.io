@@ -45,6 +45,7 @@ localsearchbench.github.io/
 - **Interactive Demo**: Web-based interface for testing
 - **Scalable Backend**: FastAPI + FAISS vector search
 - **Docker Support**: Easy deployment with Docker Compose
+- **MCP Integration**: Use as AI tool in Claude Desktop, Cursor, and more! 🆕
 
 ## 🛠️ Development
 
@@ -57,6 +58,15 @@ See [server/README.md](server/README.md) for:
 - Configuration options
 - API documentation
 - Troubleshooting
+
+### MCP Tools (AI Integration)
+See [mcp_tools/QUICKSTART.md](mcp_tools/QUICKSTART.md) for:
+- 5-minute quick start guide
+- Claude Desktop configuration
+- Usage examples
+- Troubleshooting
+
+Reference: Based on [RL-Factory](https://github.com/bytedance/RL-Factory) MCP implementation
 
 ## 📖 Citation
 
