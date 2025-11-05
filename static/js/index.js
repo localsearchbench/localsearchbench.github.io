@@ -492,12 +492,12 @@ function displayRAGResults(response) {
         `;
     }).join('');
     
-    // Display generated answer
+    // Display generated answer (without box around the summary text)
     generatedAnswerDiv.innerHTML = `
-        <div class="box" style="background-color: #f5f5f5;">
-            <div class="content">
-                ${response.generated_answer.replace(/\n/g, '<br>')}
-            </div>
+        <div style="margin-bottom: 1.5rem;">
+            <p class="is-size-5 has-text-weight-medium" style="color: #363636;">
+                ${response.generated_answer}
+            </p>
         </div>
     `;
     
