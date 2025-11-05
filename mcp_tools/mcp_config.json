@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "localsearch": {
+      "command": "python3",
+      "args": [
+        "mcp_tools/rag_search.py"
+      ],
+      "env": {
+        "RAG_SERVER_URL": "http://127.0.0.1:5003"
+      }
+    }
+  }
+}
+

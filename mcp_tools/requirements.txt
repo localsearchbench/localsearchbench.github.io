@@ -1,0 +1,17 @@
+# MCP Tools Requirements
+# 基于 RL-Factory 的依赖配置
+
+# MCP 核心库
+mcp>=1.0.0
+fastmcp>=0.1.0
+
+# HTTP 请求
+requests>=2.31.0
+
+# 可选：如果需要异步支持
+httpx>=0.25.0
+asyncio
+
+# 可选：日志和调试
+python-dotenv>=1.0.0
+
