@@ -289,8 +289,8 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
                     doc_text = f"{doc.get('merchant_name', '')} {doc.get('description', '')} {doc.get('address', '')}"
                     pairs.append([query, doc_text])
                 
-                # 使用 Reranker 重新打分
-                rerank_scores = models.reranker_model.predict(pairs)
+                # 使用 Reranker 重新打分 (使用 batch_size=1 避免 padding 问题)
+                rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
                 
                 # 更新分数并排序
                 for doc, score in zip(retrieved_docs, rerank_scores):
