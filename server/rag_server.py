@@ -55,7 +55,7 @@ app.add_middleware(
 class RAGSearchRequest(BaseModel):
     query: str
     city: str = "shanghai"  # 支持的城市
-    top_k: int = 5
+    top_k: int = 10  # 最终返回10个结果
     retriever: str = "qwen3-embedding-8b"  # 默认使用 Qwen3-Embedding-8B
     reranker: str = "qwen3-reranker-8b"    # 默认使用 Qwen3-Reranker-8B
 
@@ -267,8 +267,8 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
         if query_embedding is None:
             raise HTTPException(status_code=503, detail="Embedding model not loaded")
         
-        # 2. 从 FAISS 向量数据库检索（检索更多用于重排序）
-        retrieval_k = top_k * 3  # 检索3倍数量用于重排序
+        # 2. 从 FAISS 向量数据库检索（检索20个用于重排序）
+        retrieval_k = 50  # 固定检索20个商家用于重排序
         retrieved_docs = models.vector_db.search(query_embedding, city=city, top_k=retrieval_k)
         
         if not retrieved_docs:
