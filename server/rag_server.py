@@ -71,7 +71,7 @@ class AgenticSearchRequest(BaseModel):
 class SearchResult(BaseModel):
     answer: str
     sources: List[Dict[str, Any]]
-    metrics: Dict[str, float]
+    metrics: Dict[str, Any]  # 改为 Any 以支持混合类型（float、int、str）
     reasoning_steps: Optional[List[str]] = None
     processing_time: float
 
