@@ -295,20 +295,21 @@ async function callRAGAPI(query, topK, retriever, reranker) {
     console.log('RAG API response:', data);
     
     // Transform API response to match display format
+    // 后端返回: answer, sources, metrics, processing_time
     return {
-        retrieved_docs: data.retrieved_documents.map(doc => ({
+        retrieved_docs: (data.sources || []).map(doc => ({
             title: doc.title || doc.merchant_name || 'Untitled',
-            score: doc.score || doc.similarity_score || 0,
+            score: doc.score || doc.similarity_score || doc.rerank_score || doc.vector_score || 0,
             content: doc.content || doc.description || '',
             type: doc.type || 'merchant'
         })),
-        generated_answer: data.generated_answer || '暂无生成的答案',
+        generated_answer: data.answer || '暂无生成的答案',
         metrics: {
             correctness: data.metrics?.correctness || 0,
             completeness: data.metrics?.completeness || 0,
             faithfulness: data.metrics?.faithfulness || 0,
-            retrieval_time: data.timing?.retrieval_time || '0s',
-            generation_time: data.timing?.generation_time || '0s'
+            retrieval_time: data.metrics?.latency_ms ? `${(data.metrics.latency_ms / 1000).toFixed(2)}s` : '0s',
+            generation_time: data.processing_time ? `${data.processing_time.toFixed(2)}s` : '0s'
         }
     };
 }
