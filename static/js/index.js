@@ -481,7 +481,6 @@ function displayRAGResults(response) {
                 ${renderFieldGroup('💼 营业信息', businessFields)}
                 ${renderFieldGroup('🚚 配送服务', serviceFields)}
                 ${renderFieldGroup('🏷️ 标签与设施', extraFields)}
-                ${renderFieldGroup('📊 评分详情', scoreFields)}
                 
                 <details style="margin-top: 1rem;">
                     <summary class="has-text-grey" style="cursor: pointer; user-select: none;">
