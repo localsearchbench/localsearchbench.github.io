@@ -452,6 +452,35 @@ code {
   visibility: visible;
 }
 
+/* Results header and collapse functionality */
+.results-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1rem !important;
+}
+
+.results-header .title {
+  margin-bottom: 0 !important;
+}
+
+#rag-results-content {
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+#rag-toggle-btn {
+  border-radius: var(--border-radius) !important;
+  transition: var(--transition) !important;
+}
+
+#rag-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
 
 /* More Works Dropdown */
 .more-works-container {

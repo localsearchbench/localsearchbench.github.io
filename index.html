@@ -480,7 +480,7 @@ Shanghai Innovation Institute</span>
           <div class="field">
             <label class="label">Query</label>
             <div class="control">
-              <textarea class="textarea" id="rag-query" placeholder="e.g., I want to find a highly-rated hotpot restaurant near Wudaokou that's open late and has parking..."></textarea>
+              <textarea class="textarea" id="rag-query" placeholder="e.g., 外滩附近的餐厅有哪些"></textarea>
             </div>
           </div>
 
@@ -522,11 +522,23 @@ Shanghai Innovation Institute</span>
 
           <!-- Results Area -->
           <div class="results-area" id="rag-results" style="display: none;">
-            <!-- Summary text (without box) -->
-            <div class="generated-answer" id="generated-answer"></div>
+            <!-- Results header with collapse button -->
+            <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 class="title is-5">Search Results</h3>
+              <button class="button is-small" onclick="toggleRAGResults()" id="rag-toggle-btn">
+                <span class="icon"><i class="fas fa-chevron-up"></i></span>
+                <span>Collapse</span>
+              </button>
+            </div>
             
-            <!-- Retrieved merchants -->
-            <div class="retrieved-docs" id="retrieved-docs"></div>
+            <!-- Collapsible results content -->
+            <div id="rag-results-content">
+              <!-- Summary text (without box) -->
+              <div class="generated-answer" id="generated-answer"></div>
+              
+              <!-- Retrieved merchants -->
+              <div class="retrieved-docs" id="retrieved-docs"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -559,8 +571,18 @@ Shanghai Innovation Institute</span>
           </div>
           <!-- Results Area -->
           <div class="results-area" id="web-results" style="display: none;">
-            <h4 class="subtitle is-6">Search Results</h4>
-            <div class="search-results" id="web-search-results"></div>
+            <!-- Results header with collapse button -->
+            <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h4 class="subtitle is-6" style="margin-bottom: 0;">Search Results</h4>
+              <button class="button is-small" onclick="toggleWebResults()" id="web-toggle-btn">
+                <span class="icon"><i class="fas fa-chevron-up"></i></span>
+                <span>Collapse</span>
+              </button>
+            </div>
+            <!-- Collapsible results content -->
+            <div id="web-results-content">
+              <div class="search-results" id="web-search-results"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -613,11 +635,22 @@ Shanghai Innovation Institute</span>
 
           <!-- Results Area -->
           <div class="results-area" id="agentic-results" style="display: none;">
-            <h4 class="subtitle is-6">Search Process</h4>
-            <div class="search-process" id="search-process"></div>
-            
-            <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Final Answer</h4>
-            <div class="generated-answer" id="agentic-answer"></div>
+            <!-- Results header with collapse button -->
+            <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h4 class="subtitle is-6" style="margin-bottom: 0;">Search Results</h4>
+              <button class="button is-small" onclick="toggleAgenticResults()" id="agentic-toggle-btn">
+                <span class="icon"><i class="fas fa-chevron-up"></i></span>
+                <span>Collapse</span>
+              </button>
+            </div>
+            <!-- Collapsible results content -->
+            <div id="agentic-results-content">
+              <h4 class="subtitle is-6">Search Process</h4>
+              <div class="search-process" id="search-process"></div>
+              
+              <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Final Answer</h4>
+              <div class="generated-answer" id="agentic-answer"></div>
+            </div>
           </div>
         </div>
       </div>

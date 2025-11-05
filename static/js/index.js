@@ -90,6 +90,60 @@ window.addEventListener('scroll', function() {
     }
 });
 
+// Toggle RAG results collapse/expand
+function toggleRAGResults() {
+    const content = document.getElementById('rag-results-content');
+    const button = document.getElementById('rag-toggle-btn');
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span:last-child');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Collapse';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Expand';
+    }
+}
+
+// Toggle Web Search results collapse/expand
+function toggleWebResults() {
+    const content = document.getElementById('web-results-content');
+    const button = document.getElementById('web-toggle-btn');
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span:last-child');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Collapse';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Expand';
+    }
+}
+
+// Toggle Agentic Search results collapse/expand
+function toggleAgenticResults() {
+    const content = document.getElementById('agentic-results-content');
+    const button = document.getElementById('agentic-toggle-btn');
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span:last-child');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Collapse';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Expand';
+    }
+}
+
 // Video carousel autoplay when in view
 function setupVideoCarouselAutoplay() {
     const carouselVideos = document.querySelectorAll('.results-carousel video');
@@ -144,7 +198,7 @@ function switchTool(toolName) {
 
 // Example queries data
 const exampleQueries = [
-    "I want to find a highly-rated hotpot restaurant near Wudaokou that's open late and has parking available.",
+    "外滩附近的餐厅有哪些",
     "I need a hotel near Beijing West Railway Station with good reviews and breakfast included for under 500 RMB.",
     "Looking for a movie theater showing the latest Marvel film in IMAX near Sanlitun.",
     "I need to buy a birthday cake with fresh fruit decoration near Zhongguancun, preferably from a popular bakery.",
