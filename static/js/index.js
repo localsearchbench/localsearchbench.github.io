@@ -196,45 +196,51 @@ function switchTool(toolName) {
     });
 }
 
-// Example queries data
+// Example queries data - [city, location, query]
 const exampleQueries = [
-    "外滩附近的餐厅有哪些",
-    "I need a hotel near Beijing West Railway Station with good reviews and breakfast included for under 500 RMB.",
-    "Looking for a movie theater showing the latest Marvel film in IMAX near Sanlitun.",
-    "I need to buy a birthday cake with fresh fruit decoration near Zhongguancun, preferably from a popular bakery.",
-    "Looking for a reliable dental clinic near Guomao with English-speaking doctors and good patient reviews.",
-    "Planning to visit the Great Wall this weekend, need recommendations for the best section and transportation options."
+    { city: "shanghai", location: "外滩", query: "有哪些评分高的餐厅" },
+    { city: "beijing", location: "五道口", query: "有哪些营业到很晚的火锅店" },
+    { city: "shenzhen", location: "南山区", query: "附近有哪些电影院" },
+    { city: "guangzhou", location: "天河区", query: "哪里可以买到生日蛋糕" },
+    { city: "chengdu", location: "春熙路", query: "推荐适合工作的咖啡店" },
+    { city: "wuhan", location: "武昌站", query: "附近性价比高的酒店" }
 ];
 
 function loadExample(index) {
     console.log('loadExample called with index:', index);
-    const query = exampleQueries[index];
-    console.log('Query:', query);
+    const example = exampleQueries[index];
+    console.log('Example:', example);
     
     // Find the currently active tab/panel
     const activeTab = document.querySelector('.tabs li.is-active');
     console.log('Active tab:', activeTab);
-    let queryInputId = 'rag-query'; // default to RAG
+    let prefix = 'rag'; // default to RAG
     
     if (activeTab) {
         const tabText = activeTab.textContent.trim();
         console.log('Tab text:', tabText);
         if (tabText.includes('Web Search')) {
-            queryInputId = 'web-query';
+            prefix = 'web';
         } else if (tabText.includes('Agentic Search')) {
-            queryInputId = 'agentic-query';
+            prefix = 'agentic';
         } else if (tabText.includes('RAG Search')) {
-            queryInputId = 'rag-query';
+            prefix = 'rag';
         }
     }
     
-    console.log('Query input ID:', queryInputId);
-    const queryInput = document.getElementById(queryInputId);
-    console.log('Query input element:', queryInput);
+    // Set city, location, and query
+    const citySelect = document.getElementById(`${prefix}-city`);
+    const locationInput = document.getElementById(`${prefix}-location`);
+    const queryInput = document.getElementById(`${prefix}-query`);
     
-    if (queryInput) {
-        queryInput.value = query;
-        // Focus on the input
+    console.log('Setting values for prefix:', prefix);
+    
+    if (citySelect && locationInput && queryInput) {
+        citySelect.value = example.city;
+        locationInput.value = example.location;
+        queryInput.value = example.query;
+        
+        // Focus on the query input
         queryInput.focus();
         // Scroll to the input
         queryInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -245,21 +251,42 @@ function loadExample(index) {
             queryInput.style.boxShadow = '';
         }, 1000);
     } else {
-        console.error('Query input not found for ID:', queryInputId);
+        console.error('Input elements not found for prefix:', prefix);
     }
 }
 
 // RAG Search Function
 async function runRAG() {
-    const query = document.getElementById('rag-query').value;
+    const city = document.getElementById('rag-city').value;
+    const location = document.getElementById('rag-location').value;
+    const queryContent = document.getElementById('rag-query').value;
     const topK = parseInt(document.getElementById('rag-topk').value);
     const retriever = document.getElementById('rag-retriever').value;
     const reranker = document.getElementById('rag-reranker').value;
     
-    if (!query.trim()) {
-        alert('Please enter a query first!');
+    // 检查必填字段
+    if (!city) {
+        alert('请选择城市！');
         return;
     }
+    
+    if (!queryContent.trim()) {
+        alert('请输入查询内容！');
+        return;
+    }
+    
+    // 组合完整查询: city + location + query
+    let fullQuery = '';
+    if (location.trim()) {
+        fullQuery = `${location.trim()} ${queryContent.trim()}`;
+    } else {
+        fullQuery = queryContent.trim();
+    }
+    
+    console.log('City:', city);
+    console.log('Location:', location);
+    console.log('Query Content:', queryContent);
+    console.log('Full Query:', fullQuery);
     
     // Show loading state
     const button = event.target.closest('button');
@@ -268,8 +295,8 @@ async function runRAG() {
     button.disabled = true;
     
     try {
-        // Call actual RAG API endpoint
-        const response = await callRAGAPI(query, topK, retriever, reranker);
+        // Call actual RAG API endpoint with full query
+        const response = await callRAGAPI(fullQuery, city, topK, retriever, reranker);
         
         // Display results
         displayRAGResults(response);
@@ -316,12 +343,13 @@ async function runRAG() {
 }
 
 // Call RAG API
-async function callRAGAPI(query, topK, retriever, reranker) {
+async function callRAGAPI(query, city, topK, retriever, reranker) {
     const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000', API_ENDPOINTS: { RAG_SEARCH: '/api/v1/rag/search' } };
     const url = `${config.RAG_SERVER_URL}${config.API_ENDPOINTS.RAG_SEARCH}`;
     
     const requestBody = {
         query: query,
+        city: city,
         top_k: topK,
         retriever_model: retriever,
         reranker_model: reranker,
@@ -562,15 +590,86 @@ function displayRAGResults(response) {
     resultsArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Agentic Search Function
-async function runAgenticSearch() {
-    const query = document.getElementById('agentic-query').value;
-    const model = document.getElementById('agentic-model').value;
+// Web Search Function
+async function runWebSearch() {
+    const city = document.getElementById('web-city').value;
+    const location = document.getElementById('web-location').value;
+    const queryContent = document.getElementById('web-query').value;
+    const topK = parseInt(document.getElementById('web-topk').value);
     
-    if (!query.trim()) {
-        alert('Please enter a query first!');
+    // 检查必填字段
+    if (!city) {
+        alert('请选择城市！');
         return;
     }
+    
+    if (!queryContent.trim()) {
+        alert('请输入查询内容！');
+        return;
+    }
+    
+    // 组合完整查询: city + location + query
+    let fullQuery = '';
+    if (location.trim()) {
+        fullQuery = `${location.trim()} ${queryContent.trim()}`;
+    } else {
+        fullQuery = queryContent.trim();
+    }
+    
+    console.log('Web Search - City:', city);
+    console.log('Web Search - Location:', location);
+    console.log('Web Search - Query Content:', queryContent);
+    console.log('Web Search - Full Query:', fullQuery);
+    
+    // Show loading state
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    button.disabled = true;
+    
+    try {
+        // TODO: Call actual Web Search API endpoint
+        alert('Web Search 功能开发中...\n\nCity: ' + city + '\nLocation: ' + location + '\nQuery: ' + queryContent);
+    } catch (error) {
+        console.error('Error running web search:', error);
+        alert('运行搜索时发生错误: ' + error.message);
+    } finally {
+        // Restore button state
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+    }
+}
+
+// Agentic Search Function
+async function runAgenticSearch() {
+    const city = document.getElementById('agentic-city').value;
+    const location = document.getElementById('agentic-location').value;
+    const queryContent = document.getElementById('agentic-query').value;
+    const model = document.getElementById('agentic-model').value;
+    
+    // 检查必填字段
+    if (!city) {
+        alert('请选择城市！');
+        return;
+    }
+    
+    if (!queryContent.trim()) {
+        alert('请输入查询内容！');
+        return;
+    }
+    
+    // 组合完整查询: city + location + query
+    let fullQuery = '';
+    if (location.trim()) {
+        fullQuery = `${location.trim()} ${queryContent.trim()}`;
+    } else {
+        fullQuery = queryContent.trim();
+    }
+    
+    console.log('Agentic Search - City:', city);
+    console.log('Agentic Search - Location:', location);
+    console.log('Agentic Search - Query Content:', queryContent);
+    console.log('Agentic Search - Full Query:', fullQuery);
     
     // Show loading state
     const button = event.target.closest('button');
@@ -580,7 +679,7 @@ async function runAgenticSearch() {
     
     try {
         // Simulate API call (replace with actual API endpoint)
-        const response = await simulateAgenticSearch(query, model);
+        const response = await simulateAgenticSearch(fullQuery, model);
         
         // Display results
         displayAgenticResults(response);

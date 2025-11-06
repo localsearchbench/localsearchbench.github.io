@@ -477,10 +477,42 @@ Shanghai Innovation Institute</span>
       <!-- RAG Search Panel -->
       <div class="tool-panel active" id="rag-panel">
         <div class="panel-content">
+          <!-- City and Location Selection -->
+          <div class="columns">
+            <div class="column is-4">
+              <div class="field">
+                <label class="label">City (城市)</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="rag-city">
+                      <option value="shanghai">上海 Shanghai</option>
+                      <option value="beijing">北京 Beijing</option>
+                      <option value="guangzhou">广州 Guangzhou</option>
+                      <option value="shenzhen">深圳 Shenzhen</option>
+                      <option value="hangzhou">杭州 Hangzhou</option>
+                      <option value="suzhou">苏州 Suzhou</option>
+                      <option value="chengdu">成都 Chengdu</option>
+                      <option value="chongqing">重庆 Chongqing</option>
+                      <option value="wuhan">武汉 Wuhan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-8">
+              <div class="field">
+                <label class="label">Location (位置)</label>
+                <div class="control">
+                  <input class="input" type="text" id="rag-location" placeholder="e.g., 外滩, 五道口, 天河区">
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="field">
-            <label class="label">Query</label>
+            <label class="label">Query (查询内容)</label>
             <div class="control">
-              <textarea class="textarea" id="rag-query" placeholder="e.g., 外滩附近的餐厅有哪些"></textarea>
+              <textarea class="textarea" id="rag-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
             </div>
           </div>
 
@@ -493,6 +525,12 @@ Shanghai Innovation Institute</span>
                 </div>
               </div>
             </div>
+            <div class="column">
+              <!-- Empty column for spacing -->
+            </div>
+          </div>
+
+          <div class="columns">
             <div class="column">
               <div class="field">
                 <label class="label">Retrieval Model</label>
@@ -549,12 +587,46 @@ Shanghai Innovation Institute</span>
           <div class="notification is-info is-light">
             <p><strong>Web Search</strong> performs traditional keyword-based search across local merchants and products.</p>
           </div>
-          <div class="field">
-            <label class="label">Query</label>
-            <div class="control">
-              <textarea class="textarea" id="web-query" placeholder="e.g., hotpot restaurant in Wudaokou"></textarea>
+          
+          <!-- City and Location Selection -->
+          <div class="columns">
+            <div class="column is-4">
+              <div class="field">
+                <label class="label">City (城市)</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="web-city">
+                      <option value="shanghai">上海 Shanghai</option>
+                      <option value="beijing">北京 Beijing</option>
+                      <option value="guangzhou">广州 Guangzhou</option>
+                      <option value="shenzhen">深圳 Shenzhen</option>
+                      <option value="hangzhou">杭州 Hangzhou</option>
+                      <option value="suzhou">苏州 Suzhou</option>
+                      <option value="chengdu">成都 Chengdu</option>
+                      <option value="chongqing">重庆 Chongqing</option>
+                      <option value="wuhan">武汉 Wuhan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-8">
+              <div class="field">
+                <label class="label">Location (位置)</label>
+                <div class="control">
+                  <input class="input" type="text" id="web-location" placeholder="e.g., 外滩, 五道口, 天河区">
+                </div>
+              </div>
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Query (查询内容)</label>
+            <div class="control">
+              <textarea class="textarea" id="web-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
+            </div>
+          </div>
+          
           <div class="field">
             <label class="label">Top-K Results</label>
             <div class="control">
@@ -593,10 +665,43 @@ Shanghai Innovation Institute</span>
           <div class="notification is-info is-light">
             <p><strong>Agentic Search</strong> uses LLM-powered agents to perform multi-step reasoning and tool use.</p>
           </div>
+          
+          <!-- City and Location Selection -->
+          <div class="columns">
+            <div class="column is-4">
+              <div class="field">
+                <label class="label">City (城市)</label>
+                <div class="control">
+                  <div class="select is-fullwidth">
+                    <select id="agentic-city">
+                      <option value="shanghai">上海 Shanghai</option>
+                      <option value="beijing">北京 Beijing</option>
+                      <option value="guangzhou">广州 Guangzhou</option>
+                      <option value="shenzhen">深圳 Shenzhen</option>
+                      <option value="hangzhou">杭州 Hangzhou</option>
+                      <option value="suzhou">苏州 Suzhou</option>
+                      <option value="chengdu">成都 Chengdu</option>
+                      <option value="chongqing">重庆 Chongqing</option>
+                      <option value="wuhan">武汉 Wuhan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column is-8">
+              <div class="field">
+                <label class="label">Location (位置)</label>
+                <div class="control">
+                  <input class="input" type="text" id="agentic-location" placeholder="e.g., 外滩, 五道口, 天河区">
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="field">
-            <label class="label">Query</label>
+            <label class="label">Query (查询内容)</label>
             <div class="control">
-              <textarea class="textarea" id="agentic-query" placeholder="Enter your search query..."></textarea>
+              <textarea class="textarea" id="agentic-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
             </div>
           </div>
 
@@ -663,37 +768,37 @@ Shanghai Innovation Institute</span>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(0)">
             <p class="has-text-weight-semibold">🍲 Restaurant Search</p>
-            <p class="is-size-7">Find a highly-rated hotpot restaurant near Wudaokou...</p>
+            <p class="is-size-7">上海 + 外滩 + 有哪些评分高的餐厅</p>
           </div>
         </div>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(1)">
-            <p class="has-text-weight-semibold">🏨 Hotel Booking</p>
-            <p class="is-size-7">I need a hotel near Beijing West Railway Station...</p>
+            <p class="has-text-weight-semibold">🔥 Hotpot Restaurant</p>
+            <p class="is-size-7">北京 + 五道口 + 有哪些营业到很晚的火锅店</p>
           </div>
         </div>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(2)">
             <p class="has-text-weight-semibold">🎬 Entertainment</p>
-            <p class="is-size-7">Looking for a movie theater showing the latest films...</p>
+            <p class="is-size-7">深圳 + 南山区 + 附近有哪些电影院</p>
           </div>
         </div>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(3)">
             <p class="has-text-weight-semibold">🛍️ Shopping</p>
-            <p class="is-size-7">I need to buy a birthday cake near Zhongguancun...</p>
+            <p class="is-size-7">广州 + 天河区 + 哪里可以买到生日蛋糕</p>
           </div>
         </div>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(4)">
-            <p class="has-text-weight-semibold">🏥 Healthcare</p>
-            <p class="is-size-7">Looking for a dental clinic near Guomao with English-speaking doctors...</p>
+            <p class="has-text-weight-semibold">☕ Coffee Shop</p>
+            <p class="is-size-7">成都 + 春熙路 + 推荐适合工作的咖啡店</p>
           </div>
         </div>
         <div class="column is-4">
           <div class="example-card" onclick="loadExample(5)">
-            <p class="has-text-weight-semibold">🗺️ Tourism</p>
-            <p class="is-size-7">Planning to visit the Great Wall this weekend...</p>
+            <p class="has-text-weight-semibold">🏨 Hotel Booking</p>
+            <p class="is-size-7">武汉 + 武昌站 + 附近性价比高的酒店</p>
           </div>
         </div>
       </div>
