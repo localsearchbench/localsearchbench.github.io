@@ -13,7 +13,8 @@ RAG Server - 部署在有 GPU 的服务器上
     本服务器与 interactive_merchant_search_vllm.py 保持高度一致：
     - 候选文档倍数：candidate_multiplier = 5
     - 相似度计算：(max_distance - distance) / max_distance
-    - 重排序文本格式：name - category - address + 多个可选字段
+    - 重排序文本格式：name - category - address + 地理位置（必须）+ 多个可选字段
+    - 地理位置字段（必须参与重排）：city, district, business_area, landmark
 """
 
 from fastapi import FastAPI, HTTPException
@@ -266,7 +267,7 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
     参考策略（与 interactive_merchant_search_vllm.py 保持一致）：
     - 候选文档倍数：5倍（即检索 top_k × 5 个候选文档）
     - 相似度转换：将 L2 距离转换为 0-1 范围的相似度分数
-    - 重排序文本：构建包含多个关键字段的丰富文本表示
+    - 重排序文本：构建包含地理位置（city/district/business_area/landmark）+ 多个关键字段的丰富文本表示
     - 保留排名信息：记录原始排名、重排序分数和最终排名
     """
     start_time = time.time()
@@ -417,7 +418,7 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
     格式化文档用于重排序
     
-    与 interactive_merchant_search_vllm.py 的 _format_document_for_rerank() 保持一致
+    增强版：在 VLLM 脚本基础上，强制包含地理位置信息（city, district, business_area, landmark）
     构建包含多个关键字段的丰富文本表示，提高重排序准确性
     
     Args:
@@ -428,6 +429,19 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
     # 基础信息：商户名称、类别、地址
     rerank_text = f"{doc_info.get('name', '')} - {doc_info.get('category', '')} - {doc_info.get('address', '')}"
+    
+    # 🔥 地理位置信息（必须参与重排）
+    if doc_info.get('city'):
+        rerank_text += f" - 城市:{doc_info['city']}"
+    
+    if doc_info.get('district'):
+        rerank_text += f" - 区域:{doc_info['district']}"
+    
+    if doc_info.get('business_area'):
+        rerank_text += f" - 商圈:{doc_info['business_area']}"
+    
+    if doc_info.get('landmark'):
+        rerank_text += f" - 地标:{doc_info['landmark']}"
     
     # 添加评分信息
     if doc_info.get('rating'):
