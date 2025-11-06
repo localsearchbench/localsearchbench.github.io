@@ -56,7 +56,7 @@ app.add_middleware(
 
 class RAGSearchRequest(BaseModel):
     query: str
-    city: str = "shanghai"  # 支持的城市
+    city: str = "上海"  # 支持的城市（中文）
     top_k: int = 10  # 最终返回10个结果
     retriever: str = "qwen3-embedding-8b"  # 默认使用 Qwen3-Embedding-8B
     reranker: str = "qwen3-reranker-8b"    # 默认使用 Qwen3-Reranker-8B
@@ -85,19 +85,20 @@ class CityVectorDB:
     def __init__(self, data_dir: str, use_gpu: bool = True):
         self.data_dir = data_dir
         self.use_gpu = use_gpu and torch.cuda.is_available()
-        self.cities = {
-            "shanghai": "上海",
-            "beijing": "北京",
-            "guangzhou": "广州",
-            "shenzhen": "深圳",
-            "hangzhou": "杭州",
-            "suzhou": "苏州",
-            "chengdu": "成都",
-            "chongqing": "重庆",
-            "wuhan": "武汉"
+        # 城市映射：中文 -> 英文（用于文件名）
+        self.city_to_en = {
+            "上海": "shanghai",
+            "北京": "beijing",
+            "广州": "guangzhou",
+            "深圳": "shenzhen",
+            "杭州": "hangzhou",
+            "苏州": "suzhou",
+            "成都": "chengdu",
+            "重庆": "chongqing",
+            "武汉": "wuhan"
         }
-        self.indexes = {}
-        self.metadata = {}
+        self.indexes = {}  # key 为中文城市名
+        self.metadata = {}  # key 为中文城市名
         self.gpu_resources = None
         
         # 初始化 GPU 资源
@@ -121,27 +122,14 @@ class CityVectorDB:
         print(f"\n📦 Loading vector databases from: {self.data_dir}")
         print(f"💻 Device: {device_info}")
         
-        # 只加载上海的索引，其他城市暂时注释
-        cities_to_load = {
-            "shanghai": "上海",
-            # "beijing": "北京",
-            # "guangzhou": "广州",
-            # "shenzhen": "深圳",
-            # "hangzhou": "杭州",
-            # "suzhou": "苏州",
-            # "chengdu": "成都",
-            # "chongqing": "重庆",
-            # "wuhan": "武汉"
-        }
-        
-        for city_en, city_cn in cities_to_load.items():
+        for city_cn, city_en in self.city_to_en.items():
             try:
-                # 加载 1028 版本的数据
+                # 加载 1028 版本的数据（文件名使用英文）
                 index_path = os.path.join(self.data_dir, f"faiss_merchant_index_vllm_{city_en}_1028.faiss")
                 meta_path = os.path.join(self.data_dir, f"faiss_merchant_index_vllm_{city_en}_1028_metadata.json")
                 
                 if not os.path.exists(index_path) or not os.path.exists(meta_path):
-                    print(f"⚠️  {city_cn} ({city_en}): Files not found")
+                    print(f"⚠️  {city_cn}: Files not found")
                     continue
                 
                 # 加载 FAISS 索引 (先加载到CPU)
@@ -150,29 +138,35 @@ class CityVectorDB:
                 # 如果启用GPU，将索引转移到GPU
                 if self.use_gpu:
                     try:
-                        # 将CPU索引转换为GPU索引
-                        self.indexes[city_en] = faiss.index_cpu_to_gpu(self.gpu_resources, 0, cpu_index)
+                        # 将CPU索引转换为GPU索引（使用中文作为 key）
+                        self.indexes[city_cn] = faiss.index_cpu_to_gpu(self.gpu_resources, 0, cpu_index)
                         device_tag = "🚀 GPU"
                     except Exception as e:
                         print(f"⚠️  {city_cn}: GPU transfer failed ({e}), using CPU")
-                        self.indexes[city_en] = cpu_index
+                        self.indexes[city_cn] = cpu_index
                         device_tag = "💻 CPU"
                 else:
-                    self.indexes[city_en] = cpu_index
+                    self.indexes[city_cn] = cpu_index
                     device_tag = "💻 CPU"
                 
-                # 加载元数据
+                # 加载元数据（使用中文作为 key）
                 with open(meta_path, "r", encoding="utf-8") as f:
-                    self.metadata[city_en] = json.load(f)
+                    self.metadata[city_cn] = json.load(f)
                 
-                print(f"✅ {city_cn} ({city_en}): {self.indexes[city_en].ntotal} vectors, {len(self.metadata[city_en])} merchants [{device_tag}]")
+                print(f"✅ {city_cn}: {self.indexes[city_cn].ntotal} vectors, {len(self.metadata[city_cn])} merchants [{device_tag}]")
             except Exception as e:
-                print(f"❌ Failed to load {city_cn} ({city_en}): {e}")
+                print(f"❌ Failed to load {city_cn}: {e}")
         
-        print(f"\n🎉 Loaded {len(self.indexes)}/{len(cities_to_load)} cities successfully on {device_info}!\n")
+        print(f"\n🎉 Loaded {len(self.indexes)}/{len(self.city_to_en)} cities successfully on {device_info}!\n")
     
-    def search(self, query_embedding: np.ndarray, city: str = "shanghai", top_k: int = 20):
-        """在指定城市的向量数据库中搜索"""
+    def search(self, query_embedding: np.ndarray, city: str = "上海", top_k: int = 20):
+        """在指定城市的向量数据库中搜索
+        
+        Args:
+            query_embedding: 查询向量
+            city: 城市名（中文），如 "上海"、"北京"
+            top_k: 返回结果数量
+        """
         if city not in self.indexes:
             raise ValueError(f"City '{city}' not loaded. Available cities: {list(self.indexes.keys())}")
         
@@ -322,15 +316,14 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
             print(f"📋 First document fields: {list(retrieved_docs[0].keys())}")
             print(f"📋 Merchant name: {retrieved_docs[0].get('name', 'NOT FOUND')}")
         
-        # 4. 生成答案摘要
-        city_name = models.vector_db.cities.get(city, city)
-        answer = f"在{city_name}找到 {len(retrieved_docs)} 家相关商户，为您推荐以下 {min(top_k, len(retrieved_docs))} 家："
+        # 4. 生成答案摘要（city 已经是中文）
+        answer = f"在{city}找到 {len(retrieved_docs)} 家相关商户，为您推荐以下 {min(top_k, len(retrieved_docs))} 家："
         
         # 5. 计算评估指标
         metrics = {
             "retrieved_count": len(retrieved_docs),
             "returned_count": min(top_k, len(retrieved_docs)),
-            "city": city_name,
+            "city": city,
             "latency_ms": (time.time() - start_time) * 1000
         }
         
