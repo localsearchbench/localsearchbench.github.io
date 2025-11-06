@@ -335,38 +335,102 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
                 doc['rank'] = i + 1  # 原始检索排名
                 doc['original_rank'] = i + 1  # 保存原始排名
         
-        # 3. 使用 Reranker 模型重排序
+        # 3. 🔥 两阶段重排序策略：先地理过滤，再类型匹配
         rerank_time = 0
         if use_reranker and len(retrieved_docs) > 1:
             try:
                 rerank_start = time.time()
                 
-                # 构建查询-文档对（使用更丰富的文档表示）
-                pairs = []
+                # 🔥 阶段1：提取查询中的地理位置关键词
+                location_keywords = _extract_location_from_query(query)
+                print(f"🗺️  Extracted location keywords: {location_keywords}")
+                
+                # 🔥 阶段2：计算地理相关性分数
                 for doc in retrieved_docs:
-                    # 参考 VLLM 系统的文档格式化策略：包含多个关键字段
-                    doc_text = _format_document_for_rerank(doc)
-                    pairs.append([query, doc_text])
+                    location_score = _calculate_location_relevance(doc, location_keywords)
+                    doc['location_score'] = location_score
                 
-                # 使用 Reranker 重新打分 (使用 batch_size=1 避免 padding 问题)
-                rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
-                
-                # 更新分数
-                for doc, score in zip(retrieved_docs, rerank_scores):
-                    doc["rerank_score"] = float(score)
-                
-                # 按重排序分数排序
-                retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("rerank_score", 0), reverse=True)
+                # 🔥 阶段3：如果有地理关键词，先按地理相关性过滤
+                if location_keywords:
+                    # 统计地理匹配情况
+                    matched_docs = [doc for doc in retrieved_docs if doc.get('location_score', 0) > 0]
+                    unmatched_docs = [doc for doc in retrieved_docs if doc.get('location_score', 0) == 0]
+                    
+                    print(f"📍 Location filtering: {len(matched_docs)} matched, {len(unmatched_docs)} unmatched")
+                    
+                    # 如果有匹配地理位置的文档，优先使用它们
+                    if matched_docs:
+                        # 对匹配地理位置的文档进行重排序
+                        pairs = []
+                        for doc in matched_docs:
+                            doc_text = _format_document_for_rerank(doc)
+                            pairs.append([query, doc_text])
+                        
+                        # 使用 Reranker 重新打分
+                        rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
+                        
+                        # 更新分数（地理分数 × 0.3 + rerank分数 × 0.7）
+                        for doc, score in zip(matched_docs, rerank_scores):
+                            doc["rerank_score"] = float(score)
+                            # 🔥 综合分数：地理位置权重30%，语义相关性权重70%
+                            doc["final_score"] = doc['location_score'] * 0.3 + float(score) * 0.7
+                        
+                        # 对未匹配地理位置的文档也打分（但分数降低）
+                        if unmatched_docs:
+                            pairs_unmatched = []
+                            for doc in unmatched_docs:
+                                doc_text = _format_document_for_rerank(doc)
+                                pairs_unmatched.append([query, doc_text])
+                            
+                            rerank_scores_unmatched = models.reranker_model.predict(pairs_unmatched, batch_size=1)
+                            for doc, score in zip(unmatched_docs, rerank_scores_unmatched):
+                                doc["rerank_score"] = float(score)
+                                # 🔥 未匹配地理位置的文档分数降低（× 0.5）
+                                doc["final_score"] = float(score) * 0.5
+                        
+                        # 合并并按最终分数排序
+                        retrieved_docs = matched_docs + unmatched_docs
+                        retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("final_score", 0), reverse=True)
+                    else:
+                        # 如果没有匹配地理位置的文档，使用原始重排序逻辑
+                        print("⚠️  No location-matched documents, using standard reranking")
+                        pairs = []
+                        for doc in retrieved_docs:
+                            doc_text = _format_document_for_rerank(doc)
+                            pairs.append([query, doc_text])
+                        
+                        rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
+                        for doc, score in zip(retrieved_docs, rerank_scores):
+                            doc["rerank_score"] = float(score)
+                            doc["final_score"] = float(score)
+                        
+                        retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("final_score", 0), reverse=True)
+                else:
+                    # 没有地理关键词，使用标准重排序
+                    print("ℹ️  No location keywords in query, using standard reranking")
+                    pairs = []
+                    for doc in retrieved_docs:
+                        doc_text = _format_document_for_rerank(doc)
+                        pairs.append([query, doc_text])
+                    
+                    rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
+                    for doc, score in zip(retrieved_docs, rerank_scores):
+                        doc["rerank_score"] = float(score)
+                        doc["final_score"] = float(score)
+                    
+                    retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("final_score", 0), reverse=True)
                 
                 # 更新最终排名
                 for i, doc in enumerate(retrieved_docs):
                     doc['final_rank'] = i + 1
                 
                 rerank_time = time.time() - rerank_start
-                print(f"🔄 Reranked {len(retrieved_docs)} documents in {rerank_time:.2f}s")
+                print(f"🔄 Two-stage reranking completed in {rerank_time:.2f}s")
                 
             except Exception as e:
                 print(f"⚠️ Reranking failed: {e}, using vector scores only")
+                import traceback
+                traceback.print_exc()
                 # 重排序失败，使用原始排名
                 for i, doc in enumerate(retrieved_docs):
                     doc['final_rank'] = doc.get('rank', i + 1)
@@ -399,9 +463,18 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
         # 调试：打印返回的商店名称
         top_merchants = retrieved_docs[:top_k]
         print(f"📦 Returning top {len(top_merchants)} merchants:")
-        for i, doc in enumerate(top_merchants[:3], 1):  # 只打印前3个
-            score_info = f"rerank={doc.get('rerank_score', 0):.4f}" if use_reranker else f"similarity={doc.get('similarity', 0):.4f}"
-            print(f"   {i}. {doc.get('name', 'NO_NAME')} ({score_info}, rank: {doc.get('original_rank', '?')}→{doc.get('final_rank', '?')})")
+        for i, doc in enumerate(top_merchants[:5], 1):  # 打印前5个
+            if use_reranker:
+                location_info = f"loc={doc.get('location_score', 0):.2f}" if 'location_score' in doc else ""
+                rerank_info = f"rerank={doc.get('rerank_score', 0):.4f}"
+                final_info = f"final={doc.get('final_score', 0):.4f}"
+                score_info = f"{location_info} {rerank_info} {final_info}".strip()
+                geo_info = f"{doc.get('district', '?')}/{doc.get('business_area', '?')}"
+            else:
+                score_info = f"similarity={doc.get('similarity', 0):.4f}"
+                geo_info = f"{doc.get('district', '?')}/{doc.get('business_area', '?')}"
+            
+            print(f"   {i}. {doc.get('name', 'NO_NAME')} | {geo_info} | {score_info} | rank: {doc.get('original_rank', '?')}→{doc.get('final_rank', '?')}")
         
         return {
             "answer": answer,
@@ -415,27 +488,125 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 
+def _extract_location_from_query(query: str) -> List[str]:
+    """
+    从查询中提取地理位置关键词
+    
+    支持的地理层级：
+    - 区级：浦东新区、黄浦区、徐汇区等
+    - 商圈：陆家嘴、南京路、淮海路等
+    - 地标：东方明珠、人民广场、虹桥机场等
+    
+    Returns:
+        地理位置关键词列表
+    """
+    location_keywords = []
+    
+    # 常见区域关键词
+    district_patterns = ['区', '新区', '县']
+    for pattern in district_patterns:
+        if pattern in query:
+            # 提取"XX区"、"XX新区"等
+            import re
+            matches = re.findall(r'[\u4e00-\u9fa5]+' + pattern, query)
+            location_keywords.extend(matches)
+    
+    # 常见商圈/地标关键词（可扩展）
+    common_areas = [
+        '陆家嘴', '南京路', '淮海路', '徐家汇', '五角场', '中山公园',
+        '人民广场', '静安寺', '虹桥', '张江', '金桥', '世纪公园',
+        '新天地', '田子坊', '外滩', '豫园', '七宝', '莘庄'
+    ]
+    
+    for area in common_areas:
+        if area in query:
+            location_keywords.append(area)
+    
+    return location_keywords
+
+
+def _calculate_location_relevance(doc_info: Dict[str, Any], location_keywords: List[str]) -> float:
+    """
+    计算文档与地理位置的相关性分数
+    
+    匹配优先级：
+    1. 商圈 (business_area) - 权重 1.0
+    2. 区域 (district) - 权重 0.8
+    3. 地标 (landmark) - 权重 0.7
+    4. 地址 (address) - 权重 0.6
+    
+    Returns:
+        地理相关性分数 (0-1)
+    """
+    if not location_keywords:
+        return 1.0  # 如果没有地理关键词，不过滤
+    
+    score = 0.0
+    matched = False
+    
+    # 检查商圈匹配
+    business_area = doc_info.get('business_area', '')
+    for keyword in location_keywords:
+        if keyword in business_area:
+            score = max(score, 1.0)
+            matched = True
+            break
+    
+    # 检查区域匹配
+    district = doc_info.get('district', '')
+    for keyword in location_keywords:
+        if keyword in district:
+            score = max(score, 0.8)
+            matched = True
+            break
+    
+    # 检查地标匹配
+    landmark = doc_info.get('landmark', '')
+    for keyword in location_keywords:
+        if keyword in landmark:
+            score = max(score, 0.7)
+            matched = True
+            break
+    
+    # 检查地址匹配
+    address = doc_info.get('address', '')
+    for keyword in location_keywords:
+        if keyword in address:
+            score = max(score, 0.6)
+            matched = True
+            break
+    
+    return score if matched else 0.0
+
+
 def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
-    格式化文档用于重排序（增强版：使用清晰的中文标签）
+    格式化文档用于重排序（地理优先策略）
     
-    增强版：在 VLLM 脚本基础上，强制包含地理位置信息（district, business_area）
-    构建包含多个关键字段的丰富文本表示，提高重排序准确性
+    🔥 新策略：先地理位置，后商店类型
     
     格式示例：
-        店名：星巴克咖啡 类型：餐饮/咖啡厅 地址：北京市朝阳区建国门外大街1号 区域：朝阳区 商圈：国贸
+        位置：浦东新区陆家嘴商圈 类型：餐饮/咖啡厅 店名：星巴克咖啡 特色：WiFi 现磨咖啡
     
     Args:
         doc_info: 文档信息字典
         
     Returns:
-        格式化后的文档文本（带中文标签，使用空格分隔）
+        格式化后的文档文本（地理位置前置）
     """
     parts = []
     
-    # 1. 店名（必填）
-    if doc_info.get('name'):
-        parts.append(f"店名：{doc_info['name']}")
+    # 🔥 1. 地理位置（最优先）
+    location_parts = []
+    if doc_info.get('district'):
+        location_parts.append(doc_info['district'])
+    if doc_info.get('business_area'):
+        location_parts.append(doc_info['business_area'] + '商圈')
+    if doc_info.get('landmark'):
+        location_parts.append('近' + doc_info['landmark'])
+    
+    if location_parts:
+        parts.append(f"位置：{''.join(location_parts)}")
     
     # 2. 类型（类别 + 子类别）
     category_parts = []
@@ -447,21 +618,18 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     if category_parts:
         parts.append(f"类型：{'/'.join(category_parts)}")
     
-    # 3. 地址（必填）
-    if doc_info.get('address'):
-        parts.append(f"地址：{doc_info['address']}")
+    # 3. 店名
+    if doc_info.get('name'):
+        parts.append(f"店名：{doc_info['name']}")
     
-    # 4. 🔥 地理位置信息（必须参与重排）
-    if doc_info.get('district'):
-        parts.append(f"区域：{doc_info['district']}")
-    
-    if doc_info.get('business_area'):
-        parts.append(f"商圈：{doc_info['business_area']}")
-    
-    # 5. 可选字段
+    # 4. 特色服务（重要）
     if doc_info.get('specialties'):
         parts.append(f"特色：{doc_info['specialties']}")
     
+    if doc_info.get('tags'):
+        parts.append(f"标签：{doc_info['tags']}")
+    
+    # 5. 其他信息
     if doc_info.get('products'):
         parts.append(f"服务：{doc_info['products']}")
     
