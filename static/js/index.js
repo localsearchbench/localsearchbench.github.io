@@ -1068,8 +1068,8 @@ async function checkServerConnection() {
         } else {
             console.warn('⚠️  RAG 服务器连接失败:', error.message);
         }
-        // Show modal if connection fails
-        showServerStatusModal(config.RAG_SERVER_URL);
+        // Modal disabled - user can check console for connection status
+        // showServerStatusModal(config.RAG_SERVER_URL);
         return false;
     }
 }
