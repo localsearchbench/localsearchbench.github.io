@@ -286,7 +286,7 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
         
         # 2. 从 FAISS 向量数据库检索
         # 候选文档策略：如果使用重排序，检索 top_k × 5 个候选文档
-        candidate_multiplier = 5  # 候选文档倍数
+        candidate_multiplier = 10  # 候选文档倍数
         use_reranker = models.reranker_model is not None
         
         if use_reranker:
@@ -541,25 +541,25 @@ def root():
 def health_check():
     """健康检查"""
     cities_loaded = {}
-    if models.vector_db:
-        cities_loaded = {
-            city_en: {
-                "name": city_cn,
-                "vectors": models.vector_db.indexes[city_en].ntotal if city_en in models.vector_db.indexes else 0,
-                "merchants": len(models.vector_db.metadata.get(city_en, []))
-            }
-            for city_en, city_cn in models.vector_db.cities.items()
-            if city_en in models.vector_db.indexes
-        }
+    if models and models.vector_db:
+        # CityVectorDB 使用 city_to_en 映射（中文 -> 英文）
+        # indexes 和 metadata 的 key 是中文城市名
+        for city_cn, city_en in models.vector_db.city_to_en.items():
+            if city_cn in models.vector_db.indexes:
+                cities_loaded[city_en] = {
+                    "name": city_cn,
+                    "vectors": models.vector_db.indexes[city_cn].ntotal,
+                    "merchants": len(models.vector_db.metadata.get(city_cn, []))
+                }
     
     return {
         "status": "healthy",
         "device": DEVICE,
         "gpu_available": torch.cuda.is_available() if 'torch' in globals() else False,
         "models_loaded": {
-            "embedding": models.embedding_model is not None,
-            "reranker": models.reranker_model is not None,
-            "vector_db": models.vector_db is not None
+            "embedding": models.embedding_model is not None if models else False,
+            "reranker": models.reranker_model is not None if models else False,
+            "vector_db": models.vector_db is not None if models else False
         },
         "cities": cities_loaded,
         "total_cities": len(cities_loaded)
