@@ -8,9 +8,35 @@
 - 🚀 **RAG Server**: See [server/README.md](server/README.md) for backend deployment
 - 📄 **Paper**: Coming soon
 
-## 🚀 Quick Start for RAG Server
+## 🚀 Quick Start
 
-If you want to run the backend RAG server:
+### Option 1: One-Command Start (Recommended)
+
+Start RAG server and tunnel monitor with automatic URL updates:
+
+```bash
+./start_with_monitor.sh
+```
+
+This will:
+- ✅ Start RAG server on port 8000
+- ✅ Start Cloudflare tunnel with auto-monitoring
+- ✅ Automatically update frontend config when tunnel URL changes
+- ✅ Run everything in background (tmux sessions)
+
+Check status:
+```bash
+./check_status.sh
+```
+
+Stop all services:
+```bash
+./stop_all.sh
+```
+
+### Option 2: Manual Start
+
+If you want to run the backend RAG server manually:
 
 ```bash
 cd server
@@ -18,6 +44,16 @@ cd server
 ```
 
 See [server/README.md](server/README.md) for detailed instructions.
+
+### Tunnel Auto-Update
+
+The tunnel monitor automatically:
+- Detects when Cloudflare tunnel goes down
+- Restarts the tunnel with a new URL
+- Updates `static/js/config.js` automatically
+- Logs all changes to `tunnel_updates.log`
+
+See [TUNNEL_AUTO_UPDATE.md](TUNNEL_AUTO_UPDATE.md) for details.
 
 ## 📁 Project Structure
 

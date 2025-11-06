@@ -20,13 +20,15 @@ import os
 import time
 from datetime import datetime
 
+# 基础依赖
+import json
+import numpy as np
+
 # 如果使用 GPU 加载模型
 try:
     import torch
     from sentence_transformers import SentenceTransformer, CrossEncoder
     import faiss
-    import json
-    import numpy as np
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"🚀 Using device: {DEVICE}")
     HAS_GPU = torch.cuda.is_available()
