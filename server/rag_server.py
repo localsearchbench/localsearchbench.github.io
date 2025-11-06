@@ -423,13 +423,13 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     构建包含多个关键字段的丰富文本表示，提高重排序准确性
     
     格式示例：
-        店名：星巴克咖啡 - 类型：餐饮/咖啡厅 - 地址：北京市朝阳区建国门外大街1号 - 城市：北京 - 区域：朝阳区 - 商圈：国贸
+        店名：星巴克咖啡 类型：餐饮/咖啡厅 地址：北京市朝阳区建国门外大街1号 城市：北京 区域：朝阳区 商圈：国贸
     
     Args:
         doc_info: 文档信息字典
         
     Returns:
-        格式化后的文档文本（带中文标签）
+        格式化后的文档文本（带中文标签，使用空格分隔）
     """
     parts = []
     
@@ -474,8 +474,8 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     if doc_info.get('business_hours'):
         parts.append(f"营业：{doc_info['business_hours']}")
     
-    # 使用 " - " 连接所有部分
-    return ' - '.join(parts)
+    # 使用单个空格连接所有部分
+    return ' '.join(parts)
 
 def perform_web_search(query: str, top_k: int) -> Dict:
     """传统 Web 搜索"""
