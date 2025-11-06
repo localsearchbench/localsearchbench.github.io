@@ -32,30 +32,6 @@ def health():
             "message": f"无法连接到 RAG 服务器: {str(e)}"
         }), 503
 
-def enhance_rerank_text(data):
-    """增强重排序文本格式，添加中文标签"""
-    if isinstance(data, dict):
-        # 处理检索结果中的文档
-        if 'retrieved_docs' in data:
-            for doc in data.get('retrieved_docs', []):
-                if 'metadata' in doc:
-                    metadata = doc['metadata']
-                    # 构建增强的重排序文本
-                    parts = []
-                    if metadata.get('name'):
-                        parts.append(f"店名：{metadata['name']}")
-                    if metadata.get('category'):
-                        parts.append(f"类型：{metadata['category']}")
-                    if metadata.get('subcategory'):
-                        parts.append(f"子类型：{metadata['subcategory']}")
-                    if metadata.get('address'):
-                        parts.append(f"地址：{metadata['address']}")
-                    
-                    if parts:
-                        # 更新 rerank_text 字段
-                        metadata['rerank_text'] = ' - '.join(parts)
-    return data
-
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def proxy(path):
     """代理所有 API 请求"""
@@ -81,15 +57,6 @@ def proxy(path):
             )
         else:
             return jsonify({"error": "Method not allowed"}), 405
-        
-        # 如果是 RAG 搜索请求，增强返回数据
-        if response.status_code == 200 and 'rag/search' in path:
-            try:
-                data = response.json()
-                data = enhance_rerank_text(data)
-                return jsonify(data)
-            except:
-                pass  # 如果解析失败，直接返回原始响应
         
         # 返回响应
         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']

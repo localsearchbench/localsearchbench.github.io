@@ -417,50 +417,65 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
 
 def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
-    格式化文档用于重排序
+    格式化文档用于重排序（增强版：使用清晰的中文标签）
     
     增强版：在 VLLM 脚本基础上，强制包含地理位置信息（city, district, business_area, landmark）
     构建包含多个关键字段的丰富文本表示，提高重排序准确性
+    
+    格式示例：
+        店名：星巴克咖啡 - 类型：餐饮/咖啡厅 - 地址：北京市朝阳区建国门外大街1号 - 城市：北京 - 区域：朝阳区 - 商圈：国贸
     
     Args:
         doc_info: 文档信息字典
         
     Returns:
-        格式化后的文档文本
+        格式化后的文档文本（带中文标签）
     """
-    # 基础信息：商户名称、类别、子类别、地址
-    category_info = doc_info.get('category', '')
+    parts = []
+    
+    # 1. 店名（必填）
+    if doc_info.get('name'):
+        parts.append(f"店名：{doc_info['name']}")
+    
+    # 2. 类型（类别 + 子类别）
+    category_parts = []
+    if doc_info.get('category'):
+        category_parts.append(doc_info['category'])
     if doc_info.get('subcategory'):
-        category_info += f"/{doc_info['subcategory']}"
+        category_parts.append(doc_info['subcategory'])
     
-    rerank_text = f"{doc_info.get('name', '')} - {category_info} - {doc_info.get('address', '')}"
+    if category_parts:
+        parts.append(f"类型：{'/'.join(category_parts)}")
     
-    # 🔥 地理位置信息（必须参与重排）
+    # 3. 地址（必填）
+    if doc_info.get('address'):
+        parts.append(f"地址：{doc_info['address']}")
+    
+    # 4. 🔥 地理位置信息（必须参与重排）
     if doc_info.get('city'):
-        rerank_text += f" - 城市:{doc_info['city']}"
+        parts.append(f"城市：{doc_info['city']}")
     
     if doc_info.get('district'):
-        rerank_text += f" - 区域:{doc_info['district']}"
+        parts.append(f"区域：{doc_info['district']}")
     
     if doc_info.get('business_area'):
-        rerank_text += f" - 商圈:{doc_info['business_area']}"
+        parts.append(f"商圈：{doc_info['business_area']}")
     
     if doc_info.get('landmark'):
-        rerank_text += f" - 地标:{doc_info['landmark']}"
+        parts.append(f"地标：{doc_info['landmark']}")
     
-    # 添加特色服务
+    # 5. 可选字段
     if doc_info.get('specialties'):
-        rerank_text += f" - 特色:{doc_info['specialties']}"
+        parts.append(f"特色：{doc_info['specialties']}")
     
-    # 添加产品/服务信息
     if doc_info.get('products'):
-        rerank_text += f" - 服务:{doc_info['products']}"
+        parts.append(f"服务：{doc_info['products']}")
     
-    # 添加营业时间
     if doc_info.get('business_hours'):
-        rerank_text += f" - 营业:{doc_info['business_hours']}"
+        parts.append(f"营业：{doc_info['business_hours']}")
     
-    return rerank_text
+    # 使用 " - " 连接所有部分
+    return ' - '.join(parts)
 
 def perform_web_search(query: str, top_k: int) -> Dict:
     """传统 Web 搜索"""
