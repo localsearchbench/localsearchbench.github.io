@@ -198,12 +198,12 @@ function switchTool(toolName) {
 
 // Example queries data - [city, location, query]
 const exampleQueries = [
-    { city: "上海", location: "外滩", query: "餐厅" },
-    { city: "北京", location: "五道口", query: "火锅店" },
-    { city: "深圳", location: "南山区", query: "电影院" },
-    { city: "广州", location: "天河区", query: "生日蛋糕" },
-    { city: "成都", location: "春熙路", query: "咖啡店" },
-    { city: "武汉", location: "武昌站", query: "酒店" }
+    { city: "shanghai", location: "外滩", query: "餐厅" },
+    { city: "beijing", location: "五道口", query: "火锅店" },
+    { city: "shenzhen", location: "南山区", query: "电影院" },
+    { city: "guangzhou", location: "天河区", query: "生日蛋糕" },
+    { city: "chengdu", location: "春熙路", query: "咖啡店" },
+    { city: "wuhan", location: "武昌站", query: "酒店" }
 ];
 
 function loadExample(index) {
