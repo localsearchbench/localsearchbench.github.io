@@ -10,7 +10,7 @@
 const CONFIG = {
     // RAG Server Configuration
     // 这个 URL 会在运行时被动态配置覆盖
-    RAG_SERVER_URL: 'https://terrorists-eyes-focused-reasonable.trycloudflare.com',
+    RAG_SERVER_URL: 'https://msg-seconds-carry-government.trycloudflare.com',
     
     // 动态配置文件路径（相对于网站根目录）
     DYNAMIC_CONFIG_URL: './tunnel_config.json',
