@@ -9,7 +9,7 @@
 
 const CONFIG = {
     // RAG Server Configuration
-    RAG_SERVER_URL: 'https://complex-defines-dan-superior.trycloudflare.com',
+    RAG_SERVER_URL: 'https://catch-interim-local-music.trycloudflare.com',
     
     // API Endpoints
     API_ENDPOINTS: {
