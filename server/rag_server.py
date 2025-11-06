@@ -8,6 +8,12 @@ RAG Server - 部署在有 GPU 的服务器上
 环境变量配置：
     export OPENAI_API_KEY="your-key"
     export DASHSCOPE_API_KEY="your-key"  # 如果使用 Qwen 模型
+
+检索与重排策略：
+    本服务器与 interactive_merchant_search_vllm.py 保持高度一致：
+    - 候选文档倍数：candidate_multiplier = 5
+    - 相似度计算：(max_distance - distance) / max_distance
+    - 重排序文本格式：name - category - address + 多个可选字段
 """
 
 from fastapi import FastAPI, HTTPException
@@ -257,7 +263,7 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
     3. 使用 Reranker 模型重排序
     4. 返回 top_k 结果
     
-    参考策略（来自 VLLM 交互式搜索系统）：
+    参考策略（与 interactive_merchant_search_vllm.py 保持一致）：
     - 候选文档倍数：5倍（即检索 top_k × 5 个候选文档）
     - 相似度转换：将 L2 距离转换为 0-1 范围的相似度分数
     - 重排序文本：构建包含多个关键字段的丰富文本表示
@@ -286,7 +292,7 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
         
         # 2. 从 FAISS 向量数据库检索
         # 候选文档策略：如果使用重排序，检索 top_k × 5 个候选文档
-        candidate_multiplier = 10  # 候选文档倍数
+        candidate_multiplier = 5  # 候选文档倍数（与 VLLM 脚本保持一致）
         use_reranker = models.reranker_model is not None
         
         if use_reranker:
@@ -411,7 +417,7 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
     格式化文档用于重排序
     
-    参考 VLLM 系统的文档格式化策略：
+    与 interactive_merchant_search_vllm.py 的 _format_document_for_rerank() 保持一致
     构建包含多个关键字段的丰富文本表示，提高重排序准确性
     
     Args:
