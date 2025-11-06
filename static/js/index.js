@@ -324,11 +324,8 @@ async function runRAG() {
         
         // Check if it's a network error
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000' };
             const errorMsg = `
 🚧 RAG 服务器未连接
-
-当前配置的服务器: ${config.RAG_SERVER_URL}
 
 快速开始指南:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -942,6 +939,27 @@ $(document).ready(function() {
         setTimeout(checkServerConnection, 500);
     });
     
+    // Listen for tunnel URL change event
+    window.addEventListener('tunnelUrlChanged', function(event) {
+        const { oldUrl, newUrl } = event.detail;
+        console.log('🔄 检测到隧道 URL 变化');
+        
+        // Show notification to user
+        showTunnelChangeNotification(oldUrl, newUrl);
+        
+        // Update server status
+        updateServerStatus();
+        
+        // Re-check server connection
+        setTimeout(checkServerConnection, 1000);
+    });
+    
+    // Listen for config updated event (from polling)
+    window.addEventListener('configUpdated', function(event) {
+        console.log('🔄 配置已更新:', event.detail.RAG_SERVER_URL);
+        updateServerStatus();
+    });
+    
     // Also update status on page load
     setTimeout(updateServerStatus, 1000);
     // Check server connection on page load
@@ -958,6 +976,61 @@ function updateServerStatus() {
     if (serverUrlElement) {
         serverUrlElement.textContent = config.RAG_SERVER_URL;
     }
+}
+
+// Show tunnel URL change notification
+function showTunnelChangeNotification(oldUrl, newUrl) {
+    // Check if notification already exists
+    let notification = document.getElementById('tunnel-change-notification');
+    if (notification) {
+        notification.remove();
+    }
+    
+    // Create notification
+    notification = document.createElement('div');
+    notification.id = 'tunnel-change-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
+        max-width: 400px;
+        animation: slideInRight 0.5s ease-out;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: start; gap: 1rem;">
+            <div style="font-size: 2rem;">🔄</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">隧道 URL 已更新</div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                    临时隧道已重启，新的访问地址：
+                </div>
+                <div style="font-size: 0.85rem; font-family: monospace; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; word-break: break-all; margin-bottom: 0.5rem;">
+                    ${newUrl}
+                </div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">
+                    页面将自动使用新地址，无需刷新。
+                </div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1;">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        if (notification && notification.parentElement) {
+            notification.style.animation = 'slideOutRight 0.5s ease-out';
+            setTimeout(() => notification.remove(), 500);
+        }
+    }, 10000);
 }
 
 // Check server connection and show modal if disconnected
@@ -1044,9 +1117,6 @@ function showServerStatusModal(serverUrl) {
             <span style="color: #f56565; font-size: 1.2rem;">🔗</span>
             <span style="font-weight: bold; color: #f56565;">RAG 服务器未连接</span>
         </div>
-        <p style="margin-bottom: 1rem; color: #4a5568;">
-            当前配置的服务器: <code style="background: #f7fafc; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">${serverUrl}</code>
-        </p>
         <div style="margin-bottom: 1rem;">
             <p style="font-weight: bold; margin-bottom: 0.5rem;">快速开始指南:</p>
             <div style="background: #f7fafc; padding: 1rem; border-radius: 4px; font-size: 0.9rem;">
