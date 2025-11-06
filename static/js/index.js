@@ -196,6 +196,24 @@ function switchTool(toolName) {
     });
 }
 
+// City name mapping: English -> Chinese
+const CITY_NAME_MAP = {
+    'shanghai': '上海',
+    'beijing': '北京',
+    'guangzhou': '广州',
+    'shenzhen': '深圳',
+    'hangzhou': '杭州',
+    'suzhou': '苏州',
+    'chengdu': '成都',
+    'chongqing': '重庆',
+    'wuhan': '武汉'
+};
+
+// Helper function to convert English city name to Chinese
+function getCityNameChinese(englishName) {
+    return CITY_NAME_MAP[englishName] || englishName;
+}
+
 // Example queries data - [city, location, query]
 const exampleQueries = [
     { city: "shanghai", location: "外滩", query: "餐厅" },
@@ -347,9 +365,12 @@ async function callRAGAPI(query, city, topK, retriever, reranker) {
     const config = window.CONFIG || { RAG_SERVER_URL: 'http://localhost:8000', API_ENDPOINTS: { RAG_SEARCH: '/api/v1/rag/search' } };
     const url = `${config.RAG_SERVER_URL}${config.API_ENDPOINTS.RAG_SEARCH}`;
     
+    // Convert English city name to Chinese
+    const chineseCity = getCityNameChinese(city);
+    
     const requestBody = {
         query: query,
-        city: city,
+        city: chineseCity,  // Use Chinese city name
         top_k: topK,
         retriever_model: retriever,
         reranker_model: reranker,
@@ -358,6 +379,7 @@ async function callRAGAPI(query, city, topK, retriever, reranker) {
     };
     
     console.log('Calling RAG API:', url);
+    console.log('City (English):', city, '-> (Chinese):', chineseCity);
     console.log('Request body:', requestBody);
     
     const response = await fetch(url, {
