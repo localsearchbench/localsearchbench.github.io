@@ -10,7 +10,7 @@
 const CONFIG = {
     // RAG Server Configuration
     // 这个 URL 会在运行时被动态配置覆盖
-    RAG_SERVER_URL: 'https://msg-seconds-carry-government.trycloudflare.com',
+    RAG_SERVER_URL: 'https://supplement-jake-yard-coleman.trycloudflare.com',
     
     // 动态配置文件路径（相对于网站根目录）
     DYNAMIC_CONFIG_URL: './tunnel_config.json',
@@ -60,9 +60,24 @@ async function loadDynamicConfig() {
         if (response.ok) {
             const dynamicConfig = await response.json();
             if (dynamicConfig.rag_server_url) {
+                const oldUrl = CONFIG.RAG_SERVER_URL;
                 CONFIG.RAG_SERVER_URL = dynamicConfig.rag_server_url;
+                
+                // 检测 URL 是否变化
+                const urlChanged = oldUrl !== dynamicConfig.rag_server_url;
+                
                 console.log('✅ 动态配置加载成功:', CONFIG.RAG_SERVER_URL);
                 console.log('📅 配置更新时间:', dynamicConfig.updated_at || '未知');
+                
+                if (dynamicConfig.tunnel_type === 'temporary') {
+                    console.warn('⚠️  当前使用临时隧道，URL 可能会在重启后变化');
+                }
+                
+                // 如果 URL 变化，显示通知
+                if (urlChanged && oldUrl !== 'https://phrases-election-integrating-brand.trycloudflare.com') {
+                    showUrlChangeNotification(oldUrl, dynamicConfig.rag_server_url);
+                }
+                
                 return true;
             }
         }
@@ -72,15 +87,66 @@ async function loadDynamicConfig() {
     return false;
 }
 
+/**
+ * 显示 URL 变化通知
+ */
+function showUrlChangeNotification(oldUrl, newUrl) {
+    console.log('🔄 隧道 URL 已更新:');
+    console.log('   旧: ' + oldUrl);
+    console.log('   新: ' + newUrl);
+    
+    // 触发自定义事件，让页面显示通知
+    window.dispatchEvent(new CustomEvent('tunnelUrlChanged', { 
+        detail: { oldUrl, newUrl } 
+    }));
+}
+
+/**
+ * 定期检查配置更新（用于临时隧道自动重启场景）
+ */
+function startConfigPolling(intervalSeconds = 60) {
+    if (window.configPollingInterval) {
+        clearInterval(window.configPollingInterval);
+    }
+    
+    window.configPollingInterval = setInterval(async () => {
+        console.log('🔍 检查配置更新...');
+        const success = await loadDynamicConfig();
+        if (success) {
+            // 触发配置更新事件
+            window.dispatchEvent(new CustomEvent('configUpdated', { detail: CONFIG }));
+        }
+    }, intervalSeconds * 1000);
+    
+    console.log(`✅ 已启动配置轮询，间隔 ${intervalSeconds} 秒`);
+}
+
+/**
+ * 停止配置轮询
+ */
+function stopConfigPolling() {
+    if (window.configPollingInterval) {
+        clearInterval(window.configPollingInterval);
+        window.configPollingInterval = null;
+        console.log('⏹️  已停止配置轮询');
+    }
+}
+
 // 在页面加载时自动加载动态配置
 if (typeof window !== 'undefined') {
     // 立即加载动态配置
     loadDynamicConfig().then(() => {
         // 触发自定义事件，通知配置已更新
         window.dispatchEvent(new CustomEvent('configLoaded', { detail: CONFIG }));
+        
+        // 启动配置轮询（每60秒检查一次）
+        // 这样当临时隧道重启时，前端可以自动获取新的 URL
+        startConfigPolling(60);
     });
 }
 
 // Export for use in other scripts
 window.CONFIG = CONFIG;
 window.loadDynamicConfig = loadDynamicConfig;
+window.startConfigPolling = startConfigPolling;
+window.stopConfigPolling = stopConfigPolling;

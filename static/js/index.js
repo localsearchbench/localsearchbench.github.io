@@ -1056,8 +1056,6 @@ async function checkServerConnection() {
         if (response.ok) {
             const data = await response.json();
             console.log('✅ RAG 服务器连接正常:', data);
-            // Hide modal if exists
-            hideServerStatusModal();
             return true;
         } else {
             throw new Error(`服务器响应错误: ${response.status}`);
@@ -1068,100 +1066,7 @@ async function checkServerConnection() {
         } else {
             console.warn('⚠️  RAG 服务器连接失败:', error.message);
         }
-        // Modal disabled - user can check console for connection status
-        // showServerStatusModal(config.RAG_SERVER_URL);
         return false;
     }
 }
 
-// Show server status modal
-function showServerStatusModal(serverUrl) {
-    // Check if modal already exists
-    let modal = document.getElementById('server-status-modal');
-    if (modal) {
-        modal.style.display = 'block';
-        return;
-    }
-    
-    // Create modal
-    modal = document.createElement('div');
-    modal.id = 'server-status-modal';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        max-width: 500px;
-        width: 90%;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    `;
-    
-    modalContent.innerHTML = `
-        <h2 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.5rem; font-weight: bold;">
-            localsearchbench.github.io 显示
-        </h2>
-        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span style="color: #f56565; font-size: 1.2rem;">🔗</span>
-            <span style="font-weight: bold; color: #f56565;">RAG 服务器未连接</span>
-        </div>
-        <div style="margin-bottom: 1rem;">
-            <p style="font-weight: bold; margin-bottom: 0.5rem;">快速开始指南:</p>
-            <div style="background: #f7fafc; padding: 1rem; border-radius: 4px; font-size: 0.9rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <input type="checkbox" id="local-test-checkbox" style="margin: 0;">
-                    <span>本地测试 (推荐)</span>
-                </label>
-                <code style="display: block; margin-top: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; font-size: 0.85rem;">
-                    cd server && ./deploy.sh --dev
-                </code>
-            </div>
-        </div>
-        <div style="text-align: right;">
-            <button id="server-status-ok-btn" style="
-                background: #4299e1;
-                color: white;
-                border: none;
-                padding: 0.5rem 1.5rem;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 1rem;
-            ">确定</button>
-        </div>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Add click handler for OK button
-    document.getElementById('server-status-ok-btn').addEventListener('click', function() {
-        hideServerStatusModal();
-    });
-    
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            hideServerStatusModal();
-        }
-    });
-}
-
-// Hide server status modal
-function hideServerStatusModal() {
-    const modal = document.getElementById('server-status-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
