@@ -8,6 +8,10 @@ LOG_FILE="cloudflared.log"
 TUNNEL_LOG="tunnel_updates.log"
 CHECK_INTERVAL=30  # 每30秒检查一次
 
+# 内网 RAG 服务器地址（可通过环境变量覆盖）
+# 格式: http://内网IP:端口 或 http://域名:端口
+RAG_SERVER_URL="${RAG_SERVER_URL:-http://localhost:8000}"
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -72,13 +76,15 @@ check_tunnel_accessible() {
 # 启动新的隧道
 start_tunnel() {
     log "🚀 启动新的 Cloudflare 隧道..."
+    log "   连接到: $RAG_SERVER_URL"
     echo -e "${YELLOW}启动新的 Cloudflare 隧道...${NC}"
+    echo -e "${YELLOW}连接到内网服务器: $RAG_SERVER_URL${NC}"
     
     # 清空旧的日志文件
     > "$LOG_FILE"
     
     # 启动隧道（后台运行）
-    nohup cloudflared tunnel --url http://localhost:8000 > "$LOG_FILE" 2>&1 &
+    nohup cloudflared tunnel --url "$RAG_SERVER_URL" > "$LOG_FILE" 2>&1 &
     
     # 等待隧道启动并获取 URL
     local max_wait=30
