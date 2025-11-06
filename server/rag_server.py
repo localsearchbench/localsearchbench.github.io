@@ -253,9 +253,15 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
     
     流程：
     1. 使用 Embedding 模型编码查询
-    2. 在指定城市的 FAISS 索引中检索
+    2. 在指定城市的 FAISS 索引中检索（候选文档数量 = top_k × candidate_multiplier）
     3. 使用 Reranker 模型重排序
     4. 返回 top_k 结果
+    
+    参考策略（来自 VLLM 交互式搜索系统）：
+    - 候选文档倍数：5倍（即检索 top_k × 5 个候选文档）
+    - 相似度转换：将 L2 距离转换为 0-1 范围的相似度分数
+    - 重排序文本：构建包含多个关键字段的丰富文本表示
+    - 保留排名信息：记录原始排名、重排序分数和最终排名
     """
     start_time = time.time()
     
@@ -272,44 +278,94 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
     
     try:
         # 1. 使用 Embedding 模型编码查询
+        embedding_start = time.time()
         query_embedding = models.encode_query(query)
         if query_embedding is None:
             raise HTTPException(status_code=503, detail="Embedding model not loaded")
+        embedding_time = time.time() - embedding_start
         
-        # 2. 从 FAISS 向量数据库检索（检索20个用于重排序）
-        retrieval_k = 50  # 固定检索20个商家用于重排序
+        # 2. 从 FAISS 向量数据库检索
+        # 候选文档策略：如果使用重排序，检索 top_k × 5 个候选文档
+        candidate_multiplier = 5  # 候选文档倍数
+        use_reranker = models.reranker_model is not None
+        
+        if use_reranker:
+            # 使用重排序：检索更多候选文档
+            retrieval_k = min(top_k * candidate_multiplier, models.vector_db.indexes[city].ntotal)
+            print(f"🔍 Retrieving {retrieval_k} candidates (top_k={top_k} × multiplier={candidate_multiplier}) for reranking")
+        else:
+            # 不使用重排序：直接检索 top_k 个
+            retrieval_k = top_k
+            print(f"🔍 Retrieving {retrieval_k} candidates (no reranking)")
+        
+        retrieval_start = time.time()
         retrieved_docs = models.vector_db.search(query_embedding, city=city, top_k=retrieval_k)
+        retrieval_time = time.time() - retrieval_start
         
         if not retrieved_docs:
             return {
                 "answer": f"未找到与「{query}」相关的商户信息",
                 "sources": [],
-                "metrics": {"latency_ms": (time.time() - start_time) * 1000},
+                "metrics": {
+                    "latency_ms": (time.time() - start_time) * 1000,
+                    "embedding_time_ms": embedding_time * 1000,
+                    "retrieval_time_ms": retrieval_time * 1000
+                },
                 "processing_time": time.time() - start_time
             }
         
+        # 2.5. 转换相似度分数（将 L2 距离转换为 0-1 范围的相似度）
+        # 参考 VLLM 系统的相似度转换策略
+        if retrieved_docs:
+            max_distance = max(doc.get('vector_score', 0) for doc in retrieved_docs)
+            for i, doc in enumerate(retrieved_docs):
+                distance = doc.get('vector_score', 0)
+                # 将 L2 距离转换为相似度：距离越小，相似度越高
+                similarity_score = max(0.0, (max_distance - distance) / max_distance) if max_distance > 0 else 0.0
+                doc['distance'] = float(distance)  # 保留原始 L2 距离
+                doc['similarity'] = float(similarity_score)  # 转换后的相似度 (0-1)
+                doc['rank'] = i + 1  # 原始检索排名
+                doc['original_rank'] = i + 1  # 保存原始排名
+        
         # 3. 使用 Reranker 模型重排序
-        if models.reranker_model and len(retrieved_docs) > 1:
+        rerank_time = 0
+        if use_reranker and len(retrieved_docs) > 1:
             try:
-                # 构建查询-文档对
+                rerank_start = time.time()
+                
+                # 构建查询-文档对（使用更丰富的文档表示）
                 pairs = []
                 for doc in retrieved_docs:
-                    # 构建更丰富的文档表示
-                    doc_text = f"{doc.get('name', '')} {doc.get('description', '')} {doc.get('address', '')}"
+                    # 参考 VLLM 系统的文档格式化策略：包含多个关键字段
+                    doc_text = _format_document_for_rerank(doc)
                     pairs.append([query, doc_text])
                 
                 # 使用 Reranker 重新打分 (使用 batch_size=1 避免 padding 问题)
                 rerank_scores = models.reranker_model.predict(pairs, batch_size=1)
                 
-                # 更新分数并排序
+                # 更新分数
                 for doc, score in zip(retrieved_docs, rerank_scores):
                     doc["rerank_score"] = float(score)
                 
+                # 按重排序分数排序
                 retrieved_docs = sorted(retrieved_docs, key=lambda x: x.get("rerank_score", 0), reverse=True)
-                print(f"🔄 Reranked {len(retrieved_docs)} documents")
+                
+                # 更新最终排名
+                for i, doc in enumerate(retrieved_docs):
+                    doc['final_rank'] = i + 1
+                
+                rerank_time = time.time() - rerank_start
+                print(f"🔄 Reranked {len(retrieved_docs)} documents in {rerank_time:.2f}s")
                 
             except Exception as e:
                 print(f"⚠️ Reranking failed: {e}, using vector scores only")
+                # 重排序失败，使用原始排名
+                for i, doc in enumerate(retrieved_docs):
+                    doc['final_rank'] = doc.get('rank', i + 1)
+        else:
+            # 不使用重排序，直接使用原始排名
+            for i, doc in enumerate(retrieved_docs):
+                doc['final_rank'] = doc.get('rank', i + 1)
         
         # 调试：打印第一个文档的字段
         if retrieved_docs:
@@ -324,14 +380,20 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
             "retrieved_count": len(retrieved_docs),
             "returned_count": min(top_k, len(retrieved_docs)),
             "city": city,
-            "latency_ms": (time.time() - start_time) * 1000
+            "latency_ms": (time.time() - start_time) * 1000,
+            "embedding_time_ms": embedding_time * 1000,
+            "retrieval_time_ms": retrieval_time * 1000,
+            "rerank_time_ms": rerank_time * 1000 if use_reranker else 0,
+            "used_reranker": use_reranker,
+            "candidate_multiplier": candidate_multiplier if use_reranker else 1
         }
         
         # 调试：打印返回的商店名称
         top_merchants = retrieved_docs[:top_k]
         print(f"📦 Returning top {len(top_merchants)} merchants:")
         for i, doc in enumerate(top_merchants[:3], 1):  # 只打印前3个
-            print(f"   {i}. {doc.get('name', 'NO_NAME')} (score: {doc.get('rerank_score', doc.get('vector_score', 0)):.4f})")
+            score_info = f"rerank={doc.get('rerank_score', 0):.4f}" if use_reranker else f"similarity={doc.get('similarity', 0):.4f}"
+            print(f"   {i}. {doc.get('name', 'NO_NAME')} ({score_info}, rank: {doc.get('original_rank', '?')}→{doc.get('final_rank', '?')})")
         
         return {
             "answer": answer,
@@ -343,6 +405,65 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
     except Exception as e:
         print(f"❌ RAG search error: {e}")
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+
+def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
+    """
+    格式化文档用于重排序
+    
+    参考 VLLM 系统的文档格式化策略：
+    构建包含多个关键字段的丰富文本表示，提高重排序准确性
+    
+    Args:
+        doc_info: 文档信息字典
+        
+    Returns:
+        格式化后的文档文本
+    """
+    # 基础信息：商户名称、类别、地址
+    rerank_text = f"{doc_info.get('name', '')} - {doc_info.get('category', '')} - {doc_info.get('address', '')}"
+    
+    # 添加评分信息
+    if doc_info.get('rating'):
+        rerank_text += f" - 评分:{doc_info['rating']}"
+    
+    # 添加价格信息
+    if doc_info.get('price_range'):
+        rerank_text += f" - 价格:{doc_info['price_range']}"
+    elif doc_info.get('price'):
+        rerank_text += f" - 价格:{doc_info['price']}"
+    
+    # 添加描述信息
+    if doc_info.get('description'):
+        rerank_text += f" - 简介:{doc_info['description']}"
+    
+    # 添加特色服务
+    if doc_info.get('specialties'):
+        rerank_text += f" - 特色:{doc_info['specialties']}"
+    
+    # 添加产品/服务信息
+    if doc_info.get('products'):
+        rerank_text += f" - 服务:{doc_info['products']}"
+    
+    # 添加营业时间
+    if doc_info.get('business_hours'):
+        rerank_text += f" - 营业:{doc_info['business_hours']}"
+    
+    # 添加店铺特点/标签
+    if doc_info.get('tags'):
+        tags = doc_info['tags']
+        if isinstance(tags, list):
+            tags = ', '.join(tags)
+        rerank_text += f" - 特点:{tags}"
+    
+    # 添加其他可能有用的字段
+    if doc_info.get('features'):
+        features = doc_info['features']
+        if isinstance(features, list):
+            features = ', '.join(features)
+        rerank_text += f" - 设施:{features}"
+    
+    return rerank_text
 
 def perform_web_search(query: str, top_k: int) -> Dict:
     """传统 Web 搜索"""
