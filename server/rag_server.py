@@ -419,11 +419,11 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     """
     格式化文档用于重排序（增强版：使用清晰的中文标签）
     
-    增强版：在 VLLM 脚本基础上，强制包含地理位置信息（city, district, business_area, landmark）
+    增强版：在 VLLM 脚本基础上，强制包含地理位置信息（district, business_area）
     构建包含多个关键字段的丰富文本表示，提高重排序准确性
     
     格式示例：
-        店名：星巴克咖啡 类型：餐饮/咖啡厅 地址：北京市朝阳区建国门外大街1号 城市：北京 区域：朝阳区 商圈：国贸
+        店名：星巴克咖啡 类型：餐饮/咖啡厅 地址：北京市朝阳区建国门外大街1号 区域：朝阳区 商圈：国贸
     
     Args:
         doc_info: 文档信息字典
@@ -452,17 +452,11 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
         parts.append(f"地址：{doc_info['address']}")
     
     # 4. 🔥 地理位置信息（必须参与重排）
-    if doc_info.get('city'):
-        parts.append(f"城市：{doc_info['city']}")
-    
     if doc_info.get('district'):
         parts.append(f"区域：{doc_info['district']}")
     
     if doc_info.get('business_area'):
         parts.append(f"商圈：{doc_info['business_area']}")
-    
-    if doc_info.get('landmark'):
-        parts.append(f"地标：{doc_info['landmark']}")
     
     # 5. 可选字段
     if doc_info.get('specialties'):
