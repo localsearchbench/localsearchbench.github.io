@@ -13,8 +13,9 @@ RAG Server - 部署在有 GPU 的服务器上
     本服务器与 interactive_merchant_search_vllm.py 保持高度一致：
     - 候选文档倍数：candidate_multiplier = 5
     - 相似度计算：(max_distance - distance) / max_distance
-    - 重排序文本格式：name - category - address + 地理位置（必须）+ 多个可选字段
+    - 重排序文本格式：name - category/subcategory - address + 地理位置（必须）+ 多个可选字段
     - 地理位置字段（必须参与重排）：city, district, business_area, landmark
+    - subcategory 字段：如果存在，会拼接到 category 后面（格式：category/subcategory）
 """
 
 from fastapi import FastAPI, HTTPException
@@ -427,8 +428,12 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     Returns:
         格式化后的文档文本
     """
-    # 基础信息：商户名称、类别、地址
-    rerank_text = f"{doc_info.get('name', '')} - {doc_info.get('category', '')} - {doc_info.get('address', '')}"
+    # 基础信息：商户名称、类别、子类别、地址
+    category_info = doc_info.get('category', '')
+    if doc_info.get('subcategory'):
+        category_info += f"/{doc_info['subcategory']}"
+    
+    rerank_text = f"{doc_info.get('name', '')} - {category_info} - {doc_info.get('address', '')}"
     
     # 🔥 地理位置信息（必须参与重排）
     if doc_info.get('city'):
@@ -443,16 +448,6 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     if doc_info.get('landmark'):
         rerank_text += f" - 地标:{doc_info['landmark']}"
     
-    # 添加评分信息
-    if doc_info.get('rating'):
-        rerank_text += f" - 评分:{doc_info['rating']}"
-    
-    # 添加价格信息
-    if doc_info.get('price_range'):
-        rerank_text += f" - 价格:{doc_info['price_range']}"
-    elif doc_info.get('price'):
-        rerank_text += f" - 价格:{doc_info['price']}"
-    
     # 添加特色服务
     if doc_info.get('specialties'):
         rerank_text += f" - 特色:{doc_info['specialties']}"
@@ -464,20 +459,6 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     # 添加营业时间
     if doc_info.get('business_hours'):
         rerank_text += f" - 营业:{doc_info['business_hours']}"
-    
-    # 添加店铺特点/标签
-    if doc_info.get('tags'):
-        tags = doc_info['tags']
-        if isinstance(tags, list):
-            tags = ', '.join(tags)
-        rerank_text += f" - 特点:{tags}"
-    
-    # 添加其他可能有用的字段
-    if doc_info.get('features'):
-        features = doc_info['features']
-        if isinstance(features, list):
-            features = ', '.join(features)
-        rerank_text += f" - 设施:{features}"
     
     return rerank_text
 
