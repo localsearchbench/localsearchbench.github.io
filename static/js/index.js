@@ -911,5 +911,25 @@ $(document).ready(function() {
     
     // Initialize leaderboard sorting
     initLeaderboardSorting();
+    
+    // Listen for config loaded event
+    window.addEventListener('configLoaded', function(event) {
+        console.log('✅ 配置已加载，RAG 服务器 URL:', event.detail.RAG_SERVER_URL);
+        updateServerStatus();
+    });
+    
+    // Also update status on page load
+    setTimeout(updateServerStatus, 1000);
 
 })
+
+// Update server status display
+function updateServerStatus() {
+    const config = window.CONFIG;
+    if (!config) return;
+    
+    const serverUrlElement = document.getElementById('server-url-display');
+    if (serverUrlElement) {
+        serverUrlElement.textContent = config.RAG_SERVER_URL;
+    }
+}

@@ -4,6 +4,7 @@
 # 当隧道挂掉时自动重启并更新配置文件
 
 CONFIG_FILE="static/js/config.js"
+DYNAMIC_CONFIG_FILE="tunnel_config.json"
 LOG_FILE="cloudflared.log"
 TUNNEL_LOG="tunnel_updates.log"
 CHECK_INTERVAL=30  # 每30秒检查一次
@@ -30,7 +31,32 @@ get_tunnel_url() {
     fi
 }
 
-# 更新配置文件中的隧道 URL
+# 更新动态配置文件（JSON）
+update_dynamic_config() {
+    local new_url="$1"
+    if [ -z "$new_url" ]; then
+        log "错误: 没有找到新的隧道 URL"
+        return 1
+    fi
+    
+    # 获取当前时间（ISO 8601 格式）
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S+08:00")
+    
+    # 创建 JSON 配置文件
+    cat > "$DYNAMIC_CONFIG_FILE" << EOF
+{
+  "rag_server_url": "$new_url",
+  "updated_at": "$timestamp",
+  "status": "active",
+  "version": "1.0"
+}
+EOF
+    
+    log "✅ 动态配置文件已更新: $new_url"
+    echo -e "${GREEN}动态配置文件已更新为: $new_url${NC}"
+}
+
+# 更新配置文件中的隧道 URL（保留作为后备）
 update_config() {
     local new_url="$1"
     if [ -z "$new_url" ]; then
@@ -45,8 +71,8 @@ update_config() {
     sed -i.tmp "s|RAG_SERVER_URL: 'https://[a-zA-Z0-9-]*\.trycloudflare\.com'|RAG_SERVER_URL: '$new_url'|g" "$CONFIG_FILE"
     rm -f "${CONFIG_FILE}.tmp"
     
-    log "✅ 配置文件已更新: $new_url"
-    echo -e "${GREEN}配置文件已更新为: $new_url${NC}"
+    log "✅ 静态配置文件已更新: $new_url"
+    echo -e "${GREEN}静态配置文件已更新为: $new_url${NC}"
 }
 
 # 检查隧道是否正在运行
@@ -103,7 +129,10 @@ start_tunnel() {
             # 等待隧道完全就绪
             sleep 3
             
-            # 更新配置文件
+            # 更新动态配置文件（主要）
+            update_dynamic_config "$tunnel_url"
+            
+            # 更新静态配置文件（作为后备）
             update_config "$tunnel_url"
             return 0
         fi
