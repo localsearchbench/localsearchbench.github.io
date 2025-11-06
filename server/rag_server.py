@@ -453,10 +453,6 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     elif doc_info.get('price'):
         rerank_text += f" - 价格:{doc_info['price']}"
     
-    # 添加描述信息
-    if doc_info.get('description'):
-        rerank_text += f" - 简介:{doc_info['description']}"
-    
     # 添加特色服务
     if doc_info.get('specialties'):
         rerank_text += f" - 特色:{doc_info['specialties']}"
