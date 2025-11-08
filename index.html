@@ -1087,124 +1087,240 @@ Shanghai Innovation Institute</span>
 <!-- ECharts China Map Initialization -->
 <script>
 (function() {
+  let retryCount = 0;
+  const maxRetries = 50; // 5 seconds max wait for ECharts
+  
+  // City coordinates - 9 supported cities
+  const cityData = [
+    { name: '北京', value: [116.4074, 39.9042, 1] },
+    { name: '上海', value: [121.4737, 31.2304, 1] },
+    { name: '广州', value: [113.2644, 23.1291, 1] },
+    { name: '深圳', value: [114.0579, 22.5431, 1] },
+    { name: '武汉', value: [114.3162, 30.5810, 1] },
+    { name: '重庆', value: [106.5516, 29.5630, 1] },
+    { name: '成都', value: [104.0668, 30.5728, 1] },
+    { name: '苏州', value: [120.5853, 31.2989, 1] },
+    { name: '南京', value: [118.7969, 32.0603, 1] }
+  ];
+  
+  // Multiple data sources as fallback
+  const mapDataSources = [
+    'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+    'https://geo.datav.aliyun.com/areas_v3/bound/100000.json',
+    'https://raw.githubusercontent.com/apache/echarts/master/map/json/china.json'
+  ];
+  
   // Wait for DOM and ECharts to be ready
   function initChinaMap() {
-    if (typeof echarts === 'undefined') {
-      setTimeout(initChinaMap, 100);
-      return;
-    }
-    
     const mapContainer = document.getElementById('chinaMap');
     if (!mapContainer) {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(initChinaMap, 100);
+      }
       return;
     }
     
+    // Check if ECharts is loaded
+    if (typeof echarts === 'undefined') {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(initChinaMap, 100);
+      } else {
+        mapContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">ECharts library loading failed. Please refresh the page.</p>';
+      }
+      return;
+    }
+    
+    // Show loading state
+    mapContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">Loading map data...</p>';
+    
+    // Initialize chart
     const myChart = echarts.init(mapContainer);
     
-    // Load China map GeoJSON data
-    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
-      .then(response => response.json())
-      .then(chinaJson => {
-        // Register map data
-        echarts.registerMap('china', chinaJson);
-        
-        // City coordinates - 9 supported cities
-        const cityData = [
-          { name: '北京', value: [116.4074, 39.9042, 1] },
-          { name: '上海', value: [121.4737, 31.2304, 1] },
-          { name: '广州', value: [113.2644, 23.1291, 1] },
-          { name: '深圳', value: [114.0579, 22.5431, 1] },
-          { name: '武汉', value: [114.3162, 30.5810, 1] },
-          { name: '重庆', value: [106.5516, 29.5630, 1] },
-          { name: '成都', value: [104.0668, 30.5728, 1] },
-          { name: '苏州', value: [120.5853, 31.2989, 1] },
-          { name: '南京', value: [118.7969, 32.0603, 1] }
-        ];
-        
-        const option = {
-          backgroundColor: 'transparent',
-          tooltip: {
-            trigger: 'item',
-            formatter: function(params) {
-              if (params.seriesType === 'scatter') {
-                return params.name + '<br/>Supported City';
-              }
-              return params.name;
+    // Try to load map data from multiple sources
+    function tryLoadMap(sourceIndex) {
+      if (sourceIndex >= mapDataSources.length) {
+        // All sources failed, show cities without map
+        console.warn('All map data sources failed, showing cities only');
+        showCitiesOnly(myChart);
+        return;
+      }
+      
+      const url = mapDataSources[sourceIndex];
+      console.log('Trying to load map data from:', url);
+      
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(chinaJson => {
+          // Register map data
+          echarts.registerMap('china', chinaJson);
+          setupMap(myChart);
+        })
+        .catch(error => {
+          console.warn(`Failed to load from ${url}:`, error);
+          // Try next source
+          tryLoadMap(sourceIndex + 1);
+        });
+    }
+    
+    // Setup map with registered data
+    function setupMap(chart) {
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          formatter: function(params) {
+            if (params.seriesType === 'scatter') {
+              return params.name + '<br/>Supported City';
+            }
+            return params.name;
+          }
+        },
+        geo: {
+          map: 'china',
+          roam: true,
+          zoom: 1.2,
+          label: {
+            emphasis: {
+              show: false
             }
           },
-          geo: {
-            map: 'china',
-            roam: true,
-            zoom: 1.2,
+          itemStyle: {
+            normal: {
+              areaColor: '#f0f0f0',
+              borderColor: '#999',
+              borderWidth: 1
+            },
+            emphasis: {
+              areaColor: '#e6f3ff',
+              borderColor: '#4a90e2',
+              borderWidth: 2
+            }
+          }
+        },
+        series: [
+          {
+            name: 'Supported Cities',
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            data: cityData,
+            symbolSize: 12,
             label: {
-              emphasis: {
-                show: false
-              }
+              show: true,
+              position: 'right',
+              formatter: '{b}',
+              fontSize: 12,
+              color: '#333',
+              fontWeight: 'bold'
             },
             itemStyle: {
-              normal: {
-                areaColor: '#f0f0f0',
-                borderColor: '#999',
-                borderWidth: 1
+              color: '#4a90e2'
+            },
+            emphasis: {
+              label: {
+                show: true
               },
-              emphasis: {
-                areaColor: '#e6f3ff',
-                borderColor: '#4a90e2',
+              itemStyle: {
+                color: '#2563eb',
+                borderColor: '#fff',
                 borderWidth: 2
               }
             }
-          },
-          series: [
-            {
-              name: 'Supported Cities',
-              type: 'scatter',
-              coordinateSystem: 'geo',
-              data: cityData,
-              symbolSize: 8,
+          }
+        ]
+      };
+      
+      chart.setOption(option);
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        chart.resize();
+      });
+    }
+    
+    // Fallback: show cities without map background
+    function showCitiesOnly(chart) {
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          formatter: function(params) {
+            return params.name + '<br/>Supported City';
+          }
+        },
+        xAxis: {
+          type: 'value',
+          show: false
+        },
+        yAxis: {
+          type: 'value',
+          show: false
+        },
+        series: [
+          {
+            name: 'Supported Cities',
+            type: 'scatter',
+            data: cityData.map(city => ({
+              name: city.name,
+              value: [city.value[0], city.value[1]]
+            })),
+            symbolSize: 12,
+            label: {
+              show: true,
+              position: 'right',
+              formatter: '{b}',
+              fontSize: 12,
+              color: '#333',
+              fontWeight: 'bold'
+            },
+            itemStyle: {
+              color: '#4a90e2'
+            },
+            emphasis: {
               label: {
-                show: true,
-                position: 'right',
-                formatter: '{b}',
-                fontSize: 12,
-                color: '#333'
+                show: true
               },
               itemStyle: {
-                color: '#4a90e2'
-              },
-              emphasis: {
-                label: {
-                  show: true
-                },
-                itemStyle: {
-                  color: '#2563eb',
-                  borderColor: '#fff',
-                  borderWidth: 2
-                }
+                color: '#2563eb',
+                borderColor: '#fff',
+                borderWidth: 2
               }
             }
-          ]
-        };
-        
-        myChart.setOption(option);
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-          myChart.resize();
-        });
-      })
-      .catch(error => {
-        console.error('Error loading China map data:', error);
-        // Fallback: show error message
-        mapContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">Map data loading failed. Please refresh the page.</p>';
+          }
+        ]
+      };
+      
+      chart.setOption(option);
+      
+      window.addEventListener('resize', function() {
+        chart.resize();
       });
+    }
+    
+    // Start loading map data
+    tryLoadMap(0);
   }
   
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initChinaMap);
-  } else {
-    initChinaMap();
+  // Initialize when DOM and scripts are ready
+  function startInit() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit more for deferred scripts
+        setTimeout(initChinaMap, 200);
+      });
+    } else {
+      // DOM is ready, but scripts might still be loading
+      setTimeout(initChinaMap, 200);
+    }
   }
+  
+  startInit();
 })();
 </script>
 
