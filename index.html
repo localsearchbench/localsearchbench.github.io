@@ -1105,23 +1105,13 @@ Shanghai Innovation Institute</span>
     { name: '杭州', value: [120.1536, 30.2875, 1] }
   ];
   
-  // Multiple data sources as fallback (use reliable CDN sources)
-  // Try to load both _full.json (with detailed boundaries) and regular .json (simplified)
+  // Multiple data sources as fallback
+  // Primary: Use locally hosted map data (works on GitHub Pages)
   const mapDataSources = [
     {
-      // Primary: Aliyun DataV GeoJSON API (supports CORS, very reliable)
-      full: 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-      regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
-    },
-    {
-      // Fallback 1: Locally hosted map data (will work after GitHub Pages deployment)
+      // Primary: Locally hosted map data (already uploaded to GitHub Pages)
       full: './china_full.json',
       regular: './china.json'
-    },
-    {
-      // Fallback 2: jsDelivr CDN with china map data from popular repo
-      full: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
-      regular: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
     }
   ];
   
