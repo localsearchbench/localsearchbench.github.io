@@ -831,19 +831,21 @@ Shanghai Innovation Institute</span>
       </figure>
     </div>
 
-    <!-- Difficulty Grading System Description -->
-    <div class="content has-text-justified" style="margin-top: 2rem;">
-      <p style="text-align: center;">
-        We are the <strong>first</strong> to propose a difficulty grading system (L1-L5) for agentic search in the local life services domain, systematically defining query difficulty levels from simple to complex.
-      </p>
-    </div>
+
 
     <!-- China Map with Cities -->
     <div class="content has-text-justified" style="margin-top: 2rem;">
       <h3 class="title is-4 has-text-centered" style="margin-bottom: 1.5rem;">📍 Supported Cities</h3>
       <div class="overview-container" style="margin-top: 1rem;">
-        <div id="chinaMap" style="width: 100%; height: 600px; min-height: 600px; margin: 0 auto; background-color: #f8f9fa; border-radius: 8px; position: relative;"></div>
+        <div id="chinaMap" style="width: 100%; height: 750px; min-height: 750px; margin: 0 auto; background-color: #f8f9fa; border-radius: 8px; position: relative;"></div>
       </div>
+    </div>
+
+    <!-- Difficulty Grading System Description -->
+    <div class="content has-text-justified" style="margin-top: 2rem;">
+      <p style="text-align: center;">
+        We are the <strong>first</strong> to propose a difficulty grading system (L1-L5) for agentic search in the local life services domain, systematically defining query difficulty levels from simple to complex.
+      </p>
     </div>
 
     <!-- Jin Zi Ta Image -->
@@ -1092,28 +1094,36 @@ Shanghai Innovation Institute</span>
   const maxEChartsRetries = 100; // 10 seconds max wait for ECharts
   const maxDomRetries = 100; // 10 seconds max wait for DOM
   
-  // City coordinates - 9 supported cities
-  const cityData = [
-    { name: '北京', value: [116.4074, 39.9042, 1] },
-    { name: '上海', value: [121.4737, 31.2304, 1] },
-    { name: '广州', value: [113.2644, 23.1291, 1] },
-    { name: '深圳', value: [114.0579, 22.5431, 1] },
-    { name: '武汉', value: [114.3162, 30.5810, 1] },
-    { name: '重庆', value: [106.5516, 29.5630, 1] },
-    { name: '成都', value: [104.0668, 30.5728, 1] },
-    { name: '苏州', value: [120.5853, 31.2989, 1] },
-    { name: '杭州', value: [120.1536, 30.2875, 1] }
-  ];
+    // City coordinates and merchant counts - 9 supported cities
+    const cityMerchants = {
+      'Beijing': 125390,
+      'Guangzhou': 154985,
+      'Shanghai': 147904,
+      'Hangzhou': 163791,
+      'Chengdu': 137162,
+      'Chongqing': 166140,
+      'Shenzhen': 156042,
+      'Suzhou': 163033,
+      'Wuhan': 145678
+    };
+    
+    // Calculate total merchants
+    const totalMerchants = Object.values(cityMerchants).reduce((sum, count) => sum + count, 0);
+    
+    const cityData = [
+      { name: 'Beijing', value: [116.4074, 39.9042, cityMerchants['Beijing']], label: { position: 'bottom' } },
+      { name: 'Shanghai', value: [121.4737, 31.2304, cityMerchants['Shanghai']], label: { position: 'bottom' } },
+      { name: 'Guangzhou', value: [113.2644, 23.1291, cityMerchants['Guangzhou']], label: { position: 'top' } },
+      { name: 'Shenzhen', value: [114.0579, 22.5431, cityMerchants['Shenzhen']], label: { position: 'bottom' } },
+      { name: 'Wuhan', value: [114.3162, 30.5810, cityMerchants['Wuhan']], label: { position: 'bottom' } },
+      { name: 'Chongqing', value: [106.5516, 29.5630, cityMerchants['Chongqing']], label: { position: 'bottom' } },
+      { name: 'Chengdu', value: [104.0668, 30.5728, cityMerchants['Chengdu']], label: { position: 'bottom' } },
+      { name: 'Suzhou', value: [120.5853, 31.2989, cityMerchants['Suzhou']], label: { position: 'top' } },
+      { name: 'Hangzhou', value: [120.1536, 30.2875, cityMerchants['Hangzhou']], label: { position: 'bottom' } }
+    ];
   
-  // Multiple data sources as fallback
-  // Primary: Use locally hosted map data (works on GitHub Pages)
-  const mapDataSources = [
-    {
-      // Primary: Locally hosted map data (already uploaded to GitHub Pages)
-      full: './china_full.json',
-      regular: './china.json'
-    }
-  ];
+  // Use province-level map data to show provincial boundaries
+  const mapDataSource = './china_provinces.json';
   
   // Wait for DOM to be ready
   function waitForDOM() {
@@ -1154,14 +1164,13 @@ Shanghai Innovation Institute</span>
   
   // Initialize the map
   function initChinaMap() {
+    console.log('ECharts 版本:', echarts.version);
+    
     const mapContainer = document.getElementById('chinaMap');
     if (!mapContainer) {
       console.error('Map container not found');
       return;
     }
-    
-    // Show loading state
-    mapContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">Loading map data...</p>';
     
     // Initialize chart
     let myChart;
@@ -1179,615 +1188,111 @@ Shanghai Innovation Institute</span>
       return;
     }
     
-    // Try to load map data from multiple sources
-    function tryLoadMap(sourceIndex) {
-      if (sourceIndex >= mapDataSources.length) {
-        // All sources failed, show cities with geo coordinate system (better than x/y axis)
-        console.warn('All map data sources failed, showing cities with geo coordinates');
-        const mapContainer = document.getElementById('chinaMap');
-        if (mapContainer) {
-          mapContainer.innerHTML = ''; // Clear loading message
+    // Load map data
+    fetch(mapDataSource)
+      .then(response => {
+        console.log('china.json HTTP 状态:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        try {
-          showCitiesWithGeo(myChart);
-        } catch (e) {
-          console.error('Error showing cities with geo:', e);
-          // Final fallback: show city list as text
-          if (mapContainer) {
-            mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
-              '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
-              '<p style="font-size: 16px; line-height: 2;">' + cityData.map(city => city.name).join(', ') + '</p>' +
-              '<p style="font-size: 12px; color: #999; margin-top: 20px;">Map data unavailable. Please check your network connection.</p>' +
-              '</div>';
-          }
-        }
-        return;
-      }
-      
-      const source = mapDataSources[sourceIndex];
-      console.log(`[Map Loader] Trying source ${sourceIndex + 1}/${mapDataSources.length}:`, source.full);
-      
-      // Add timeout to fetch (reduced to 8 seconds for faster fallback)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-      
-      // Try to load both full and regular versions
-      Promise.all([
-        fetch(source.full, {
-          mode: 'cors',
-          cache: 'default',
-          signal: controller.signal
-        }).then(response => {
-          console.log(`[Map Loader] Response from ${source.full}:`, response.status, response.statusText);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json().then(data => {
-            console.log(`[Map Loader] Successfully parsed JSON from ${source.full}, type:`, data?.type);
-            return data;
-          });
-        }).catch(err => {
-          console.warn(`[Map Loader] Failed to load full version from ${source.full}:`, err.message);
-          return null;
-        }),
-        fetch(source.regular, {
-          mode: 'cors',
-          cache: 'default',
-          signal: controller.signal
-        }).then(response => {
-          console.log(`[Map Loader] Response from ${source.regular}:`, response.status, response.statusText);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json().then(data => {
-            console.log(`[Map Loader] Successfully parsed JSON from ${source.regular}, type:`, data?.type);
-            return data;
-          });
-        }).catch(err => {
-          console.warn(`[Map Loader] Failed to load regular version from ${source.regular}:`, err.message);
-          return null;
-        })
-      ])
-        .then(([chinaFullJson, chinaJson]) => {
-          clearTimeout(timeoutId);
-          
-          // Use full version if available, otherwise use regular
-          const mapJson = chinaFullJson || chinaJson;
-          const shadowJson = chinaJson || chinaFullJson;
-          
-          if (!mapJson) {
-            throw new Error('Both full and regular versions failed to load');
-          }
-          
-          if (!mapJson.type || mapJson.type !== 'FeatureCollection') {
-            console.error('[Map Loader] Invalid map data format:', mapJson.type);
-            throw new Error('Invalid map data format: expected FeatureCollection');
-          }
-          
-          console.log('[Map Loader] Valid map data received, registering...');
-          
-          // Register map data - use full for main map, regular for shadows
-          try {
-            echarts.registerMap('china', mapJson);
-            if (shadowJson && shadowJson !== mapJson) {
-              echarts.registerMap('china_shadow', shadowJson);
-            } else {
-              echarts.registerMap('china_shadow', mapJson);
-            }
-            console.log('[Map Loader] Map registered successfully');
-          } catch (regError) {
-            console.error('[Map Loader] Error registering map:', regError);
-            throw new Error('Failed to register map data: ' + regError.message);
-          }
-          
-          const mapContainer = document.getElementById('chinaMap');
-          if (mapContainer) {
-            mapContainer.innerHTML = ''; // Clear loading message
-          }
-          
-          try {
-            setupMap(myChart, !!chinaFullJson);
-            console.log('[Map Loader] Map loaded and displayed successfully from:', source.full);
-          } catch (setupError) {
-            console.error('[Map Loader] Error setting up map:', setupError);
-            throw new Error('Failed to setup map: ' + setupError.message);
-          }
-        })
-        .catch(error => {
-          clearTimeout(timeoutId);
-          if (error.name === 'AbortError') {
-            console.warn(`[Map Loader] Timeout (8s) loading from ${source.full}`);
-          } else {
-            console.warn(`[Map Loader] Failed to load from ${source.full}:`, error.message);
-          }
-          // Try next source
-          tryLoadMap(sourceIndex + 1);
-        });
-    }
-    
-    // Setup map with registered data
-    function setupMap(chart, hasFullData) {
-      // Check which cities are in the map data to show labels
-      const cityNamesInMap = new Set();
-      try {
-        // Try to get map data after it's registered
-        const mapData = echarts.getMap('china');
-        if (mapData && mapData.features) {
-          mapData.features.forEach(feature => {
-            if (feature.properties && feature.properties.name) {
-              cityNamesInMap.add(feature.properties.name);
-            }
-          });
-        }
-      } catch (e) {
-        // Map might not be registered yet, that's okay
-        console.warn('Could not check map data:', e);
-      }
-      
-      const option = {
-        backgroundColor: 'transparent',
-        tooltip: {
-          trigger: 'item',
-          formatter: function(params) {
-            if (params.seriesType === 'scatter') {
-              return '<div style="' +
-                     'line-height: 24px;' +
-                     'padding: 13px 15px;' +
-                     'border-top: 1px solid #16D0FE;' +
-                     'border-bottom: 1px solid #16D0FE;' +
-                     'background-color: rgba(6,79,124,0.92);' +
-                     'box-shadow: inset 0 -10px 10px -10px #00B5FF, 0 10px 10px -10px #00B5FF, inset 0 10px 10px -10px #00B5FF, 0 -10px 10px -10px #00B5FF;' +
-                     'letter-spacing: 0.2em;' +
-                     'border-radius: 10%;' +
-                     '">' +
-                     '<div style="color: #fff; font-size: 14px; font-weight: bold;">📍 ' + params.name + '</div>' +
-                     '<div style="color: #16D0FE; font-size: 12px; margin-top: 5px;">Supported City</div>' +
-                     '</div>';
-            }
-            return params.name;
-          },
-          textStyle: {
-            color: '#ffffff',
-            fontSize: 14
-          },
-          padding: 0,
-          borderRadius: 20,
-          borderColor: 'transparent',
-          backgroundColor: 'transparent'
-        },
-        // 地图渲染层级通过 z 属性来控制，创建多层阴影效果
-        geo: [
-          { // 整个地图最外部轮廓的外阴影
-            map: 'china_shadow',
-            z: 3,
-            roam: true,
-            aspectScale: 0.9, // 长宽比
-            zoom: 1.1,
-            tooltip: {
-              show: false
-            },
-            label: {
-              show: false
-            },
-            layoutCenter: ['50%', '50%'],
-            layoutSize: '80%',
-            emphasis: {
-              disabled: true
-            },
-            select: {
-              disabled: true
-            },
-            itemStyle: {
-              normal: {
-                areaColor: '#2f9fe7',
-                shadowColor: 'rgba(9, 117, 185, 0.7)',
-                shadowBlur: 15,
-                borderWidth: 0,
-                shadowOffsetY: 25,
-                shadowOffsetX: 5
-              },
-              emphasis: {
-                disabled: true
+        return response.json();
+      })
+      .then(chinaJson => {
+        console.log('china.json 加载成功');
+        console.log('数据类型:', chinaJson.type);
+        console.log('特征数量:', chinaJson.features ? chinaJson.features.length : 0);
+        
+        // Register map
+        echarts.registerMap('china', chinaJson);
+        console.log('地图注册成功');
+        
+        // Setup map option with single layer
+        const option = {
+          backgroundColor: 'transparent',
+          tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+              if (params.componentSubType === 'scatter' && params.data) {
+                const merchants = params.data.value[2];
+                if (merchants > 0) {
+                  const percentage = ((merchants / totalMerchants) * 100).toFixed(2);
+                  return `<strong>${params.name}</strong><br/>Merchants: ${merchants.toLocaleString()}<br/>Percentage: ${percentage}%`;
+                }
               }
+              return params.name;
             }
           },
-          { // 中间部分的蓝色阴影-主体部分
-            map: 'china_shadow',
-            roam: true,
-            z: 2,
-            aspectScale: 0.9,
-            zoom: 1.1,
-            tooltip: {
-              show: false
-            },
-            label: {
-              show: false
-            },
-            layoutCenter: ['50%', '57%'],
-            layoutSize: '80%',
-            emphasis: {
-              disabled: true
-            },
-            select: {
-              disabled: true
-            },
-            itemStyle: {
-              normal: {
-                areaColor: '#38b4fc',
-                borderColor: '#6dceff',
-                borderWidth: 5,
-                shadowColor: 'rgba(9, 117, 185, 0.7)',
-                shadowBlur: 10,
-                shadowOffsetY: -5,
-                shadowOffsetX: -5
-              },
-              emphasis: {
-                disabled: true
-              }
-            }
-          },
-          { // 最下层阴影
-            map: 'china_shadow',
-            roam: true,
-            z: 1,
-            aspectScale: 0.9,
-            zoom: 1.3,
-            tooltip: {
-              show: false
-            },
-            label: {
-              show: false
-            },
-            layoutCenter: ['51%', '60%'],
-            layoutSize: '80%',
-            emphasis: {
-              disabled: true
-            },
-            select: {
-              disabled: true
-            },
-            itemStyle: {
-              normal: {
-                areaColor: 'rgba(4, 29, 83, 0.5)',
-                borderWidth: 0
-              },
-              emphasis: {
-                disabled: true
-              }
-            }
-          }
-        ],
-        series: [
-          {
-            type: 'map',
+          geo: {
             map: 'china',
-            zoom: 1.1,
-            z: 4,
-            layoutCenter: ['50%', '50%'],
-            layoutSize: '80%',
-            aspectScale: 0.9,
-            roam: true,
-            label: {
-              show: hasFullData, // Show labels if we have full data
-              fontSize: 12,
-              lineHeight: 16,
-              padding: 0,
-              borderRadius: 5,
-              formatter: function (params) {
-                const areaname = params.name;
-                // Check if this is a supported city
-                const isSupportedCity = cityData.some(city => city.name === areaname);
-                if (isSupportedCity) {
-                  return `{blue|${areaname}}`;
-                }
-                return areaname;
-              },
-              rich: {
-                // 标签样式 - 参考 echarts-map 项目
-                blue: {
-                  color: "#fff",
-                  padding: 8,
-                  borderRadius: 3,
-                  textBorderWidth: 8,
-                  textShadowBlur: 12,
-                  textBorderColor: 'rgba(3, 40, 103, 0.2)',
-                  textShadowColor: 'rgba(3, 40, 103, 1)',
-                  backgroundColor: 'rgba(8, 136, 255, 0.8)',
-                }
-              }
-            },
+            roam: false,
+            zoom: 1.10,
+            center: [105, 33],
+            aspectScale: 0.75,
+            top: 20,
+            bottom: 20,
+            left: 'center',
+            right: 'auto',
             itemStyle: {
-              normal: {
-                borderColor: {
-                  type: 'linear',
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    { offset: 0, color: '#306ca1' },
-                    { offset: 0.3, color: '#41b8ff' }
-                  ]
-                },
-                borderWidth: 3,
-                areaColor: {
-                  // Create a subtle texture effect using gradient
-                  type: 'linear',
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    { offset: 0, color: '#f5f7fa' },
-                    { offset: 1, color: '#e8f4f8' }
-                  ]
-                }
-              },
-              emphasis: {
-                areaColor: {
-                  type: 'linear',
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    { offset: 0, color: '#e0f2fe' },
-                    { offset: 1, color: '#bae6fd' }
-                  ]
-                },
-                borderColor: '#fff',
-                borderWidth: 5
-              }
-            },
-            select: {
-              disabled: true
-            }
-          },
-          {
-            name: 'Supported Cities',
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            z: 12,
-            data: cityData,
-            symbol: 'pin',
-            symbolSize: [44, 33],
-            label: {
-              show: true,
-              position: 'bottom',
-              offset: [0, 10],
-              formatter: '{b}',
-              fontSize: 12,
-              color: '#fff',
-              fontWeight: 'bold',
-              backgroundColor: 'rgba(8, 136, 255, 0.8)',
-              padding: [6, 10],
-              borderRadius: 3,
-              textBorderColor: 'rgba(3, 40, 103, 0.2)',
-              textBorderWidth: 2,
-              textShadowColor: 'rgba(3, 40, 103, 1)',
-              textShadowBlur: 15
-            },
-            itemStyle: {
-              color: '#4a90e2',
-              shadowColor: 'rgba(74, 144, 226, 0.5)',
-              shadowBlur: 8,
-              shadowOffsetY: 2
+              areaColor: '#e8f4f8',
+              borderColor: '#2563eb',
+              borderWidth: 2,
+              shadowColor: 'rgba(37, 99, 235, 0.2)',
+              shadowBlur: 4
             },
             emphasis: {
+              itemStyle: {
+                areaColor: '#d0e8f0',
+                borderColor: '#1d4ed8',
+                borderWidth: 2.5
+              },
               label: {
                 show: true,
-                fontSize: 14,
-                backgroundColor: 'rgba(8, 136, 255, 0.95)',
-                borderColor: '#fff',
-                borderWidth: 2
-              },
-              itemStyle: {
                 color: '#2563eb',
-                shadowBlur: 15,
-                shadowOffsetY: 4
-              },
-              scale: true,
-              scaleSize: 30
-            }
-          }
-        ],
-        animation: false
-      };
-      
-      chart.setOption(option);
-      
-      // Add click event for interactive features
-      chart.on('click', function(params) {
-        if (params.seriesType === 'scatter' && params.componentType === 'series') {
-          const cityName = params.name;
-          const cityInfo = cityData.find(city => city.name === cityName);
-          
-          if (cityInfo) {
-            console.log('Clicked city:', cityName, 'at coordinates:', cityInfo.value);
-            
-            chart.dispatchAction({
-              type: 'highlight',
-              seriesIndex: 1,
-              dataIndex: params.dataIndex
-            });
-            
-            setTimeout(() => {
-              chart.dispatchAction({
-                type: 'downplay',
-                seriesIndex: 1,
-                dataIndex: params.dataIndex
-              });
-            }, 2000);
-          }
-        }
-      });
-      
-      // Handle window resize
-      const resizeHandler = function() {
-        chart.resize();
-      };
-      window.addEventListener('resize', resizeHandler);
-    }
-    
-    // Fallback: show cities with geo coordinate system (no map background)
-    function showCitiesWithGeo(chart) {
-      // Create a simple geo coordinate system without map data
-      // Use a minimal valid GeoJSON structure for the coordinate system
-      const minimalGeoJson = {
-        type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          properties: { name: 'China' },
-          geometry: {
-            type: 'Polygon',
-            coordinates: [[
-              [73, 18], [135, 18], [135, 54], [73, 54], [73, 18]
-            ]]
-          }
-        }]
-      };
-      
-      try {
-        // Register minimal map for coordinate system
-        echarts.registerMap('china_fallback', minimalGeoJson);
-      } catch (e) {
-        console.warn('Could not register fallback map:', e);
-      }
-      
-      const option = {
-        backgroundColor: '#f8f9fa',
-        tooltip: {
-          trigger: 'item',
-          backgroundColor: 'rgba(50, 50, 50, 0.9)',
-          borderColor: '#4a90e2',
-          borderWidth: 1,
-          textStyle: {
-            color: '#fff',
-            fontSize: 14
-          },
-          formatter: function(params) {
-            return '<div style="padding: 5px;">' +
-                   '<strong style="color: #4a90e2;">📍 ' + params.name + '</strong><br/>' +
-                   '<span style="color: #ccc;">Supported City</span>' +
-                   '</div>';
-          }
-        },
-        geo: {
-          map: 'china_fallback',
-          roam: true,
-          zoom: 1.2,
-          center: [105, 36],
-          aspectScale: 0.75,
-          itemStyle: {
-            areaColor: '#e8f4f8',
-            borderColor: '#b0d4e8',
-            borderWidth: 1
-          },
-          emphasis: {
-            itemStyle: {
-              areaColor: '#d0e8f0'
-            }
-          },
-          silent: false
-        },
-        series: [
-          {
-            name: 'Supported Cities',
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            data: cityData,
-            symbolSize: function(value, params) {
-              return 30;
+                fontSize: 12,
+                fontWeight: 'bold'
+              }
             },
-            symbol: 'pin',
-            symbolRotate: 0,
             label: {
-              show: true,
-              position: 'bottom',
-              offset: [0, 8],
-              formatter: '{b}',
-              fontSize: 12,
-              color: '#333',
-              fontWeight: 'bold',
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              padding: [4, 8],
-              borderRadius: 4,
-              borderColor: '#4a90e2',
-              borderWidth: 1
-            },
-            itemStyle: {
-              color: '#4a90e2',
-              shadowColor: 'rgba(74, 144, 226, 0.5)',
-              shadowBlur: 8,
-              shadowOffsetY: 2
-            },
-            emphasis: {
+              show: false
+            }
+          },
+          series: [
+            {
+              name: 'Supported Cities',
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              data: cityData,
+              symbolSize: 20,
+              symbol: 'pin',
+              itemStyle: {
+                color: '#ef4444'
+              },
               label: {
                 show: true,
-                fontSize: 14,
-                color: '#2563eb',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderColor: '#2563eb',
-                borderWidth: 2
-              },
-              itemStyle: {
-                color: '#2563eb',
-                shadowBlur: 15,
-                shadowOffsetY: 4
-              },
-              scale: true,
-              scaleSize: 25
+                formatter: '{b}',
+                color: '#333',
+                fontSize: 12,
+                fontWeight: 'bold'
+              }
             }
-          }
-        ]
-      };
-      
-      try {
-        chart.setOption(option, true); // notMerge = true to replace existing option
-        console.log('Cities displayed with geo coordinate system');
-      } catch (error) {
-        console.error('Error setting chart option:', error);
-        // Last resort: show simple list
-        const mapContainer = document.getElementById('chinaMap');
-        if (mapContainer) {
-          const cityList = cityData.map(city => city.name).join(', ');
-          mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
-            '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
-            '<p style="font-size: 16px; line-height: 2;">' + cityList + '</p>' +
-            '</div>';
-        }
-        return;
-      }
-      
-      // Add click event for interactive features
-      chart.on('click', function(params) {
-        if (params.seriesType === 'scatter' && params.componentType === 'series') {
-          const cityName = params.name;
-          const cityInfo = cityData.find(city => city.name === cityName);
-          
-          if (cityInfo) {
-            console.log('Clicked city:', cityName, 'at coordinates:', cityInfo.value);
-            
-            chart.dispatchAction({
-              type: 'highlight',
-              seriesIndex: 0,
-              dataIndex: params.dataIndex
-            });
-            
-            setTimeout(() => {
-              chart.dispatchAction({
-                type: 'downplay',
-                seriesIndex: 0,
-                dataIndex: params.dataIndex
-              });
-            }, 2000);
-          }
-        }
+          ]
+        };
+        
+        myChart.setOption(option);
+        console.log('地图显示成功!');
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+          myChart.resize();
+        });
+      })
+      .catch(error => {
+        console.error('地图加载失败:', error);
+        mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
+          '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
+          '<p style="font-size: 16px; line-height: 2;">' + cityData.map(city => city.name).join(', ') + '</p>' +
+          '</div>';
       });
-      
-      window.addEventListener('resize', function() {
-        chart.resize();
-      });
-    }
-    
-    // Start loading map data
-    tryLoadMap(0);
   }
   
   // Initialize when page is ready
