@@ -1105,33 +1105,23 @@ Shanghai Innovation Institute</span>
     { name: '杭州', value: [120.1536, 30.2875, 1] }
   ];
   
-  // Multiple data sources as fallback (more reliable sources first)
-  // Try to load both _full.json (with labels) and regular .json (for shadows)
+  // Multiple data sources as fallback (locally hosted files first for reliability)
+  // Try to load both _full.json (with detailed boundaries) and regular .json (simplified)
   const mapDataSources = [
     {
-      // Use GitHub raw content - more reliable
-      full: 'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json',
-      regular: 'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json'
+      // Primary: Locally hosted map data (most reliable, no CORS issues)
+      full: './china_full.json',
+      regular: './china.json'
     },
     {
-      // Use unpkg.com CDN
+      // Fallback 1: Aliyun DataV (works from server but has CORS restrictions in browser)
+      full: 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
+      regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
+    },
+    {
+      // Fallback 2: Use unpkg.com CDN (if available)
       full: 'https://unpkg.com/echarts@5.4.3/map/json/china.json',
       regular: 'https://unpkg.com/echarts@5.4.3/map/json/china.json'
-    },
-    {
-      // Use jsDelivr with GitHub
-      full: 'https://cdn.jsdelivr.net/gh/apache/echarts@master/test/data/map/json/china.json',
-      regular: 'https://cdn.jsdelivr.net/gh/apache/echarts@master/test/data/map/json/china.json'
-    },
-    {
-      // Alternative GitHub mirror
-      full: 'https://ghproxy.com/https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json',
-      regular: 'https://ghproxy.com/https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json'
-    },
-    {
-      // Statically.io CDN for GitHub
-      full: 'https://cdn.statically.io/gh/apache/echarts/master/test/data/map/json/china.json',
-      regular: 'https://cdn.statically.io/gh/apache/echarts/master/test/data/map/json/china.json'
     }
   ];
   
