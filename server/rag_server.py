@@ -559,10 +559,10 @@ def health_check():
         for city_cn, city_en in models.vector_db.city_to_en.items():
             if city_cn in models.vector_db.indexes:
                 cities_loaded[city_en] = {
-                    "name": city_cn,
+                "name": city_cn,
                     "vectors": models.vector_db.indexes[city_cn].ntotal,
                     "merchants": len(models.vector_db.metadata.get(city_cn, []))
-                }
+        }
     
     return {
         "status": "healthy",
