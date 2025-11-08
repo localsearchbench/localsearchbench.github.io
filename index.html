@@ -842,7 +842,7 @@ Shanghai Innovation Institute</span>
     <div class="content has-text-justified" style="margin-top: 2rem;">
       <h3 class="title is-4 has-text-centered" style="margin-bottom: 1.5rem;">📍 Supported Cities</h3>
       <div class="overview-container" style="margin-top: 1rem;">
-        <div id="chinaMap" style="width: 100%; height: 600px; margin: 0 auto;"></div>
+        <div id="chinaMap" style="width: 100%; height: 600px; min-height: 600px; margin: 0 auto; background-color: #f8f9fa; border-radius: 8px; position: relative;"></div>
       </div>
     </div>
 
@@ -1110,7 +1110,8 @@ Shanghai Innovation Institute</span>
     'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
     'https://geo.datav.aliyun.com/areas_v3/bound/100000.json',
     'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
-    'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
+    'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
+    'https://unpkg.com/echarts@5.4.3/map/json/china.json'
   ];
   
   // Wait for DOM to be ready
@@ -1162,13 +1163,30 @@ Shanghai Innovation Institute</span>
     mapContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 50px;">Loading map data...</p>';
     
     // Initialize chart
-    const myChart = echarts.init(mapContainer);
+    let myChart;
+    try {
+      myChart = echarts.init(mapContainer);
+      if (!myChart) {
+        throw new Error('Failed to initialize ECharts');
+      }
+    } catch (error) {
+      console.error('Error initializing ECharts:', error);
+      mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
+        '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
+        '<p style="font-size: 16px; line-height: 2;">' + cityData.map(city => city.name).join(', ') + '</p>' +
+        '</div>';
+      return;
+    }
     
     // Try to load map data from multiple sources
     function tryLoadMap(sourceIndex) {
       if (sourceIndex >= mapDataSources.length) {
         // All sources failed, show cities with geo coordinate system (better than x/y axis)
         console.warn('All map data sources failed, showing cities with geo coordinates');
+        const mapContainer = document.getElementById('chinaMap');
+        if (mapContainer) {
+          mapContainer.innerHTML = ''; // Clear loading message
+        }
         showCitiesWithGeo(myChart);
         return;
       }
@@ -1176,24 +1194,44 @@ Shanghai Innovation Institute</span>
       const url = mapDataSources[sourceIndex];
       console.log('Trying to load map data from:', url);
       
+      // Add timeout to fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       fetch(url, {
         mode: 'cors',
-        cache: 'default'
+        cache: 'default',
+        signal: controller.signal
       })
         .then(response => {
+          clearTimeout(timeoutId);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.json();
         })
         .then(chinaJson => {
+          clearTimeout(timeoutId);
+          // Validate JSON structure
+          if (!chinaJson || !chinaJson.type || chinaJson.type !== 'FeatureCollection') {
+            throw new Error('Invalid map data format');
+          }
           // Register map data
           echarts.registerMap('china', chinaJson);
+          const mapContainer = document.getElementById('chinaMap');
+          if (mapContainer) {
+            mapContainer.innerHTML = ''; // Clear loading message
+          }
           setupMap(myChart);
           console.log('Map loaded successfully from:', url);
         })
         .catch(error => {
-          console.warn(`Failed to load from ${url}:`, error.message);
+          clearTimeout(timeoutId);
+          if (error.name === 'AbortError') {
+            console.warn(`Timeout loading from ${url}`);
+          } else {
+            console.warn(`Failed to load from ${url}:`, error.message);
+          }
           // Try next source
           tryLoadMap(sourceIndex + 1);
         });
@@ -1465,8 +1503,30 @@ Shanghai Innovation Institute</span>
     // Fallback: show cities with geo coordinate system (no map background)
     function showCitiesWithGeo(chart) {
       // Create a simple geo coordinate system without map data
+      // Use a minimal valid GeoJSON structure for the coordinate system
+      const minimalGeoJson = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          properties: { name: 'China' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [73, 18], [135, 18], [135, 54], [73, 54], [73, 18]
+            ]]
+          }
+        }]
+      };
+      
+      try {
+        // Register minimal map for coordinate system
+        echarts.registerMap('china_fallback', minimalGeoJson);
+      } catch (e) {
+        console.warn('Could not register fallback map:', e);
+      }
+      
       const option = {
-        backgroundColor: 'transparent',
+        backgroundColor: '#f8f9fa',
         tooltip: {
           trigger: 'item',
           backgroundColor: 'rgba(50, 50, 50, 0.9)',
@@ -1484,18 +1544,22 @@ Shanghai Innovation Institute</span>
           }
         },
         geo: {
-          map: null, // No map data, just coordinate system
+          map: 'china_fallback',
           roam: true,
           zoom: 1.2,
           center: [105, 36],
           aspectScale: 0.75,
           itemStyle: {
-            normal: {
-              areaColor: 'transparent',
-              borderColor: 'transparent'
+            areaColor: '#e8f4f8',
+            borderColor: '#b0d4e8',
+            borderWidth: 1
+          },
+          emphasis: {
+            itemStyle: {
+              areaColor: '#d0e8f0'
             }
           },
-          silent: true
+          silent: false
         },
         series: [
           {
@@ -1504,19 +1568,19 @@ Shanghai Innovation Institute</span>
             coordinateSystem: 'geo',
             data: cityData,
             symbolSize: function(value, params) {
-              return 20;
+              return 30;
             },
             symbol: 'pin',
             symbolRotate: 0,
             label: {
               show: true,
               position: 'bottom',
-              offset: [0, 5],
+              offset: [0, 8],
               formatter: '{b}',
               fontSize: 12,
               color: '#333',
               fontWeight: 'bold',
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
               padding: [4, 8],
               borderRadius: 4,
               borderColor: '#4a90e2',
@@ -1549,7 +1613,22 @@ Shanghai Innovation Institute</span>
         ]
       };
       
-      chart.setOption(option);
+      try {
+        chart.setOption(option, true); // notMerge = true to replace existing option
+        console.log('Cities displayed with geo coordinate system');
+      } catch (error) {
+        console.error('Error setting chart option:', error);
+        // Last resort: show simple list
+        const mapContainer = document.getElementById('chinaMap');
+        if (mapContainer) {
+          const cityList = cityData.map(city => city.name).join(', ');
+          mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
+            '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
+            '<p style="font-size: 16px; line-height: 2;">' + cityList + '</p>' +
+            '</div>';
+        }
+        return;
+      }
       
       // Add click event for interactive features
       chart.on('click', function(params) {
