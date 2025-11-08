@@ -1113,8 +1113,8 @@ Shanghai Innovation Institute</span>
       regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
     },
     {
-      full: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
-      regular: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
+      full: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json',
+      regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
     },
     {
       full: 'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
@@ -1123,6 +1123,10 @@ Shanghai Innovation Institute</span>
     {
       full: 'https://unpkg.com/echarts@5.4.3/map/json/china.json',
       regular: 'https://unpkg.com/echarts@5.4.3/map/json/china.json'
+    },
+    {
+      full: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
+      regular: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
     }
   ];
   
@@ -1199,16 +1203,28 @@ Shanghai Innovation Institute</span>
         if (mapContainer) {
           mapContainer.innerHTML = ''; // Clear loading message
         }
-        showCitiesWithGeo(myChart);
+        try {
+          showCitiesWithGeo(myChart);
+        } catch (e) {
+          console.error('Error showing cities with geo:', e);
+          // Final fallback: show city list as text
+          if (mapContainer) {
+            mapContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">' +
+              '<h4 style="color: #4a90e2; margin-bottom: 20px;">📍 Supported Cities</h4>' +
+              '<p style="font-size: 16px; line-height: 2;">' + cityData.map(city => city.name).join(', ') + '</p>' +
+              '<p style="font-size: 12px; color: #999; margin-top: 20px;">Map data unavailable. Please check your network connection.</p>' +
+              '</div>';
+          }
+        }
         return;
       }
       
       const source = mapDataSources[sourceIndex];
-      console.log('Trying to load map data from:', source.full);
+      console.log(`[Map Loader] Trying source ${sourceIndex + 1}/${mapDataSources.length}:`, source.full);
       
-      // Add timeout to fetch
+      // Add timeout to fetch (reduced to 8 seconds for faster fallback)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
       
       // Try to load both full and regular versions
       Promise.all([
@@ -1217,17 +1233,31 @@ Shanghai Innovation Institute</span>
           cache: 'default',
           signal: controller.signal
         }).then(response => {
+          console.log(`[Map Loader] Response from ${source.full}:`, response.status, response.statusText);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json();
-        }).catch(() => null), // If full fails, try regular as fallback
+          return response.json().then(data => {
+            console.log(`[Map Loader] Successfully parsed JSON from ${source.full}, type:`, data?.type);
+            return data;
+          });
+        }).catch(err => {
+          console.warn(`[Map Loader] Failed to load full version from ${source.full}:`, err.message);
+          return null;
+        }),
         fetch(source.regular, {
           mode: 'cors',
           cache: 'default',
           signal: controller.signal
         }).then(response => {
+          console.log(`[Map Loader] Response from ${source.regular}:`, response.status, response.statusText);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json();
-        }).catch(() => null)
+          return response.json().then(data => {
+            console.log(`[Map Loader] Successfully parsed JSON from ${source.regular}, type:`, data?.type);
+            return data;
+          });
+        }).catch(err => {
+          console.warn(`[Map Loader] Failed to load regular version from ${source.regular}:`, err.message);
+          return null;
+        })
       ])
         .then(([chinaFullJson, chinaJson]) => {
           clearTimeout(timeoutId);
@@ -1236,31 +1266,50 @@ Shanghai Innovation Institute</span>
           const mapJson = chinaFullJson || chinaJson;
           const shadowJson = chinaJson || chinaFullJson;
           
-          if (!mapJson || !mapJson.type || mapJson.type !== 'FeatureCollection') {
-            throw new Error('Invalid map data format');
+          if (!mapJson) {
+            throw new Error('Both full and regular versions failed to load');
           }
           
+          if (!mapJson.type || mapJson.type !== 'FeatureCollection') {
+            console.error('[Map Loader] Invalid map data format:', mapJson.type);
+            throw new Error('Invalid map data format: expected FeatureCollection');
+          }
+          
+          console.log('[Map Loader] Valid map data received, registering...');
+          
           // Register map data - use full for main map, regular for shadows
-          echarts.registerMap('china', mapJson);
-          if (shadowJson && shadowJson !== mapJson) {
-            echarts.registerMap('china_shadow', shadowJson);
-          } else {
-            echarts.registerMap('china_shadow', mapJson);
+          try {
+            echarts.registerMap('china', mapJson);
+            if (shadowJson && shadowJson !== mapJson) {
+              echarts.registerMap('china_shadow', shadowJson);
+            } else {
+              echarts.registerMap('china_shadow', mapJson);
+            }
+            console.log('[Map Loader] Map registered successfully');
+          } catch (regError) {
+            console.error('[Map Loader] Error registering map:', regError);
+            throw new Error('Failed to register map data: ' + regError.message);
           }
           
           const mapContainer = document.getElementById('chinaMap');
           if (mapContainer) {
             mapContainer.innerHTML = ''; // Clear loading message
           }
-          setupMap(myChart, !!chinaFullJson);
-          console.log('Map loaded successfully from:', source.full);
+          
+          try {
+            setupMap(myChart, !!chinaFullJson);
+            console.log('[Map Loader] Map loaded and displayed successfully from:', source.full);
+          } catch (setupError) {
+            console.error('[Map Loader] Error setting up map:', setupError);
+            throw new Error('Failed to setup map: ' + setupError.message);
+          }
         })
         .catch(error => {
           clearTimeout(timeoutId);
           if (error.name === 'AbortError') {
-            console.warn(`Timeout loading from ${source.full}`);
+            console.warn(`[Map Loader] Timeout (8s) loading from ${source.full}`);
           } else {
-            console.warn(`Failed to load from ${source.full}:`, error.message);
+            console.warn(`[Map Loader] Failed to load from ${source.full}:`, error.message);
           }
           // Try next source
           tryLoadMap(sourceIndex + 1);
