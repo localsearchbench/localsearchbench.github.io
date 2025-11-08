@@ -111,7 +111,7 @@
   <script defer src="static/js/index.js?v=8&t=20251105"></script>
   
   <!-- ECharts for China Map -->
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   
   <!-- Structured Data for Academic Papers -->
   <script type="application/ld+json">
@@ -841,7 +841,9 @@ Shanghai Innovation Institute</span>
     <!-- China Map with Cities -->
     <div class="content has-text-justified" style="margin-top: 2rem;">
       <h3 class="title is-4 has-text-centered" style="margin-bottom: 1.5rem;">📍 Supported Cities</h3>
-      <div id="china-map-container" style="width: 100%; height: 600px; margin: 0 auto;"></div>
+      <div class="overview-container" style="margin-top: 1rem;">
+        <div id="chinaMap" style="width: 100%; height: 600px; margin: 0 auto;"></div>
+      </div>
     </div>
 
     <!-- Jin Zi Ta Image -->
@@ -1082,169 +1084,127 @@ Shanghai Innovation Institute</span>
 </div>
 <!-- End of Visitor Counter -->
 
-<!-- China Map Initialization -->
+<!-- ECharts China Map Initialization -->
 <script>
 (function() {
-    // 9个城市的数据：城市名、经纬度坐标、商店数量
-    const cityData = [
-        { name: '北京', value: [116.4074, 39.9042], merchants: 125000, enName: 'Beijing' },
-        { name: '上海', value: [121.4737, 31.2304], merchants: 145000, enName: 'Shanghai' },
-        { name: '广州', value: [113.2644, 23.1291], merchants: 98000, enName: 'Guangzhou' },
-        { name: '深圳', value: [114.0579, 22.5431], merchants: 112000, enName: 'Shenzhen' },
-        { name: '苏州', value: [120.5853, 31.2989], merchants: 68000, enName: 'Suzhou' },
-        { name: '成都', value: [104.0668, 30.5728], merchants: 89000, enName: 'Chengdu' },
-        { name: '重庆', value: [106.5516, 29.5630], merchants: 76000, enName: 'Chongqing' },
-        { name: '武汉', value: [114.3162, 30.5810], merchants: 72000, enName: 'Wuhan' },
-        { name: '南京', value: [118.7969, 32.0603], merchants: 65000, enName: 'Nanjing' }
-    ];
-
-    // 等待DOM和ECharts加载完成
-    function initChinaMap() {
-        if (typeof echarts === 'undefined') {
-            setTimeout(initChinaMap, 100);
-            return;
-        }
-
-        const mapContainer = document.getElementById('china-map-container');
-        if (!mapContainer) {
-            return;
-        }
-
-        const myChart = echarts.init(mapContainer);
-
-        // 使用ECharts内置的中国地图，如果不可用则使用在线地图数据
-        // 尝试加载在线地图数据
-        const loadMapData = () => {
-            return fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .catch(() => {
-                    // 如果在线加载失败，返回null，使用散点图模式
-                    return null;
-                });
-        };
-
-        loadMapData().then(chinaJson => {
-            if (chinaJson) {
-                echarts.registerMap('china', chinaJson);
+  // Wait for DOM and ECharts to be ready
+  function initChinaMap() {
+    if (typeof echarts === 'undefined') {
+      setTimeout(initChinaMap, 100);
+      return;
+    }
+    
+    const mapContainer = document.getElementById('chinaMap');
+    if (!mapContainer) {
+      return;
+    }
+    
+    const myChart = echarts.init(mapContainer);
+    
+    // Load China map GeoJSON data
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+      .then(response => response.json())
+      .then(chinaJson => {
+        // Register map data
+        echarts.registerMap('china', chinaJson);
+        
+        // City coordinates - 9 supported cities
+        const cityData = [
+          { name: '北京', value: [116.4074, 39.9042, 1] },
+          { name: '上海', value: [121.4737, 31.2304, 1] },
+          { name: '广州', value: [113.2644, 23.1291, 1] },
+          { name: '深圳', value: [114.0579, 22.5431, 1] },
+          { name: '武汉', value: [114.3162, 30.5810, 1] },
+          { name: '重庆', value: [106.5516, 29.5630, 1] },
+          { name: '成都', value: [104.0668, 30.5728, 1] },
+          { name: '苏州', value: [120.5853, 31.2989, 1] },
+          { name: '南京', value: [118.7969, 32.0603, 1] }
+        ];
+        
+        const option = {
+          backgroundColor: 'transparent',
+          tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+              if (params.seriesType === 'scatter') {
+                return params.name + '<br/>Supported City';
+              }
+              return params.name;
             }
-
-            const option = {
-                backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function(params) {
-                        if (params.seriesType === 'scatter') {
-                            return params.data.name + '<br/>商店数量: ' + params.data.merchants.toLocaleString() + ' 家';
-                        }
-                        return params.name;
-                    },
-                    backgroundColor: 'rgba(50, 50, 50, 0.9)',
-                    borderColor: '#333',
-                    borderWidth: 1,
-                    textStyle: {
-                        color: '#fff',
-                        fontSize: 14
-                    },
-                    padding: [10, 15]
+          },
+          geo: {
+            map: 'china',
+            roam: true,
+            zoom: 1.2,
+            label: {
+              emphasis: {
+                show: false
+              }
+            },
+            itemStyle: {
+              normal: {
+                areaColor: '#f0f0f0',
+                borderColor: '#999',
+                borderWidth: 1
+              },
+              emphasis: {
+                areaColor: '#e6f3ff',
+                borderColor: '#4a90e2',
+                borderWidth: 2
+              }
+            }
+          },
+          series: [
+            {
+              name: 'Supported Cities',
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              data: cityData,
+              symbolSize: 8,
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{b}',
+                fontSize: 12,
+                color: '#333'
+              },
+              itemStyle: {
+                color: '#4a90e2'
+              },
+              emphasis: {
+                label: {
+                  show: true
                 },
-                geo: chinaJson ? {
-                    map: 'china',
-                    roam: true,
-                    zoom: 1.2,
-                    center: [105, 36],
-                    itemStyle: {
-                        areaColor: '#f0f0f0',
-                        borderColor: '#999',
-                        borderWidth: 1
-                    },
-                    emphasis: {
-                        itemStyle: {
-                            areaColor: '#e0e0e0'
-                        }
-                    },
-                    label: {
-                        show: false
-                    }
-                } : undefined,
-                series: [
-                    {
-                        name: '城市',
-                        type: 'scatter',
-                        coordinateSystem: chinaJson ? 'geo' : undefined,
-                        data: cityData.map(city => ({
-                            name: city.name + ' (' + city.enName + ')',
-                            value: city.value,
-                            merchants: city.merchants
-                        })),
-                        symbolSize: function(val, params) {
-                            // 根据商店数量调整点的大小
-                            return Math.sqrt(params.data.merchants / 1000) * 2 + 8;
-                        },
-                        itemStyle: {
-                            color: '#2563eb',
-                            borderColor: '#fff',
-                            borderWidth: 2,
-                            shadowBlur: 10,
-                            shadowColor: 'rgba(37, 99, 235, 0.5)'
-                        },
-                        emphasis: {
-                            itemStyle: {
-                                color: '#1d4ed8',
-                                borderColor: '#fff',
-                                borderWidth: 3,
-                                shadowBlur: 15,
-                                shadowColor: 'rgba(37, 99, 235, 0.8)'
-                            },
-                            scale: true
-                        },
-                        label: {
-                            show: true,
-                            position: 'right',
-                            formatter: '{b}',
-                            fontSize: 12,
-                            color: '#333',
-                            fontWeight: 'bold',
-                            offset: [5, 0]
-                        }
-                    }
-                ]
-            };
-
-            // 如果没有地图数据，使用散点图模式
-            if (!chinaJson) {
-                option.xAxis = {
-                    type: 'value',
-                    show: false,
-                    min: 100,
-                    max: 125
-                };
-                option.yAxis = {
-                    type: 'value',
-                    show: false,
-                    min: 20,
-                    max: 42
-                };
-                option.series[0].coordinateSystem = undefined;
+                itemStyle: {
+                  color: '#2563eb',
+                  borderColor: '#fff',
+                  borderWidth: 2
+                }
+              }
             }
-
-            myChart.setOption(option);
-
-            // 响应式调整
-            window.addEventListener('resize', function() {
-                myChart.resize();
-            });
+          ]
+        };
+        
+        myChart.setOption(option);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+          myChart.resize();
         });
-    }
-
-    // 页面加载完成后初始化
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initChinaMap);
-    } else {
-        initChinaMap();
-    }
+      })
+      .catch(error => {
+        console.error('Error loading China map data:', error);
+        // Fallback: show error message
+        mapContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">Map data loading failed. Please refresh the page.</p>';
+      });
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChinaMap);
+  } else {
+    initChinaMap();
+  }
 })();
 </script>
 
