@@ -1087,8 +1087,10 @@ Shanghai Innovation Institute</span>
 <!-- ECharts China Map Initialization -->
 <script>
 (function() {
-  let retryCount = 0;
-  const maxRetries = 50; // 5 seconds max wait for ECharts
+  let echartsRetryCount = 0;
+  let domRetryCount = 0;
+  const maxEChartsRetries = 100; // 10 seconds max wait for ECharts
+  const maxDomRetries = 100; // 10 seconds max wait for DOM
   
   // City coordinates - 9 supported cities
   const cityData = [
@@ -1103,32 +1105,56 @@ Shanghai Innovation Institute</span>
     { name: '杭州', value: [120.1536, 30.2875, 1] }
   ];
   
-  // Multiple data sources as fallback
+  // Multiple data sources as fallback (more reliable sources first)
   const mapDataSources = [
     'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
     'https://geo.datav.aliyun.com/areas_v3/bound/100000.json',
-    'https://raw.githubusercontent.com/apache/echarts/master/map/json/china.json'
+    'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
+    'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
   ];
   
-  // Wait for DOM and ECharts to be ready
-  function initChinaMap() {
+  // Wait for DOM to be ready
+  function waitForDOM() {
     const mapContainer = document.getElementById('chinaMap');
     if (!mapContainer) {
-      if (retryCount < maxRetries) {
-        retryCount++;
-        setTimeout(initChinaMap, 100);
+      if (domRetryCount < maxDomRetries) {
+        domRetryCount++;
+        setTimeout(waitForDOM, 100);
+      } else {
+        console.error('Map container not found after maximum retries');
       }
       return;
     }
     
-    // Check if ECharts is loaded
+    // DOM is ready, now wait for ECharts
+    waitForECharts();
+  }
+  
+  // Wait for ECharts to be loaded
+  function waitForECharts() {
     if (typeof echarts === 'undefined') {
-      if (retryCount < maxRetries) {
-        retryCount++;
-        setTimeout(initChinaMap, 100);
+      if (echartsRetryCount < maxEChartsRetries) {
+        echartsRetryCount++;
+        setTimeout(waitForECharts, 100);
       } else {
-        mapContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">ECharts library loading failed. Please refresh the page.</p>';
+        const mapContainer = document.getElementById('chinaMap');
+        if (mapContainer) {
+          mapContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 50px;">ECharts library loading failed. Please refresh the page.</p>';
+        }
+        console.error('ECharts library not loaded after maximum retries');
       }
+      return;
+    }
+    
+    // Both DOM and ECharts are ready, initialize map
+    initChinaMap();
+  }
+  
+  // Initialize the map
+  function initChinaMap() {
+    const mapContainer = document.getElementById('chinaMap');
+    if (!mapContainer) {
+      console.error('Map container not found');
       return;
     }
     
@@ -1141,16 +1167,19 @@ Shanghai Innovation Institute</span>
     // Try to load map data from multiple sources
     function tryLoadMap(sourceIndex) {
       if (sourceIndex >= mapDataSources.length) {
-        // All sources failed, show cities without map
-        console.warn('All map data sources failed, showing cities only');
-        showCitiesOnly(myChart);
+        // All sources failed, show cities with geo coordinate system (better than x/y axis)
+        console.warn('All map data sources failed, showing cities with geo coordinates');
+        showCitiesWithGeo(myChart);
         return;
       }
       
       const url = mapDataSources[sourceIndex];
       console.log('Trying to load map data from:', url);
       
-      fetch(url)
+      fetch(url, {
+        mode: 'cors',
+        cache: 'default'
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -1161,9 +1190,10 @@ Shanghai Innovation Institute</span>
           // Register map data
           echarts.registerMap('china', chinaJson);
           setupMap(myChart);
+          console.log('Map loaded successfully from:', url);
         })
         .catch(error => {
-          console.warn(`Failed to load from ${url}:`, error);
+          console.warn(`Failed to load from ${url}:`, error.message);
           // Try next source
           tryLoadMap(sourceIndex + 1);
         });
@@ -1177,32 +1207,295 @@ Shanghai Innovation Institute</span>
           trigger: 'item',
           formatter: function(params) {
             if (params.seriesType === 'scatter') {
-              return params.name + '<br/>Supported City';
+              return '<div style="' +
+                     'line-height: 24px;' +
+                     'padding: 13px 15px;' +
+                     'border-top: 1px solid #16D0FE;' +
+                     'border-bottom: 1px solid #16D0FE;' +
+                     'background-color: rgba(6,79,124,0.92);' +
+                     'box-shadow: inset 0 -10px 10px -10px #00B5FF, 0 10px 10px -10px #00B5FF, inset 0 10px 10px -10px #00B5FF, 0 -10px 10px -10px #00B5FF;' +
+                     'letter-spacing: 0.2em;' +
+                     'border-radius: 10%;' +
+                     '">' +
+                     '<div style="color: #fff; font-size: 14px; font-weight: bold;">📍 ' + params.name + '</div>' +
+                     '<div style="color: #16D0FE; font-size: 12px; margin-top: 5px;">Supported City</div>' +
+                     '</div>';
             }
             return params.name;
+          },
+          textStyle: {
+            color: '#ffffff',
+            fontSize: 14
+          },
+          padding: 0,
+          borderRadius: 20,
+          borderColor: 'transparent',
+          backgroundColor: 'transparent'
+        },
+        // 地图渲染层级通过 z 属性来控制，创建多层阴影效果
+        geo: [
+          { // 整个地图最外部轮廓的外阴影
+            map: 'china',
+            z: 3,
+            roam: true,
+            aspectScale: 0.9, // 长宽比
+            zoom: 1.1,
+            center: [105, 36],
+            tooltip: {
+              show: false
+            },
+            label: {
+              show: false
+            },
+            layoutCenter: ['50%', '50%'],
+            layoutSize: '80%',
+            emphasis: {
+              disabled: true
+            },
+            select: {
+              disabled: true
+            },
+            itemStyle: {
+              normal: {
+                areaColor: '#2f9fe7',
+                shadowColor: 'rgba(9, 117, 185, 0.7)',
+                shadowBlur: 15,
+                borderWidth: 0,
+                shadowOffsetY: 25,
+                shadowOffsetX: 5
+              },
+              emphasis: {
+                disabled: true
+              }
+            }
+          },
+          { // 中间部分的蓝色阴影-主体部分
+            map: 'china',
+            roam: true,
+            z: 2,
+            aspectScale: 0.9,
+            zoom: 1.1,
+            center: [105, 36],
+            tooltip: {
+              show: false
+            },
+            label: {
+              show: false
+            },
+            layoutCenter: ['50%', '57%'],
+            layoutSize: '80%',
+            emphasis: {
+              disabled: true
+            },
+            select: {
+              disabled: true
+            },
+            itemStyle: {
+              normal: {
+                areaColor: '#38b4fc',
+                borderColor: '#6dceff',
+                borderWidth: 5,
+                shadowColor: 'rgba(9, 117, 185, 0.7)',
+                shadowBlur: 10,
+                shadowOffsetY: -5,
+                shadowOffsetX: -5
+              },
+              emphasis: {
+                disabled: true
+              }
+            }
+          },
+          { // 最下层阴影
+            map: 'china',
+            roam: true,
+            z: 1,
+            aspectScale: 0.9,
+            zoom: 1.3,
+            center: [105, 36],
+            tooltip: {
+              show: false
+            },
+            label: {
+              show: false
+            },
+            layoutCenter: ['51%', '60%'],
+            layoutSize: '80%',
+            emphasis: {
+              disabled: true
+            },
+            select: {
+              disabled: true
+            },
+            itemStyle: {
+              normal: {
+                areaColor: 'rgba(4, 29, 83, 0.5)',
+                borderWidth: 0
+              },
+              emphasis: {
+                disabled: true
+              }
+            }
+          }
+        ],
+        series: [
+          {
+            type: 'map',
+            map: 'china',
+            zoom: 1.1,
+            z: 4,
+            layoutCenter: ['50%', '50%'],
+            layoutSize: '80%',
+            aspectScale: 0.9,
+            roam: true,
+            label: {
+              show: false
+            },
+            itemStyle: {
+              normal: {
+                borderColor: {
+                  type: 'linear',
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [
+                    { offset: 0, color: '#306ca1' },
+                    { offset: 0.3, color: '#41b8ff' }
+                  ]
+                },
+                borderWidth: 3,
+                areaColor: '#f5f7fa'
+              },
+              emphasis: {
+                areaColor: '#e0f2fe',
+                borderColor: '#fff',
+                borderWidth: 5
+              }
+            },
+            select: {
+              disabled: true
+            }
+          },
+          {
+            name: 'Supported Cities',
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            z: 12,
+            data: cityData,
+            symbol: 'pin',
+            symbolSize: [44, 33],
+            label: {
+              show: true,
+              position: 'bottom',
+              offset: [0, 10],
+              formatter: '{b}',
+              fontSize: 12,
+              color: '#fff',
+              fontWeight: 'bold',
+              backgroundColor: 'rgba(8, 136, 255, 0.8)',
+              padding: [6, 10],
+              borderRadius: 3,
+              textBorderColor: 'rgba(3, 40, 103, 0.2)',
+              textBorderWidth: 2,
+              textShadowColor: 'rgba(3, 40, 103, 1)',
+              textShadowBlur: 15
+            },
+            itemStyle: {
+              color: '#4a90e2',
+              shadowColor: 'rgba(74, 144, 226, 0.5)',
+              shadowBlur: 8,
+              shadowOffsetY: 2
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 14,
+                backgroundColor: 'rgba(8, 136, 255, 0.95)',
+                borderColor: '#fff',
+                borderWidth: 2
+              },
+              itemStyle: {
+                color: '#2563eb',
+                shadowBlur: 15,
+                shadowOffsetY: 4
+              },
+              scale: true,
+              scaleSize: 30
+            }
+          }
+        ],
+        animation: false
+      };
+      
+      chart.setOption(option);
+      
+      // Add click event for interactive features
+      chart.on('click', function(params) {
+        if (params.seriesType === 'scatter' && params.componentType === 'series') {
+          const cityName = params.name;
+          const cityInfo = cityData.find(city => city.name === cityName);
+          
+          if (cityInfo) {
+            console.log('Clicked city:', cityName, 'at coordinates:', cityInfo.value);
+            
+            chart.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 1,
+              dataIndex: params.dataIndex
+            });
+            
+            setTimeout(() => {
+              chart.dispatchAction({
+                type: 'downplay',
+                seriesIndex: 1,
+                dataIndex: params.dataIndex
+              });
+            }, 2000);
+          }
+        }
+      });
+      
+      // Handle window resize
+      const resizeHandler = function() {
+        chart.resize();
+      };
+      window.addEventListener('resize', resizeHandler);
+    }
+    
+    // Fallback: show cities with geo coordinate system (no map background)
+    function showCitiesWithGeo(chart) {
+      // Create a simple geo coordinate system without map data
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(50, 50, 50, 0.9)',
+          borderColor: '#4a90e2',
+          borderWidth: 1,
+          textStyle: {
+            color: '#fff',
+            fontSize: 14
+          },
+          formatter: function(params) {
+            return '<div style="padding: 5px;">' +
+                   '<strong style="color: #4a90e2;">📍 ' + params.name + '</strong><br/>' +
+                   '<span style="color: #ccc;">Supported City</span>' +
+                   '</div>';
           }
         },
         geo: {
-          map: 'china',
+          map: null, // No map data, just coordinate system
           roam: true,
           zoom: 1.2,
-          label: {
-            emphasis: {
-              show: false
-            }
-          },
+          center: [105, 36],
+          aspectScale: 0.75,
           itemStyle: {
             normal: {
-              areaColor: '#f0f0f0',
-              borderColor: '#999',
-              borderWidth: 1
-            },
-            emphasis: {
-              areaColor: '#e6f3ff',
-              borderColor: '#4a90e2',
-              borderWidth: 2
+              areaColor: 'transparent',
+              borderColor: 'transparent'
             }
-          }
+          },
+          silent: true
         },
         series: [
           {
@@ -1210,27 +1503,47 @@ Shanghai Innovation Institute</span>
             type: 'scatter',
             coordinateSystem: 'geo',
             data: cityData,
-            symbolSize: 12,
+            symbolSize: function(value, params) {
+              return 20;
+            },
+            symbol: 'pin',
+            symbolRotate: 0,
             label: {
               show: true,
-              position: 'right',
+              position: 'bottom',
+              offset: [0, 5],
               formatter: '{b}',
               fontSize: 12,
               color: '#333',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              padding: [4, 8],
+              borderRadius: 4,
+              borderColor: '#4a90e2',
+              borderWidth: 1
             },
             itemStyle: {
-              color: '#4a90e2'
+              color: '#4a90e2',
+              shadowColor: 'rgba(74, 144, 226, 0.5)',
+              shadowBlur: 8,
+              shadowOffsetY: 2
             },
             emphasis: {
               label: {
-                show: true
+                show: true,
+                fontSize: 14,
+                color: '#2563eb',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: '#2563eb',
+                borderWidth: 2
               },
               itemStyle: {
                 color: '#2563eb',
-                borderColor: '#fff',
-                borderWidth: 2
-              }
+                shadowBlur: 15,
+                shadowOffsetY: 4
+              },
+              scale: true,
+              scaleSize: 25
             }
           }
         ]
@@ -1238,65 +1551,31 @@ Shanghai Innovation Institute</span>
       
       chart.setOption(option);
       
-      // Handle window resize
-      window.addEventListener('resize', function() {
-        chart.resize();
+      // Add click event for interactive features
+      chart.on('click', function(params) {
+        if (params.seriesType === 'scatter' && params.componentType === 'series') {
+          const cityName = params.name;
+          const cityInfo = cityData.find(city => city.name === cityName);
+          
+          if (cityInfo) {
+            console.log('Clicked city:', cityName, 'at coordinates:', cityInfo.value);
+            
+            chart.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: params.dataIndex
+            });
+            
+            setTimeout(() => {
+              chart.dispatchAction({
+                type: 'downplay',
+                seriesIndex: 0,
+                dataIndex: params.dataIndex
+              });
+            }, 2000);
+          }
+        }
       });
-    }
-    
-    // Fallback: show cities without map background
-    function showCitiesOnly(chart) {
-      const option = {
-        backgroundColor: 'transparent',
-        tooltip: {
-          trigger: 'item',
-          formatter: function(params) {
-            return params.name + '<br/>Supported City';
-          }
-        },
-        xAxis: {
-          type: 'value',
-          show: false
-        },
-        yAxis: {
-          type: 'value',
-          show: false
-        },
-        series: [
-          {
-            name: 'Supported Cities',
-            type: 'scatter',
-            data: cityData.map(city => ({
-              name: city.name,
-              value: [city.value[0], city.value[1]]
-            })),
-            symbolSize: 12,
-            label: {
-              show: true,
-              position: 'right',
-              formatter: '{b}',
-              fontSize: 12,
-              color: '#333',
-              fontWeight: 'bold'
-            },
-            itemStyle: {
-              color: '#4a90e2'
-            },
-            emphasis: {
-              label: {
-                show: true
-              },
-              itemStyle: {
-                color: '#2563eb',
-                borderColor: '#fff',
-                borderWidth: 2
-              }
-            }
-          }
-        ]
-      };
-      
-      chart.setOption(option);
       
       window.addEventListener('resize', function() {
         chart.resize();
@@ -1307,20 +1586,13 @@ Shanghai Innovation Institute</span>
     tryLoadMap(0);
   }
   
-  // Initialize when DOM and scripts are ready
-  function startInit() {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        // Wait a bit more for deferred scripts
-        setTimeout(initChinaMap, 200);
-      });
-    } else {
-      // DOM is ready, but scripts might still be loading
-      setTimeout(initChinaMap, 200);
-    }
+  // Initialize when page is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForDOM);
+  } else {
+    // DOM is already ready
+    waitForDOM();
   }
-  
-  startInit();
 })();
 </script>
 
