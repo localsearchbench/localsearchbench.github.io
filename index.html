@@ -1109,24 +1109,29 @@ Shanghai Innovation Institute</span>
   // Try to load both _full.json (with labels) and regular .json (for shadows)
   const mapDataSources = [
     {
-      full: 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-      regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
+      // Use GitHub raw content - more reliable
+      full: 'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json',
+      regular: 'https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json'
     },
     {
-      full: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json',
-      regular: 'https://geo.datav.aliyun.com/areas_v3/bound/100000.json'
-    },
-    {
-      full: 'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
-      regular: 'https://fastly.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
-    },
-    {
+      // Use unpkg.com CDN
       full: 'https://unpkg.com/echarts@5.4.3/map/json/china.json',
       regular: 'https://unpkg.com/echarts@5.4.3/map/json/china.json'
     },
     {
-      full: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json',
-      regular: 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/map/json/china.json'
+      // Use jsDelivr with GitHub
+      full: 'https://cdn.jsdelivr.net/gh/apache/echarts@master/test/data/map/json/china.json',
+      regular: 'https://cdn.jsdelivr.net/gh/apache/echarts@master/test/data/map/json/china.json'
+    },
+    {
+      // Alternative GitHub mirror
+      full: 'https://ghproxy.com/https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json',
+      regular: 'https://ghproxy.com/https://raw.githubusercontent.com/apache/echarts/master/test/data/map/json/china.json'
+    },
+    {
+      // Statically.io CDN for GitHub
+      full: 'https://cdn.statically.io/gh/apache/echarts/master/test/data/map/json/china.json',
+      regular: 'https://cdn.statically.io/gh/apache/echarts/master/test/data/map/json/china.json'
     }
   ];
   
