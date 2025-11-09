@@ -886,12 +886,61 @@ Shanghai Innovation Institute</span>
       </p>
     </div>
 
-    <!-- GitHub Example Image -->
+    <!-- GitHub Example Images -->
     <div class="overview-container" style="margin-top: 1rem;">
-      <figure class="image" style="max-width: 50%; margin: 0 auto;">
-        <img src="static/images/github-ex.png" alt="LocalSearchBench GitHub Example" style="width: 100%; height: auto;">
-      </figure>
+      <div id="github-examples-container" style="display: flex; gap: 1rem; justify-content: center; align-items: stretch; flex-wrap: wrap;">
+        <figure class="image" style="flex: 1; min-width: 300px; max-width: 48%; margin: 0; display: flex; align-items: center; justify-content: center;">
+          <img id="github-ex-1" src="static/images/github-ex.png" alt="LocalSearchBench GitHub Example" style="width: 100%; height: auto; object-fit: contain; display: block;">
+        </figure>
+        <figure class="image" style="flex: 1; min-width: 300px; max-width: 48%; margin: 0; display: flex; align-items: center; justify-content: center;">
+          <img id="github-ex-2" src="static/images/github-ex2.png" alt="LocalSearchBench GitHub Example 2" style="width: 100%; height: auto; object-fit: contain; display: block;">
+        </figure>
+      </div>
     </div>
+    <script>
+      // Ensure both GitHub example images have the same height
+      (function() {
+        const img1 = document.getElementById('github-ex-1');
+        const img2 = document.getElementById('github-ex-2');
+        
+        function setEqualHeight() {
+          if (img1 && img2) {
+            // Wait a bit for images to render
+            setTimeout(function() {
+              const height1 = img1.offsetHeight;
+              const height2 = img2.offsetHeight;
+              const maxHeight = Math.max(height1, height2);
+              
+              if (maxHeight > 0) {
+                // Set both images to the same height, width auto to maintain aspect ratio
+                img1.style.height = maxHeight + 'px';
+                img2.style.height = maxHeight + 'px';
+                img1.style.width = 'auto';
+                img2.style.width = 'auto';
+              }
+            }, 100);
+          }
+        }
+        
+        // Wait for both images to load
+        let loadedCount = 0;
+        function onImageLoad() {
+          loadedCount++;
+          if (loadedCount === 2) {
+            setEqualHeight();
+          }
+        }
+        
+        if (img1 && img2) {
+          if (img1.complete && img2.complete) {
+            setEqualHeight();
+          } else {
+            img1.addEventListener('load', onImageLoad);
+            img2.addEventListener('load', onImageLoad);
+          }
+        }
+      })();
+    </script>
   </div>
 </section>
 <!-- End Overview -->
