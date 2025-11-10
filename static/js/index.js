@@ -241,7 +241,7 @@ function loadExample(index) {
             prefix = 'web';
         } else if (tabText.includes('Agentic Search')) {
             prefix = 'agentic';
-        } else if (tabText.includes('RAG Search')) {
+        } else if (tabText.includes('LocalRAG Search')) {
             prefix = 'rag';
         }
     }
@@ -325,18 +325,14 @@ async function runRAG() {
         // Check if it's a network error
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             const errorMsg = `
-🚧 RAG 服务器未连接
+🚧 LocalRAG 服务器未连接
 
 快速开始指南:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1️⃣ 本地测试（推荐）
    cd server && ./deploy.sh --dev
 
-2️⃣ 使用 Gradio 版本
-   ./run_gradio.sh
-   
-3️⃣ 使用在线演示
-   访问 Hugging Face Space (见项目 README)
+
 
 详细文档: 
 📖 QUICK_START.md - 5分钟快速开始
