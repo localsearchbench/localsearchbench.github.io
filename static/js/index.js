@@ -328,8 +328,8 @@ async function runRAG() {
 🚧 LocalRAG 服务器未连接
 LocalRAG Server Not Connected
 
-支持时间: 工作日10:00-21:00
-Support Hours: Weekdays 10:00-21:00
+支持时间: 工作日10:30-21:00
+Support Hours: Weekdays 10:30-21:00
 
 提示: 这是一个需要后端支持的交互式演示。
 您可以查看页面其他部分了解 LocalSearchBench！
