@@ -326,21 +326,15 @@ async function runRAG() {
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             const errorMsg = `
 🚧 LocalRAG 服务器未连接
+LocalRAG Server Not Connected
 
-快速开始指南:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1️⃣ 本地测试（推荐）
-   cd server && ./deploy.sh --dev
-
-
-
-详细文档: 
-📖 QUICK_START.md - 5分钟快速开始
-📖 DEPLOYMENT.md - 完整部署指南
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+支持时间: 工作日10:00-21:00
+Support Hours: Weekdays 10:00-21:00
 
 提示: 这是一个需要后端支持的交互式演示。
 您可以查看页面其他部分了解 LocalSearchBench！
+Tip: This is an interactive demo that requires backend support.
+You can explore other parts of the page to learn about LocalSearchBench!
             `.trim();
             alert(errorMsg);
         } else {
