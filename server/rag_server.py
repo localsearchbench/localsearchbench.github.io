@@ -65,13 +65,13 @@ app.add_middleware(
 class RAGSearchRequest(BaseModel):
     query: str
     city: str = "上海"  # 支持的城市（中文）
-    top_k: int = 10  # 最终返回10个结果
+    top_k: int = 5  # 最终返回5个结果
     retriever: str = "qwen3-embedding-8b"  # 默认使用 Qwen3-Embedding-8B
     reranker: str = "qwen3-reranker-8b"    # 默认使用 Qwen3-Reranker-8B
 
 class WebSearchRequest(BaseModel):
     query: str
-    top_k: int = 10
+    top_k: int = 5
 
 class AgenticSearchRequest(BaseModel):
     query: str

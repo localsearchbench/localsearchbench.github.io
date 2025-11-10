@@ -54,7 +54,7 @@ curl -X POST http://localhost:8000/search \
   -d '{
     "query": "推荐一家火锅店",
     "city": "shanghai",
-    "top_k": 10
+    "top_k": 5
   }'
 ```
 
