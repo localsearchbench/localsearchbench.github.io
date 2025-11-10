@@ -1066,3 +1066,120 @@ async function checkServerConnection() {
     }
 }
 
+// Custom Select with Model Logos
+document.addEventListener('DOMContentLoaded', function() {
+    const customSelect = document.getElementById('agentic-model-select');
+    if (!customSelect) return;
+    
+    const trigger = customSelect.querySelector('.custom-select-trigger');
+    const options = customSelect.querySelectorAll('.custom-select-option');
+    const hiddenSelect = document.getElementById('agentic-model');
+    
+    // Model logo mapping
+    const modelLogos = {
+        'gpt-4.1': 'static/images/logo/icon-chatgpt (1).png',
+        'gemini-2.5-pro': 'static/images/logo/google.png',
+        'qwen-plus-latest': 'static/images/logo/qwen.png',
+        'longcat-large-32k': 'static/images/logo/longcat.png',
+        'hunyuan-t1': 'static/images/logo/ai_hunyuan.png',
+        'qwen3-235b-a22b': 'static/images/logo/qwen.png',
+        'qwen3-32b': 'static/images/logo/qwen.png',
+        'qwen3-14b': 'static/images/logo/qwen.png',
+        'glm-4.5': 'static/images/logo/logo_chatglm.png',
+        'deepseek-v3.1': 'static/images/logo/deepseek.png'
+    };
+    
+    // Model name mapping
+    const modelNames = {
+        'gpt-4.1': 'GPT-4.1',
+        'gemini-2.5-pro': 'Gemini-2.5-Pro',
+        'qwen-plus-latest': 'Qwen-Plus-Latest',
+        'longcat-large-32k': 'LongCat-Large-32K',
+        'hunyuan-t1': 'Hunyuan-T1',
+        'qwen3-235b-a22b': 'Qwen3-235B-A22B',
+        'qwen3-32b': 'Qwen3-32B',
+        'qwen3-14b': 'Qwen3-14B',
+        'glm-4.5': 'GLM-4.5',
+        'deepseek-v3.1': 'Deepseek-V3.1'
+    };
+    
+    // Initialize selected option
+    const selectedOption = customSelect.querySelector('.custom-select-option[data-selected="true"]');
+    if (selectedOption) {
+        const value = selectedOption.getAttribute('data-value');
+        updateTrigger(value);
+        selectedOption.classList.add('selected');
+    } else if (hiddenSelect.value) {
+        // Fallback: use hidden select value
+        const value = hiddenSelect.value;
+        updateTrigger(value);
+        const option = customSelect.querySelector(`.custom-select-option[data-value="${value}"]`);
+        if (option) {
+            option.classList.add('selected');
+        }
+    }
+    
+    // Toggle dropdown
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        customSelect.classList.toggle('active');
+    });
+    
+    // Handle option selection
+    options.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const value = this.getAttribute('data-value');
+            
+            // Update hidden select
+            hiddenSelect.value = value;
+            
+            // Update trigger
+            updateTrigger(value);
+            
+            // Update selected state
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            // Close dropdown
+            customSelect.classList.remove('active');
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!customSelect.contains(e.target)) {
+            customSelect.classList.remove('active');
+        }
+    });
+    
+    // Update trigger display
+    function updateTrigger(value) {
+        const logoImg = trigger.querySelector('.model-logo-select');
+        const nameSpan = trigger.querySelector('span');
+        
+        if (logoImg && modelLogos[value]) {
+            logoImg.src = modelLogos[value];
+            logoImg.alt = modelNames[value] || value;
+        }
+        
+        if (nameSpan && modelNames[value]) {
+            nameSpan.textContent = modelNames[value];
+        }
+    }
+    
+    // Sync with hidden select changes (if changed programmatically)
+    hiddenSelect.addEventListener('change', function() {
+        const value = this.value;
+        updateTrigger(value);
+        
+        // Update selected state
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.getAttribute('data-value') === value) {
+                opt.classList.add('selected');
+            }
+        });
+    });
+});
+

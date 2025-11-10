@@ -711,22 +711,73 @@ Shanghai Innovation Institute</span>
           <div class="field">
             <label class="label">LRM Model</label>
             <div class="control">
-              <div class="select is-fullwidth">
-                <select id="agentic-model">
-                  <optgroup label="Proprietary LRMs">
-                    <option value="gpt-4.1">🟢 GPT-4.1</option>
-                    <option value="gemini-2.5-pro">🔵 Gemini-2.5-Pro</option>
-                    <option value="qwen-plus-latest">🔮 Qwen-Plus-Latest</option>
-                    <option value="longcat-large-32k">🟢 LongCat-Large-32K</option>
-                    <option value="hunyuan-t1">Hunyuan-T1</option>
-                  </optgroup>
-                  <optgroup label="Open-source LRMs">
-                    <option value="qwen3-235b-a22b">🔮 Qwen3-235B-A22B</option>
-                    <option value="qwen3-32b">🔮 Qwen3-32B</option>
-                    <option value="qwen3-14b">🔮 Qwen3-14B</option>
-                    <option value="glm-4.5">🔵 GLM-4.5</option>
-                    <option value="deepseek-v3.1" selected>🔷 Deepseek-V3.1</option>
-                  </optgroup>
+              <div class="custom-select-wrapper is-fullwidth">
+                <div class="custom-select" id="agentic-model-select">
+                  <div class="custom-select-trigger">
+                    <img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo-select">
+                    <span>Deepseek-V3.1</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                  <div class="custom-select-options">
+                    <div class="custom-select-group">
+                      <div class="custom-select-group-label">Proprietary LRMs</div>
+                      <div class="custom-select-option" data-value="gpt-4.1">
+                        <img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo-select">
+                        <span>GPT-4.1</span>
+                      </div>
+                      <div class="custom-select-option" data-value="gemini-2.5-pro">
+                        <img src="static/images/logo/google.png" alt="Gemini" class="model-logo-select">
+                        <span>Gemini-2.5-Pro</span>
+                      </div>
+                      <div class="custom-select-option" data-value="qwen-plus-latest">
+                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
+                        <span>Qwen-Plus-Latest</span>
+                      </div>
+                      <div class="custom-select-option" data-value="longcat-large-32k">
+                        <img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo-select">
+                        <span>LongCat-Large-32K</span>
+                      </div>
+                      <div class="custom-select-option" data-value="hunyuan-t1">
+                        <img src="static/images/logo/ai_hunyuan.png" alt="Hunyuan" class="model-logo-select">
+                        <span>Hunyuan-T1</span>
+                      </div>
+                    </div>
+                    <div class="custom-select-group">
+                      <div class="custom-select-group-label">Open-source LRMs</div>
+                      <div class="custom-select-option" data-value="qwen3-235b-a22b">
+                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
+                        <span>Qwen3-235B-A22B</span>
+                      </div>
+                      <div class="custom-select-option" data-value="qwen3-32b">
+                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
+                        <span>Qwen3-32B</span>
+                      </div>
+                      <div class="custom-select-option" data-value="qwen3-14b">
+                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
+                        <span>Qwen3-14B</span>
+                      </div>
+                      <div class="custom-select-option" data-value="glm-4.5">
+                        <img src="static/images/logo/logo_chatglm.png" alt="ChatGLM" class="model-logo-select">
+                        <span>GLM-4.5</span>
+                      </div>
+                      <div class="custom-select-option" data-value="deepseek-v3.1" data-selected="true">
+                        <img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo-select">
+                        <span>Deepseek-V3.1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <select id="agentic-model" style="display: none;">
+                  <option value="gpt-4.1">GPT-4.1</option>
+                  <option value="gemini-2.5-pro">Gemini-2.5-Pro</option>
+                  <option value="qwen-plus-latest">Qwen-Plus-Latest</option>
+                  <option value="longcat-large-32k">LongCat-Large-32K</option>
+                  <option value="hunyuan-t1">Hunyuan-T1</option>
+                  <option value="qwen3-235b-a22b">Qwen3-235B-A22B</option>
+                  <option value="qwen3-32b">Qwen3-32B</option>
+                  <option value="qwen3-14b">Qwen3-14B</option>
+                  <option value="glm-4.5">GLM-4.5</option>
+                  <option value="deepseek-v3.1" selected>Deepseek-V3.1</option>
                 </select>
               </div>
             </div>
