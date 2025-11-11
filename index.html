@@ -462,12 +462,6 @@ Shanghai Innovation Institute</span>
                 <span>LocalRAG Search</span>
               </a>
             </li>
-            <li data-tab="agentic">
-              <a onclick="switchTool('agentic')">
-                <span class="icon is-small"><i class="fas fa-robot"></i></span>
-                <span>Agentic Search</span>
-              </a>
-            </li>
           </ul>
         </div>
       </div>
@@ -606,17 +600,17 @@ Shanghai Innovation Institute</span>
                     </select>
             </div>
           </div>
-              </div>
-            </div>
-            <div class="column is-8">
-              <div class="field">
-                <label class="label">Location (位置)</label>
-                <div class="control">
-                  <input class="input" type="text" id="web-location" placeholder="e.g., 外滩, 五道口, 天河区">
-                </div>
-              </div>
             </div>
           </div>
+            <div class="column is-8">
+          <div class="field">
+                <label class="label">Location (位置)</label>
+            <div class="control">
+                  <input class="input" type="text" id="web-location" placeholder="e.g., 外滩, 五道口, 天河区">
+            </div>
+          </div>
+        </div>
+      </div>
 
           <div class="field">
             <label class="label">Query (查询内容)</label>
@@ -624,13 +618,13 @@ Shanghai Innovation Institute</span>
               <textarea class="textarea" id="web-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
             </div>
           </div>
-          
+
           <div class="field">
             <label class="label">Top-K Results</label>
             <div class="control">
               <input class="input" type="number" id="web-topk" value="5" min="1" max="50">
+              </div>
             </div>
-          </div>
           <div class="field">
             <div class="control">
               <button class="button is-primary is-fullwidth" onclick="runWebSearch()">
@@ -652,158 +646,6 @@ Shanghai Innovation Institute</span>
             <!-- Collapsible results content -->
             <div id="web-results-content">
               <div class="search-results" id="web-search-results"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Agentic Search Panel -->
-      <div class="tool-panel" id="agentic-panel">
-        <div class="panel-content">
-          <div class="notification is-info is-light">
-            <p><strong>Agentic Search</strong> uses LRM agents to perform multi-step reasoning and tool use.</p>
-          </div>
-          
-          <!-- City and Location Selection -->
-          <div class="columns">
-            <div class="column is-4">
-          <div class="field">
-                <label class="label">City (城市)</label>
-            <div class="control">
-                  <div class="select is-fullwidth">
-                    <select id="agentic-city">
-                      <option value="shanghai">上海 Shanghai</option>
-                      <option value="beijing">北京 Beijing</option>
-                      <option value="guangzhou">广州 Guangzhou</option>
-                      <option value="shenzhen">深圳 Shenzhen</option>
-                      <option value="hangzhou">杭州 Hangzhou</option>
-                      <option value="suzhou">苏州 Suzhou</option>
-                      <option value="chengdu">成都 Chengdu</option>
-                      <option value="chongqing">重庆 Chongqing</option>
-                      <option value="wuhan">武汉 Wuhan</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="column is-8">
-              <div class="field">
-                <label class="label">Location (位置)</label>
-                <div class="control">
-                  <input class="input" type="text" id="agentic-location" placeholder="e.g., 外滩, 五道口, 天河区">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">Query (查询内容)</label>
-            <div class="control">
-              <textarea class="textarea" id="agentic-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">LRM Model</label>
-            <div class="control">
-              <div class="custom-select-wrapper is-fullwidth">
-                <div class="custom-select" id="agentic-model-select">
-                  <div class="custom-select-trigger">
-                    <img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo-select">
-                    <span>Deepseek-V3.1</span>
-                    <i class="fas fa-chevron-down"></i>
-                  </div>
-                  <div class="custom-select-options">
-                    <div class="custom-select-group">
-                      <div class="custom-select-group-label">Proprietary LRMs</div>
-                      <div class="custom-select-option" data-value="gpt-4.1">
-                        <img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo-select">
-                        <span>GPT-4.1</span>
-                      </div>
-                      <div class="custom-select-option" data-value="gemini-2.5-pro">
-                        <img src="static/images/logo/google.png" alt="Gemini" class="model-logo-select">
-                        <span>Gemini-2.5-Pro</span>
-                      </div>
-                      <div class="custom-select-option" data-value="qwen-plus-latest">
-                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
-                        <span>Qwen-Plus-Latest</span>
-                      </div>
-                      <div class="custom-select-option" data-value="longcat-large-32k">
-                        <img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo-select">
-                        <span>LongCat-Large-32K</span>
-                      </div>
-                      <div class="custom-select-option" data-value="hunyuan-t1">
-                        <img src="static/images/logo/ai_hunyuan.png" alt="Hunyuan" class="model-logo-select">
-                        <span>Hunyuan-T1</span>
-                      </div>
-                    </div>
-                    <div class="custom-select-group">
-                      <div class="custom-select-group-label">Open-source LRMs</div>
-                      <div class="custom-select-option" data-value="qwen3-235b-a22b">
-                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
-                        <span>Qwen3-235B-A22B</span>
-                      </div>
-                      <div class="custom-select-option" data-value="qwen3-32b">
-                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
-                        <span>Qwen3-32B</span>
-                      </div>
-                      <div class="custom-select-option" data-value="qwen3-14b">
-                        <img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo-select">
-                        <span>Qwen3-14B</span>
-                      </div>
-                      <div class="custom-select-option" data-value="glm-4.5">
-                        <img src="static/images/logo/logo_chatglm.png" alt="ChatGLM" class="model-logo-select">
-                        <span>GLM-4.5</span>
-                      </div>
-                      <div class="custom-select-option" data-value="deepseek-v3.1" data-selected="true">
-                        <img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo-select">
-                        <span>Deepseek-V3.1</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <select id="agentic-model" style="display: none;">
-                  <option value="gpt-4.1">GPT-4.1</option>
-                  <option value="gemini-2.5-pro">Gemini-2.5-Pro</option>
-                  <option value="qwen-plus-latest">Qwen-Plus-Latest</option>
-                  <option value="longcat-large-32k">LongCat-Large-32K</option>
-                    <option value="hunyuan-t1">Hunyuan-T1</option>
-                  <option value="qwen3-235b-a22b">Qwen3-235B-A22B</option>
-                  <option value="qwen3-32b">Qwen3-32B</option>
-                  <option value="qwen3-14b">Qwen3-14B</option>
-                  <option value="glm-4.5">GLM-4.5</option>
-                  <option value="deepseek-v3.1" selected>Deepseek-V3.1</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="field">
-            <div class="control">
-              <button class="button is-primary is-fullwidth" onclick="runAgenticSearch()">
-                <span class="icon"><i class="fas fa-play"></i></span>
-                <span>Run Agentic Search</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Results Area -->
-          <div class="results-area" id="agentic-results" style="display: none;">
-            <!-- Results header with collapse button -->
-            <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h4 class="subtitle is-6" style="margin-bottom: 0;">Search Results</h4>
-              <button class="button is-small" onclick="toggleAgenticResults()" id="agentic-toggle-btn">
-                <span class="icon"><i class="fas fa-chevron-up"></i></span>
-                <span>Collapse</span>
-              </button>
-            </div>
-            <!-- Collapsible results content -->
-            <div id="agentic-results-content">
-              <h4 class="subtitle is-6">Search Process</h4>
-              <div class="search-process" id="search-process"></div>
-              
-              <h4 class="subtitle is-6" style="margin-top: 1.5rem;">Final Answer</h4>
-              <div class="generated-answer" id="agentic-answer"></div>
             </div>
           </div>
         </div>
@@ -925,7 +767,7 @@ Shanghai Innovation Institute</span>
     <!-- Multi-hop Query Example Description -->
     <div class="content has-text-justified" style="margin-top: 2rem;">
       <p style="text-align: justify;">
-        Based on the above database, we construct <strong>900 multi-hop QA tasks</strong> with difficulty levels ranging from <strong>L3 to L4</strong>, comprising <strong>100 QA tasks per city</strong>. These tasks involve <strong>3-5 hops</strong> and support both <strong>web search</strong> and <strong>LocalRAG search</strong>. They are designed to challenge agents' ability to perform complex reasoning and multi-step retrieval across diverse local service scenarios.
+        Based on the above merchant database, we construct <strong>900 multi-hop QA tasks</strong> with difficulty levels ranging from <strong>L3 to L4</strong>, comprising <strong>100 QA tasks per city</strong>. These tasks involve <strong>3-5 hops</strong> and support both <strong>web search</strong> and <strong>LocalRAG search</strong>. They are designed to challenge agents' ability to perform complex reasoning and multi-step retrieval across diverse local service scenarios.
       </p>
       <p style="text-align: justify; margin-top: 1rem;">
         The following examples illustrate Multi-hop QA tasks from our benchmark, demonstrating how the system performs iterative retrieval across multiple rounds to fulfill complex planning requirements.
