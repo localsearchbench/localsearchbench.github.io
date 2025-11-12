@@ -450,12 +450,6 @@ Shanghai Innovation Institute</span>
         <h3 class="subtitle is-5">Select Search Method</h3>
         <div class="tabs is-centered is-boxed">
           <ul>
-            <li data-tab="web">
-              <a onclick="switchTool('web')">
-                <span class="icon is-small"><i class="fas fa-globe"></i></span>
-                <span>Web Search</span>
-              </a>
-            </li>
             <li class="is-active" data-tab="rag">
               <a onclick="switchTool('rag')">
                 <span class="icon is-small"><i class="fas fa-search"></i></span>
@@ -573,83 +567,6 @@ Shanghai Innovation Institute</span>
         </div>
       </div>
 
-      <!-- Web Search Panel -->
-      <div class="tool-panel" id="web-panel">
-        <div class="panel-content">
-          <div class="notification is-info is-light">
-            <p><strong>Web Search</strong> performs traditional keyword-based search across local merchants and products.</p>
-          </div>
-          
-          <!-- City and Location Selection -->
-          <div class="columns">
-            <div class="column is-4">
-          <div class="field">
-                <label class="label">City (城市)</label>
-            <div class="control">
-                  <div class="select is-fullwidth">
-                    <select id="web-city">
-                      <option value="shanghai">上海 Shanghai</option>
-                      <option value="beijing">北京 Beijing</option>
-                      <option value="guangzhou">广州 Guangzhou</option>
-                      <option value="shenzhen">深圳 Shenzhen</option>
-                      <option value="hangzhou">杭州 Hangzhou</option>
-                      <option value="suzhou">苏州 Suzhou</option>
-                      <option value="chengdu">成都 Chengdu</option>
-                      <option value="chongqing">重庆 Chongqing</option>
-                      <option value="wuhan">武汉 Wuhan</option>
-                    </select>
-            </div>
-          </div>
-            </div>
-          </div>
-            <div class="column is-8">
-          <div class="field">
-                <label class="label">Location (位置)</label>
-            <div class="control">
-                  <input class="input" type="text" id="web-location" placeholder="e.g., 外滩, 五道口, 天河区">
-            </div>
-          </div>
-        </div>
-      </div>
-
-          <div class="field">
-            <label class="label">Query (查询内容)</label>
-            <div class="control">
-              <textarea class="textarea" id="web-query" placeholder="e.g., 有哪些评分高的火锅店"></textarea>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">Top-K Results</label>
-            <div class="control">
-              <input class="input" type="number" id="web-topk" value="5" min="1" max="50">
-              </div>
-            </div>
-          <div class="field">
-            <div class="control">
-              <button class="button is-primary is-fullwidth" onclick="runWebSearch()">
-                <span class="icon"><i class="fas fa-play"></i></span>
-                <span>Run Web Search</span>
-              </button>
-            </div>
-          </div>
-          <!-- Results Area -->
-          <div class="results-area" id="web-results" style="display: none;">
-            <!-- Results header with collapse button -->
-            <div class="results-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h4 class="subtitle is-6" style="margin-bottom: 0;">Search Results</h4>
-              <button class="button is-small" onclick="toggleWebResults()" id="web-toggle-btn">
-                <span class="icon"><i class="fas fa-chevron-up"></i></span>
-                <span>Collapse</span>
-              </button>
-            </div>
-            <!-- Collapsible results content -->
-            <div id="web-results-content">
-              <div class="search-results" id="web-search-results"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Example Queries -->
