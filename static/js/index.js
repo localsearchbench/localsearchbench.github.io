@@ -373,7 +373,10 @@ async function callRAGAPI(query, city, topK, retriever, reranker) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
         },
+        cache: 'no-cache',
         body: JSON.stringify(requestBody)
     });
     
@@ -1037,7 +1040,10 @@ async function checkServerConnection() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
             },
+            cache: 'no-cache',
             signal: controller.signal
         });
         
