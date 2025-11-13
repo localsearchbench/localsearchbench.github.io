@@ -484,11 +484,20 @@ code {
 
 /* 折叠按钮箭头动画 */
 .toggle-btn .icon i {
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease !important;
 }
 
 .toggle-btn.collapsed .icon i {
-  transform: rotate(180deg);
+  transform: rotate(180deg) !important;
+}
+
+/* 确保按钮箭头动画生效 */
+#rag-toggle-btn .icon i {
+  transition: transform 0.3s ease !important;
+}
+
+#rag-toggle-btn.collapsed .icon i {
+  transform: rotate(180deg) !important;
 }
 
 /* More Works Dropdown */
