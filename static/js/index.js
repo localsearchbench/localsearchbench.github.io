@@ -1,5 +1,29 @@
 window.HELP_IMPROVE_VIDEOJS = false;
 
+/**
+ * 设置按钮加载状态，根据高峰期显示不同提示
+ */
+function setButtonLoadingState(button) {
+    const originalHTML = button.innerHTML;
+    
+    // Check if it's peak hours (10:30-21:00 Beijing time)
+    const now = new Date();
+    const beijingTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"}));
+    const hour = beijingTime.getHours();
+    const minute = beijingTime.getMinutes();
+    const currentTime = hour * 100 + minute;
+    const isPeakHour = currentTime >= 1030 && currentTime <= 2100;
+    
+    if (isPeakHour) {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>当前在高峰期，请耐心等待...</span>';
+    } else {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Processing...</span>';
+    }
+    button.disabled = true;
+    
+    return originalHTML;
+}
+
 // More Works Dropdown Functionality
 function toggleMoreWorks() {
     const dropdown = document.getElementById('moreWorksDropdown');
@@ -306,10 +330,23 @@ async function runRAG() {
     console.log('Query Content:', queryContent);
     console.log('Full Query:', fullQuery);
     
-    // Show loading state
+    // Show loading state with peak hour message
     const button = event.target.closest('button');
     const originalHTML = button.innerHTML;
-    button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    
+    // Check if it's peak hours (10:30-21:00 Beijing time)
+    const now = new Date();
+    const beijingTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"}));
+    const hour = beijingTime.getHours();
+    const minute = beijingTime.getMinutes();
+    const currentTime = hour * 100 + minute;
+    const isPeakHour = currentTime >= 1030 && currentTime <= 2100;
+    
+    if (isPeakHour) {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>当前在高峰期，请耐心等待...</span>';
+    } else {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    }
     button.disabled = true;
     
     try {
@@ -633,10 +670,23 @@ async function runWebSearch() {
     console.log('Web Search - Query Content:', queryContent);
     console.log('Web Search - Full Query:', fullQuery);
     
-    // Show loading state
+    // Show loading state with peak hour message
     const button = event.target.closest('button');
     const originalHTML = button.innerHTML;
-    button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    
+    // Check if it's peak hours (10:30-21:00 Beijing time)
+    const now = new Date();
+    const beijingTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"}));
+    const hour = beijingTime.getHours();
+    const minute = beijingTime.getMinutes();
+    const currentTime = hour * 100 + minute;
+    const isPeakHour = currentTime >= 1030 && currentTime <= 2100;
+    
+    if (isPeakHour) {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>当前在高峰期，请耐心等待...</span>';
+    } else {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    }
     button.disabled = true;
     
     try {
@@ -683,10 +733,23 @@ async function runAgenticSearch() {
     console.log('Agentic Search - Query Content:', queryContent);
     console.log('Agentic Search - Full Query:', fullQuery);
     
-    // Show loading state
+    // Show loading state with peak hour message
     const button = event.target.closest('button');
     const originalHTML = button.innerHTML;
-    button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    
+    // Check if it's peak hours (10:30-21:00 Beijing time)
+    const now = new Date();
+    const beijingTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Shanghai"}));
+    const hour = beijingTime.getHours();
+    const minute = beijingTime.getMinutes();
+    const currentTime = hour * 100 + minute;
+    const isPeakHour = currentTime >= 1030 && currentTime <= 2100;
+    
+    if (isPeakHour) {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>当前在高峰期，请耐心等待...</span>';
+    } else {
+        button.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Running...</span>';
+    }
     button.disabled = true;
     
     try {
