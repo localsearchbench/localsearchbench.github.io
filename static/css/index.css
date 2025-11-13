@@ -482,22 +482,14 @@ code {
   box-shadow: var(--shadow-md);
 }
 
-/* 折叠按钮箭头动画 */
-.toggle-btn .icon i {
-  transition: transform 0.3s ease !important;
+/* 折叠按钮箭头动画（模仿 More Works） */
+.toggle-btn .toggle-arrow {
+  transition: transform 0.3s ease;
+  font-size: 0.8rem;
 }
 
-.toggle-btn.collapsed .icon i {
-  transform: rotate(180deg) !important;
-}
-
-/* 确保按钮箭头动画生效 */
-#rag-toggle-btn .icon i {
-  transition: transform 0.3s ease !important;
-}
-
-#rag-toggle-btn.collapsed .icon i {
-  transform: rotate(180deg) !important;
+.toggle-btn.collapsed .toggle-arrow {
+  transform: rotate(180deg);
 }
 
 /* More Works Dropdown */
