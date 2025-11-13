@@ -1,7 +1,7 @@
 {
-  "rag_server_url": "https://elementary-louisiana-contribute-computed.trycloudflare.com",
+  "rag_server_url": "https://port-festival-conducting-cookies.trycloudflare.com",
   "tunnel_type": "temporary",
-  "updated_at": "2025-11-13T07:24:44Z",
-  "target": "http://localhost:8000",
-  "pid": 46878
+  "updated_at": "2025-11-13T07:45:12Z",
+  "target": "http://10.148.24.17:8000",
+  "pid": 67267
 }
