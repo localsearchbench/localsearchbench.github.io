@@ -27,21 +27,21 @@ function setButtonLoadingState(button) {
 /**
  * 切换折叠/展开状态
  */
-function toggleCollapse(collapseId, button) {
-    const collapseDiv = document.getElementById(collapseId);
+function toggleFold(foldId, button) {
+    const foldDiv = document.getElementById(foldId);
     const icon = button.querySelector('i');
     const textSpan = button.querySelector('span:last-child');
     
-    if (collapseDiv.style.display === 'none') {
+    if (foldDiv.style.display === 'none') {
         // 展开
-        collapseDiv.style.display = 'block';
+        foldDiv.style.display = 'block';
         icon.className = 'fas fa-chevron-up';
         textSpan.textContent = '收起';
     } else {
         // 收起
-        collapseDiv.style.display = 'none';
+        foldDiv.style.display = 'none';
         icon.className = 'fas fa-chevron-down';
-        const hiddenCount = collapseDiv.children.length;
+        const hiddenCount = foldDiv.children.length;
         textSpan.textContent = `显示更多 (${hiddenCount} 个)`;
     }
 }
@@ -617,10 +617,10 @@ function displayRAGResults(response) {
                 // 检查数组中是否包含对象
                 if (value.some(item => typeof item === 'object' && item !== null)) {
                     // 对于对象数组，使用卡片式展示，支持折叠
-                    const shouldCollapse = (key === 'products' || key === 'group_deals') && value.length > 5;
-                    const visibleItems = shouldCollapse ? value.slice(0, 5) : value;
-                    const hiddenItems = shouldCollapse ? value.slice(5) : [];
-                    const collapseId = `collapse_${key}_${Math.random().toString(36).substr(2, 9)}`;
+                    const shouldFold = (key === 'products' || key === 'group_deals') && value.length > 5;
+                    const visibleItems = shouldFold ? value.slice(0, 5) : value;
+                    const hiddenItems = shouldFold ? value.slice(5) : [];
+                    const foldId = `fold_${key}_${Math.random().toString(36).substr(2, 9)}`;
                     
                     let html = '<div style="margin-top: 0.5rem;">';
                     
@@ -643,9 +643,9 @@ function displayRAGResults(response) {
                     }).join('');
                     
                     // 如果需要折叠，添加展开/收起功能
-                    if (shouldCollapse) {
+                    if (shouldFold) {
                         html += `
-                            <div id="${collapseId}" style="display: none;">
+                            <div id="${foldId}" style="display: none;">
                                 ${hiddenItems.map((item, idx) => {
                                     const entries = Object.entries(item);
                                     return `
@@ -664,7 +664,7 @@ function displayRAGResults(response) {
                                 }).join('')}
                             </div>
                             <div style="text-align: center; margin-top: 0.5rem;">
-                                <button class="button is-small is-light" onclick="toggleCollapse('${collapseId}', this)" style="font-size: 0.8rem;">
+                                <button class="button is-small is-light" onclick="toggleFold('${foldId}', this)" style="font-size: 0.8rem;">
                                     <span class="icon is-small"><i class="fas fa-chevron-down"></i></span>
                                     <span>显示更多 (${hiddenItems.length} 个)</span>
                                 </button>
