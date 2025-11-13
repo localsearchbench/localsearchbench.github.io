@@ -56,11 +56,11 @@ function updateLocationPlaceholder(cityValue) {
     // 城市对应的地点示例
     const cityLocationExamples = {
         'shanghai': '外滩, 陆家嘴, 徐家汇, 静安寺, 黄浦区',
-        'beijing': '五道口, 三里屯, 国贸, 王府井',
-        'guangzhou': '天河区, 珠江新城, 北京路, 上下九',
-        'shenzhen': '南山区, 福田区, 罗湖区, 宝安区',
-        'hangzhou': '西湖区, 滨江区, 拱墅区, 江干区',
-        'suzhou': '姑苏区, 工业园区, 吴中区, 相城区',
+        'beijing': '五道口, 三里屯, 国贸, 王府井, 海淀区',
+        'guangzhou': '广州塔, 天河区, 珠江新城, 北京路, 上下九',
+        'shenzhen': '深圳湾公园, 南山区, 福田区, 罗湖区, 宝安区',
+        'hangzhou': '钱江世纪城, 西湖区, 滨江区, 拱墅区, 江干区',
+        'suzhou': '东方之门,姑苏区, 工业园区, 吴中区, 相城区',
         'chengdu': '春熙路, 宽窄巷子, 锦里, 太古里, 锦江区',
         'chongqing': '解放碑, 观音桥, 南坪, 沙坪坝',
         'wuhan': '武昌站, 汉口站, 光谷, 江汉路'
