@@ -46,7 +46,31 @@ function toggleCollapse(collapseId, button) {
     }
 }
 
-// More Works Dropdown Functionality
+/**
+ * 根据选择的城市更新位置输入框的 placeholder
+ */
+function updateLocationPlaceholder(cityValue) {
+    const locationInput = document.getElementById('rag-location');
+    if (!locationInput) return;
+    
+    // 城市对应的地点示例
+    const cityLocationExamples = {
+        'shanghai': '外滩, 陆家嘴, 徐家汇, 静安寺, 黄浦区',
+        'beijing': '五道口, 三里屯, 国贸, 王府井',
+        'guangzhou': '天河区, 珠江新城, 北京路, 上下九',
+        'shenzhen': '南山区, 福田区, 罗湖区, 宝安区',
+        'hangzhou': '西湖区, 滨江区, 拱墅区, 江干区',
+        'suzhou': '姑苏区, 工业园区, 吴中区, 相城区',
+        'chengdu': '春熙路, 宽窄巷子, 锦里, 太古里, 锦江区',
+        'chongqing': '解放碑, 观音桥, 南坪, 沙坪坝',
+        'wuhan': '武昌站, 汉口站, 光谷, 江汉路'
+    };
+    
+    const examples = cityLocationExamples[cityValue] || '外滩, 五道口, 天河区';
+    locationInput.placeholder = `e.g., ${examples}`;
+}
+
+    // More Works Dropdown Functionality
 function toggleMoreWorks() {
     const dropdown = document.getElementById('moreWorksDropdown');
     const button = document.querySelector('.more-works-btn');
@@ -70,6 +94,25 @@ document.addEventListener('click', function(event) {
         dropdown.classList.remove('show');
         button.classList.remove('active');
     }
+});
+
+// 页面加载完成后，为城市选择器添加事件监听
+document.addEventListener('DOMContentLoaded', function() {
+    // 为所有城市选择器添加事件监听
+    const citySelectors = ['rag-city', 'web-city', 'agentic-city'];
+    
+    citySelectors.forEach(selectorId => {
+        const citySelect = document.getElementById(selectorId);
+        if (citySelect) {
+            // 初始化时设置 placeholder
+            updateLocationPlaceholder(citySelect.value);
+            
+            // 监听城市选择变化
+            citySelect.addEventListener('change', function() {
+                updateLocationPlaceholder(this.value);
+            });
+        }
+    });
 });
 
 // Close dropdown on escape key
@@ -303,6 +346,9 @@ function loadExample(index) {
         citySelect.value = example.city;
         locationInput.value = example.location;
         queryInput.value = example.query;
+        
+        // 更新位置输入框的 placeholder
+        updateLocationPlaceholder(example.city);
         
         // Focus on the query input
         queryInput.focus();
