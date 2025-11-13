@@ -3,11 +3,12 @@ RAG Server - 部署在有 GPU 的服务器上
 支持 Web Search、RAG Search 和 Agentic Search
 
 运行方式：
-    python rag_server.py --port 8000 --host 0.0.0.0
+    python rag_server.py --port 8000 --host 0.0.0.0 --config /path/to/config.yaml
 
 环境变量配置：
     export OPENAI_API_KEY="your-key"
     export DASHSCOPE_API_KEY="your-key"  # 如果使用 Qwen 模型
+    export TUANSOU_CONFIG="/path/to/config.yaml"  # LLM 配置文件路径
 
 检索与重排策略：
     本服务器与 interactive_merchant_search_vllm.py 保持高度一致：
@@ -16,21 +17,33 @@ RAG Server - 部署在有 GPU 的服务器上
     - 重排序文本格式：name - category/subcategory - address + 地理位置（必须）+ 多个可选字段
     - 地理位置字段（必须参与重排）：city, district, business_area, landmark
     - subcategory 字段：如果存在，会拼接到 category 后面（格式：category/subcategory）
+
+LLM 精排（新增）：
+    - 在 rerank 后，使用 LLM 从 20 个候选中选出最终的 5 个结果
+    - 可通过请求参数 use_llm_ranking 控制是否启用（默认启用）
+    - LLM 会综合考虑用户查询意图、商户信息完整性、评分等因素
+    - 配置文件需包含 LLM API keys 和相关配置（参考 auto_rag_merchant_search.py）
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 import uvicorn
 import argparse
 import os
 import time
 from datetime import datetime
+from pathlib import Path
+import threading
 
 # 基础依赖
 import json
+import yaml
+import requests
 import numpy as np
+import aiohttp
+import asyncio
 
 # 如果使用 GPU 加载模型
 try:
@@ -68,6 +81,7 @@ class RAGSearchRequest(BaseModel):
     top_k: int = 5  # 最终返回5个结果
     retriever: str = "qwen3-embedding-8b"  # 默认使用 Qwen3-Embedding-8B
     reranker: str = "qwen3-reranker-8b"    # 默认使用 Qwen3-Reranker-8B
+    use_llm_ranking: bool = True  # 是否启用 LLM 精排（默认启用）
 
 class WebSearchRequest(BaseModel):
     query: str
@@ -192,16 +206,356 @@ class CityVectorDB:
         
         return results
 
+# ==================== LLM 精排器 ====================
+
+class LLMRanker:
+    """LLM 精排器：从 rerank 的候选中筛选出最终结果"""
+    
+    def __init__(self, config_path: Optional[str] = None):
+        self.config = self._load_config(config_path)
+        self.llm = self._init_llm_config()
+        self._api_keys: List[str] = self.llm.get("api_keys", [])
+        self._key_index = 0
+        # 延迟初始化锁，避免在事件循环外创建
+        self._key_lock = None
+        
+    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+        """加载配置文件"""
+        candidates: List[str] = []
+        
+        # 优先使用传入的路径
+        if config_path:
+            candidates.append(os.path.abspath(os.path.expanduser(config_path)))
+        
+        # 尝试环境变量
+        env_cfg = os.getenv("TUANSOU_CONFIG") or os.getenv("CONFIG_PATH")
+        if env_cfg:
+            candidates.append(os.path.abspath(os.path.expanduser(env_cfg)))
+        
+        # 硬编码的服务器配置文件路径（优先级高）
+        candidates.append("/mnt/dolphinfs/hdd_pool/docker/user/hadoop-mtsearch-assistant/ai-search/hehang03/config/config.yaml")
+        
+        # 尝试相对路径（Mac 本地开发）
+        candidates.append("config/config.yaml")
+        candidates.append("../config/config.yaml")
+        
+        for cfg_path in candidates:
+            if os.path.exists(cfg_path):
+                try:
+                    with open(cfg_path, "r", encoding="utf-8") as f:
+                        return yaml.safe_load(f)
+                except Exception as e:
+                    print(f"⚠️ Failed to load config from {cfg_path}: {e}")
+        
+        # 如果找不到配置文件，返回默认配置
+        print("⚠️ No config file found, using default LLM config")
+        return {}
+    
+    def _init_llm_config(self) -> Dict[str, Any]:
+        """初始化 LLM 配置"""
+        llm_config = self.config.get("llm", {})
+        defaults = {
+            "provider": "openai",
+            "model": "deepseek-v31-meituan",
+            "base_url": "https://aigc.sankuai.com/v1/openai/native",
+            "timeout": 300,
+            "max_retries": 3,
+            "temperature": 0.2,
+        }
+        for k, v in defaults.items():
+            llm_config.setdefault(k, v)
+        
+        # 获取 API Keys
+        api_keys = llm_config.get("api_keys") or []
+        if not api_keys:
+            env_key = os.getenv("OPENAI_API_KEY")
+            if env_key:
+                api_keys = [env_key]
+        
+        if not api_keys:
+            llm_config["enabled"] = False
+            print("⚠️ No API keys found, LLM ranking disabled")
+        else:
+            llm_config["api_keys"] = api_keys
+            llm_config["enabled"] = True
+            print(f"✅ LLM ranking enabled with {len(api_keys)} API key(s)")
+        
+        return llm_config
+    
+    def _next_key(self) -> Optional[str]:
+        """轮询获取下一个 API Key"""
+        if not self._api_keys:
+            return None
+        key = self._api_keys[self._key_index % len(self._api_keys)]
+        self._key_index += 1
+        return key
+    
+    async def select_top_k_async(
+        self, 
+        query: str, 
+        candidates: List[Dict[str, Any]], 
+        top_k: int = 5,
+        city: str = "上海"
+    ) -> List[Dict[str, Any]]:
+        """
+        使用 LLM 从候选中筛选出 top_k 个最相关的商户
+        
+        Args:
+            query: 用户查询
+            candidates: 候选商户列表（通常是 rerank 后的结果）
+            top_k: 返回结果数量
+            city: 城市名称
+            
+        Returns:
+            筛选后的商户列表
+        """
+        if not self.llm.get("enabled", False):
+            print("⚠️ LLM ranking disabled, returning top_k candidates as-is")
+            return candidates[:top_k]
+        
+        if len(candidates) <= top_k:
+            print(f"📋 Candidates count ({len(candidates)}) <= top_k ({top_k}), no LLM ranking needed")
+            return candidates
+        
+        try:
+            # 构建提示词
+            prompt = self._build_selection_prompt(query, candidates[:20], top_k, city)
+            
+            # 调用 LLM
+            content = await self._call_llm_async(prompt, temperature=0.0, max_tokens=8192)
+            
+            # 解析结果
+            selected_indices = self._parse_selection_result(content, len(candidates), top_k)
+            
+            # 根据索引返回结果
+            result = []
+            for idx in selected_indices:
+                if 0 <= idx < len(candidates):
+                    merchant = candidates[idx].copy()
+                    merchant['llm_selected'] = True
+                    merchant['llm_rank'] = len(result) + 1
+                    result.append(merchant)
+            
+            # 如果 LLM 成功解析但选择了较少的商户（包括0个），尊重这个判断
+            if len(selected_indices) > 0:
+                # LLM 成功返回了选择（即使少于 top_k）
+                print(f"✅ LLM selected {len(result)} merchants from {len(candidates)} candidates (requested: {top_k})")
+                return result if result else candidates[:min(1, len(candidates))]  # 至少返回1个，避免完全为空
+            else:
+                # LLM 返回空列表，说明没有符合条件的，但为了保证用户体验，返回top 1
+                print(f"⚠️ LLM returned empty selection, returning top 1 candidate")
+                return candidates[:min(1, len(candidates))]
+                
+        except Exception as e:
+            print(f"❌ LLM ranking error: {e}, falling back to top_k")
+            return candidates[:top_k]
+    
+    def _build_selection_prompt(
+        self, 
+        query: str, 
+        candidates: List[Dict[str, Any]], 
+        top_k: int,
+        city: str
+    ) -> str:
+        """构建 LLM 筛选提示词"""
+        # 格式化候选商户信息
+        formatted_candidates = []
+        for i, doc in enumerate(candidates, 0):
+            name = doc.get('name', '未知')
+            category = doc.get('category', '')
+            subcategory = doc.get('subcategory', '')
+            address = doc.get('address', '')
+            rating = doc.get('rating', '')
+            price = doc.get('price_range', '')
+            district = doc.get('district', '')
+            business_area = doc.get('business_area', '')
+            tags = doc.get('tags', [])
+            products = doc.get('products', '')
+            hours = doc.get('business_hours', '')
+            rerank_score = doc.get('rerank_score', 0)
+            
+            tags_str = ','.join(tags[:5]) if isinstance(tags, list) else str(tags)
+            cat_str = f"{category}/{subcategory}" if subcategory else category
+            
+            formatted_candidates.append(
+                f"{i}. 名称：{name} | 类别：{cat_str} | 地址：{address} | "
+                f"区域：{district} {business_area} | 评分：{rating} | 价格：{price} | "
+                f"标签：{tags_str} | 服务：{products} | 营业：{hours} | 重排分：{rerank_score:.4f}"
+            )
+        
+        candidates_text = '\n'.join(formatted_candidates)
+        
+        prompt = f"""任务：从下方候选商户中，筛选出真正符合用户查询需求的商户（最多 {top_k} 个）。
+
+用户查询：{query}
+城市：{city}
+
+候选商户（共 {len(candidates)} 个）：
+{candidates_text}
+
+筛选要求：
+1. **严格匹配**用户查询中的关键条件（如地点、价格、类型、特殊需求等）
+2. **只选择真正符合条件的商户**，不要为了凑数而选择不太相关的
+3. 优先选择评分高、信息完整、相关度高的商户
+4. 考虑重排分数（rerank_score）作为参考，但最终以用户需求为准
+5. 如果用户查询中提到具体区域/商圈，优先选择该区域的商户
+6. 确保选出的商户信息充分、不重复
+
+数量要求：
+- 最多选择 {top_k} 个商户
+- 如果只有 2 家真正符合条件，就只返回 2 家，不要凑数
+- 如果没有完全符合条件的，可以返回空列表
+
+输出格式：
+仅输出一个 JSON 对象，包含字段 "selected_indices"，值为选中的商户索引列表（0-based）。
+例如：
+- 5家符合：{{"selected_indices": [0, 3, 5, 8, 12]}}
+- 2家符合：{{"selected_indices": [0, 5]}}
+- 0家符合：{{"selected_indices": []}}
+
+注意：
+- 只输出 JSON，不要其他文字
+- selected_indices 必须是整数列表
+- 索引范围：0 到 {len(candidates)-1}
+- 宁缺毋滥，质量优先于数量
+"""
+        
+        return prompt
+    
+    def _parse_selection_result(
+        self, 
+        content: str, 
+        max_index: int, 
+        top_k: int
+    ) -> List[int]:
+        """解析 LLM 返回的选择结果"""
+        try:
+            # 尝试直接解析 JSON
+            data = json.loads(content)
+            if isinstance(data, dict) and "selected_indices" in data:
+                indices = data["selected_indices"]
+                if isinstance(indices, list):
+                    # 验证并过滤索引
+                    valid_indices = []
+                    for idx in indices:
+                        if isinstance(idx, int) and 0 <= idx < max_index:
+                            if idx not in valid_indices:  # 去重
+                                valid_indices.append(idx)
+                    return valid_indices[:top_k]
+        except json.JSONDecodeError:
+            pass
+        
+        # 如果 JSON 解析失败，尝试从文本中提取数字
+        import re
+        numbers = re.findall(r'\b(\d+)\b', content)
+        valid_indices = []
+        for num_str in numbers:
+            try:
+                idx = int(num_str)
+                if 0 <= idx < max_index and idx not in valid_indices:
+                    valid_indices.append(idx)
+                    if len(valid_indices) >= top_k:
+                        break
+            except ValueError:
+                continue
+        
+        if valid_indices:
+            return valid_indices
+        
+        # 如果完全失败，返回前 top_k 个索引
+        return list(range(min(top_k, max_index)))
+    
+    async def _call_llm_async(
+        self, 
+        prompt: str, 
+        temperature: float, 
+        max_tokens: int
+    ) -> str:
+        """异步调用 LLM"""
+        if not self.llm.get("enabled", False):
+            return '{"selected_indices": []}'
+        
+        url = f"{self.llm['base_url']}/chat/completions"
+        retries = max(1, int(self.llm.get("max_retries", 3)))
+        timeout = int(self.llm.get("timeout", 300))
+        
+        last_err = None
+        
+        for attempt in range(retries):
+            # 获取 API Key
+            if self._key_lock is None:
+                try:
+                    loop = asyncio.get_running_loop()
+                    self._key_lock = asyncio.Lock()
+                except RuntimeError:
+                    pass
+            
+            if self._key_lock:
+                async with self._key_lock:
+                    api_key = self._next_key()
+            else:
+                api_key = self._next_key()
+            
+            if not api_key:
+                return '{"selected_indices": []}'
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            }
+            body = {
+                "model": self.llm["model"],
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+            
+            try:
+                timeout_cfg = aiohttp.ClientTimeout(total=timeout)
+                start_ts = time.time()
+                print(f"[LLM] Attempt {attempt+1}/{retries}, model={self.llm['model']}, prompt_len={len(prompt)}")
+                
+                async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+                    async with session.post(url, headers=headers, json=body) as resp:
+                        if resp.status == 200:
+                            data = await resp.json()
+                            content = data["choices"][0]["message"]["content"].strip()
+                            latency = (time.time() - start_ts) * 1000.0
+                            print(f"[LLM] Success: {resp.status}, latency={latency:.0f}ms")
+                            return content
+                        else:
+                            txt = await resp.text()
+                            last_err = f"{resp.status} {txt[:200]}"
+                            latency = (time.time() - start_ts) * 1000.0
+                            print(f"[LLM] Error: {resp.status}, latency={latency:.0f}ms, detail={last_err[:100]}")
+                            
+                            # 429 时退避
+                            if resp.status == 429 and attempt < retries - 1:
+                                backoff = 2 ** attempt
+                                await asyncio.sleep(backoff)
+                                continue
+            except Exception as e:
+                last_err = str(e)
+                latency = (time.time() - start_ts) * 1000.0
+                print(f"[LLM] Exception: latency={latency:.0f}ms, error={last_err[:100]}")
+            
+            # 简单退避
+            if attempt < retries - 1:
+                await asyncio.sleep(1.5 * (attempt + 1))
+        
+        raise Exception(f"LLM 调用失败: {last_err}")
+
 # ==================== 模型加载（GPU）====================
 
 class RAGModels:
     """在服务器启动时加载模型到 GPU"""
     
-    def __init__(self, data_dir: str = None, use_gpu: bool = True):
+    def __init__(self, data_dir: str = None, use_gpu: bool = True, config_path: str = None):
         self.embedding_model = None
         self.reranker_model = None
         self.llm = None
         self.vector_db = None
+        self.llm_ranker = None
         
         # 初始化向量数据库（支持 GPU 加速）
         if data_dir and os.path.exists(data_dir):
@@ -209,6 +563,12 @@ class RAGModels:
                 self.vector_db = CityVectorDB(data_dir, use_gpu=use_gpu)
             except Exception as e:
                 print(f"⚠️ Failed to load vector databases: {e}")
+        
+        # 初始化 LLM 精排器
+        try:
+            self.llm_ranker = LLMRanker(config_path=config_path)
+        except Exception as e:
+            print(f"⚠️ Failed to initialize LLM ranker: {e}")
         
     def load_embedding_model(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         """加载 Embedding 模型到 GPU"""
@@ -255,7 +615,7 @@ models = None
 
 # ==================== RAG 实现 ====================
 
-def perform_rag_search(query: str, city: str, top_k: int, retriever: str, reranker: str) -> Dict:
+async def perform_rag_search(query: str, city: str, top_k: int, retriever: str, reranker: str, use_llm_ranking: bool = True) -> Dict:
     """
     真实的 RAG 搜索实现（使用1028版本向量数据库）
     
@@ -380,32 +740,59 @@ def perform_rag_search(query: str, city: str, top_k: int, retriever: str, rerank
             print(f"📋 First document fields: {list(retrieved_docs[0].keys())}")
             print(f"📋 Merchant name: {retrieved_docs[0].get('name', 'NOT FOUND')}")
         
-        # 4. 生成答案摘要（city 已经是中文）
-        answer = f"在{city}找到 {len(retrieved_docs)} 家相关商户，为您推荐以下 {min(top_k, len(retrieved_docs))} 家："
+        # 4. 使用 LLM 精排（从 rerank 的结果中选出 top_k 个）
+        llm_ranking_time = 0
+        if use_llm_ranking and models.llm_ranker and len(retrieved_docs) > top_k:
+            try:
+                llm_start = time.time()
+                print(f"🤖 LLM ranking: selecting {top_k} from {len(retrieved_docs)} candidates")
+                retrieved_docs = await models.llm_ranker.select_top_k_async(
+                    query=query,
+                    candidates=retrieved_docs,
+                    top_k=top_k,
+                    city=city
+                )
+                llm_ranking_time = time.time() - llm_start
+                print(f"✅ LLM ranking completed in {llm_ranking_time:.2f}s")
+            except Exception as e:
+                print(f"⚠️ LLM ranking failed: {e}, using reranked results")
+                retrieved_docs = retrieved_docs[:top_k]
+        else:
+            # 不使用 LLM 精排，直接取 top_k
+            if not use_llm_ranking:
+                print(f"📋 LLM ranking disabled by request")
+            elif not models.llm_ranker:
+                print(f"⚠️ LLM ranker not initialized")
+            retrieved_docs = retrieved_docs[:top_k]
         
-        # 5. 计算评估指标
+        # 5. 生成答案摘要（city 已经是中文）
+        answer = f"在{city}找到相关商户，为您推荐以下 {len(retrieved_docs)} 家："
+        
+        # 6. 计算评估指标
         metrics = {
             "retrieved_count": len(retrieved_docs),
-            "returned_count": min(top_k, len(retrieved_docs)),
+            "returned_count": len(retrieved_docs),
             "city": city,
             "latency_ms": (time.time() - start_time) * 1000,
             "embedding_time_ms": embedding_time * 1000,
             "retrieval_time_ms": retrieval_time * 1000,
             "rerank_time_ms": rerank_time * 1000 if use_reranker else 0,
+            "llm_ranking_time_ms": llm_ranking_time * 1000,
             "used_reranker": use_reranker,
+            "used_llm_ranking": use_llm_ranking and llm_ranking_time > 0,
             "candidate_multiplier": candidate_multiplier if use_reranker else 1
         }
         
         # 调试：打印返回的商店名称
-        top_merchants = retrieved_docs[:top_k]
-        print(f"📦 Returning top {len(top_merchants)} merchants:")
-        for i, doc in enumerate(top_merchants[:3], 1):  # 只打印前3个
+        print(f"📦 Returning {len(retrieved_docs)} merchants:")
+        for i, doc in enumerate(retrieved_docs[:3], 1):  # 只打印前3个
             score_info = f"rerank={doc.get('rerank_score', 0):.4f}" if use_reranker else f"similarity={doc.get('similarity', 0):.4f}"
-            print(f"   {i}. {doc.get('name', 'NO_NAME')} ({score_info}, rank: {doc.get('original_rank', '?')}→{doc.get('final_rank', '?')})")
+            llm_rank = f", llm_rank={doc.get('llm_rank', '-')}" if doc.get('llm_selected') else ""
+            print(f"   {i}. {doc.get('name', 'NO_NAME')} ({score_info}, rank: {doc.get('original_rank', '?')}→{doc.get('final_rank', '?')}{llm_rank})")
         
         return {
             "answer": answer,
-            "sources": retrieved_docs[:top_k],
+            "sources": retrieved_docs,
             "metrics": metrics,
             "processing_time": time.time() - start_time
         }
@@ -463,16 +850,6 @@ def _format_document_for_rerank(doc_info: Dict[str, Any]) -> str:
     
     if doc_info.get('landmark'):
         parts.append(f"地标：{doc_info['landmark']}")
-    
-    # 5. 可选字段
-    if doc_info.get('specialties'):
-        parts.append(f"特色：{doc_info['specialties']}")
-    
-    if doc_info.get('products'):
-        parts.append(f"服务：{doc_info['products']}")
-    
-    if doc_info.get('business_hours'):
-        parts.append(f"营业：{doc_info['business_hours']}")
     
     # 使用 " - " 连接所有部分
     return ' - '.join(parts)
@@ -581,12 +958,13 @@ def health_check():
 async def rag_search(request: RAGSearchRequest):
     """RAG 搜索端点（支持多城市）"""
     try:
-        result = perform_rag_search(
+        result = await perform_rag_search(
             query=request.query,
             city=request.city,
             top_k=request.top_k,
             retriever=request.retriever,
-            reranker=request.reranker
+            reranker=request.reranker,
+            use_llm_ranking=request.use_llm_ranking
         )
         return SearchResult(**result)
     except Exception as e:
@@ -630,9 +1008,10 @@ async def startup_event():
     embedding_model_path = getattr(app.state, 'embedding_model_path', None)
     reranker_model_path = getattr(app.state, 'reranker_model_path', None)
     use_gpu = getattr(app.state, 'use_gpu', True)  # 默认使用 GPU
+    config_path = getattr(app.state, 'config_path', None)  # LLM 配置文件路径
     
-    # 初始化模型（包括向量数据库，会根据 use_gpu 参数决定是否使用 GPU）
-    models = RAGModels(data_dir=data_dir, use_gpu=use_gpu)
+    # 初始化模型（包括向量数据库和 LLM 精排器）
+    models = RAGModels(data_dir=data_dir, use_gpu=use_gpu, config_path=config_path)
     
     # 预加载模型到 GPU
     if DEVICE == "cuda":
@@ -679,6 +1058,7 @@ def main():
     parser.add_argument("--data-dir", type=str, default=None, help="Path to vector database directory (containing 1028 FAISS files)")
     parser.add_argument("--embedding-model", type=str, default=None, help="Path to Qwen3-Embedding-8B model")
     parser.add_argument("--reranker-model", type=str, default=None, help="Path to Qwen3-Reranker-8B model")
+    parser.add_argument("--config", type=str, default=None, help="Path to config.yaml for LLM ranking")
     parser.add_argument("--use-gpu", action="store_true", default=True, help="Use GPU for FAISS vector search (default: True)")
     parser.add_argument("--no-gpu", action="store_true", help="Force CPU mode for FAISS vector search")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
@@ -690,6 +1070,7 @@ def main():
     data_dir = args.data_dir or os.getenv("RAG_DATA_DIR")
     embedding_model_path = args.embedding_model or os.getenv("EMBEDDING_MODEL_PATH")
     reranker_model_path = args.reranker_model or os.getenv("RERANKER_MODEL_PATH")
+    config_path = args.config or os.getenv("TUANSOU_CONFIG") or os.getenv("CONFIG_PATH")
     
     # GPU 配置
     use_gpu = args.use_gpu and not args.no_gpu
@@ -699,6 +1080,7 @@ def main():
     app.state.embedding_model_path = embedding_model_path
     app.state.reranker_model_path = reranker_model_path
     app.state.use_gpu = use_gpu
+    app.state.config_path = config_path
     
     print(f"""
 ╔═══════════════════════════════════════════════════════════╗

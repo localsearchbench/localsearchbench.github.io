@@ -35,9 +35,7 @@ const CONFIG = {
     
     // Timeout settings (milliseconds)
     TIMEOUT: {
-        RAG_SEARCH: 60000,      // 60 seconds
-        WEB_SEARCH: 10000,      // 10 seconds
-        AGENTIC_SEARCH: 120000  // 120 seconds
+        RAG_SEARCH: 120000,     // 120 seconds (2 minutes) - 增加以支持 LLM 精排
     }
 };
 
