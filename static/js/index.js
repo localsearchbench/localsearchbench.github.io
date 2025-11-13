@@ -29,7 +29,7 @@ function setButtonLoadingState(button) {
  */
 function toggleFold(foldId, button) {
     const foldDiv = document.getElementById(foldId);
-    const textSpan = button.querySelector('span:last-child');
+    const textSpan = button.querySelector('span');
     
     if (foldDiv.style.display === 'none') {
         // 展开
@@ -712,8 +712,8 @@ function displayRAGResults(response) {
                             </div>
                             <div style="text-align: center; margin-top: 0.5rem;">
                                 <button class="button is-small is-light toggle-btn" onclick="toggleFold('${foldId}', this)" style="font-size: 0.8rem;">
-                                    <span class="icon is-small"><i class="fas fa-chevron-down"></i></span>
                                     <span>显示更多 (${hiddenItems.length} 个)</span>
+                                    <i class="fas fa-chevron-down toggle-arrow"></i>
                                 </button>
                             </div>
                         `;
