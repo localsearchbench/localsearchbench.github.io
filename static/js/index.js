@@ -183,16 +183,15 @@ function toggleRAGResults() {
     const content = document.getElementById('rag-results-content');
     const button = document.getElementById('rag-toggle-btn');
     const resultsArea = document.getElementById('rag-results');
-    const icon = button ? button.querySelector('.icon i') : null;
     const text = button ? button.querySelector('span:last-child') : null;
     
     console.log('toggleRAGResults called, content:', content, 'button:', button);
-    console.log('Icon:', icon, 'Text:', text);
+    console.log('Text:', text);
     console.log('Results area display:', resultsArea ? resultsArea.style.display : 'not found');
     
     // 检查必要的元素是否存在
-    if (!content || !button || !icon || !text) {
-        console.log('Missing required elements:', { content: !!content, button: !!button, icon: !!icon, text: !!text });
+    if (!content || !button || !text) {
+        console.log('Missing required elements:', { content: !!content, button: !!button, text: !!text });
         return;
     }
     
