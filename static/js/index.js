@@ -183,10 +183,18 @@ window.addEventListener('scroll', function() {
 function toggleRAGResults() {
     const content = document.getElementById('rag-results-content');
     const button = document.getElementById('rag-toggle-btn');
+    const resultsArea = document.getElementById('rag-results');
     const icon = button.querySelector('i');
     const text = button.querySelector('span:last-child');
     
     console.log('toggleRAGResults called, content:', content, 'button:', button);
+    console.log('Results area display:', resultsArea ? resultsArea.style.display : 'not found');
+    
+    // 如果搜索结果区域本身是隐藏的，不执行操作
+    if (!resultsArea || resultsArea.style.display === 'none') {
+        console.log('No search results to toggle');
+        return;
+    }
     
     // 检查当前状态：如果没有设置 display 或者是 block，说明是展开状态
     const isExpanded = content.style.display !== 'none';
