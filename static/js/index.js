@@ -210,12 +210,12 @@ function toggleRAGResults() {
         content.style.display = 'none';
         button.classList.add('collapsed');  // 添加 collapsed 类，触发 CSS 旋转
         text.textContent = 'Expand';
-        console.log('Collapsed RAG results');
+        console.log('Folded RAG results');
     } else {
         // 当前是收起状态，点击后展开
         content.style.display = 'block';
         button.classList.remove('collapsed');  // 移除 collapsed 类，恢复原始状态
-        text.textContent = 'Collapse';
+        text.textContent = 'Fold';
         console.log('Expanded RAG results');
     }
 }
