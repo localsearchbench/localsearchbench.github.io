@@ -184,7 +184,7 @@ function toggleRAGResults() {
     const content = document.getElementById('rag-results-content');
     const button = document.getElementById('rag-toggle-btn');
     const resultsArea = document.getElementById('rag-results');
-    const icon = button ? button.querySelector('i') : null;
+    const icon = button ? button.querySelector('.icon i') : null;
     const text = button ? button.querySelector('span:last-child') : null;
     
     console.log('toggleRAGResults called, content:', content, 'button:', button);
@@ -225,8 +225,8 @@ function toggleRAGResults() {
 function toggleWebResults() {
     const content = document.getElementById('web-results-content');
     const button = document.getElementById('web-toggle-btn');
-    const icon = button.querySelector('i');
-    const text = button.querySelector('span:last-child');
+    const icon = button ? button.querySelector('.icon i') : null;
+    const text = button ? button.querySelector('span:last-child') : null;
     
     console.log('toggleWebResults called, content:', content, 'button:', button);
     
@@ -252,8 +252,8 @@ function toggleWebResults() {
 function toggleAgenticResults() {
     const content = document.getElementById('agentic-results-content');
     const button = document.getElementById('agentic-toggle-btn');
-    const icon = button.querySelector('i');
-    const text = button.querySelector('span:last-child');
+    const icon = button ? button.querySelector('.icon i') : null;
+    const text = button ? button.querySelector('span:last-child') : null;
     
     console.log('toggleAgenticResults called, content:', content, 'button:', button);
     
