@@ -24,6 +24,28 @@ function setButtonLoadingState(button) {
     return originalHTML;
 }
 
+/**
+ * 切换折叠/展开状态
+ */
+function toggleCollapse(collapseId, button) {
+    const collapseDiv = document.getElementById(collapseId);
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span:last-child');
+    
+    if (collapseDiv.style.display === 'none') {
+        // 展开
+        collapseDiv.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+        textSpan.textContent = '收起';
+    } else {
+        // 收起
+        collapseDiv.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        const hiddenCount = collapseDiv.children.length;
+        textSpan.textContent = `显示更多 (${hiddenCount} 个)`;
+    }
+}
+
 // More Works Dropdown Functionality
 function toggleMoreWorks() {
     const dropdown = document.getElementById('moreWorksDropdown');
@@ -548,25 +570,64 @@ function displayRAGResults(response) {
                 if (value.length === 0) return '<span class="has-text-grey-light">N/A</span>';
                 // 检查数组中是否包含对象
                 if (value.some(item => typeof item === 'object' && item !== null)) {
-                    // 对于对象数组，使用卡片式展示
-                    return '<div style="margin-top: 0.5rem;">' + 
-                           value.map((item, idx) => {
-                               const entries = Object.entries(item);
-                               return `
-                                   <div style="background: #f9f9f9; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 3px solid #3273dc;">
-                                       <div style="font-weight: 600; color: #363636; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                                           ${key === 'products' ? '📦 产品' : '🎁 团购'} ${idx + 1}
-                                       </div>
-                                       ${entries.map(([k, v]) => `
-                                           <div style="display: flex; margin-bottom: 0.25rem; font-size: 0.875rem;">
-                                               <span style="color: #7a7a7a; min-width: 100px;">${k}:</span>
-                                               <span style="color: #363636; flex: 1;">${v}</span>
-                                           </div>
-                                       `).join('')}
-                                   </div>
-                               `;
-                           }).join('') + 
-                           '</div>';
+                    // 对于对象数组，使用卡片式展示，支持折叠
+                    const shouldCollapse = (key === 'products' || key === 'group_deals') && value.length > 5;
+                    const visibleItems = shouldCollapse ? value.slice(0, 5) : value;
+                    const hiddenItems = shouldCollapse ? value.slice(5) : [];
+                    const collapseId = `collapse_${key}_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    let html = '<div style="margin-top: 0.5rem;">';
+                    
+                    // 显示前5个项目
+                    html += visibleItems.map((item, idx) => {
+                        const entries = Object.entries(item);
+                        return `
+                            <div style="background: #f9f9f9; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 3px solid #3273dc;">
+                                <div style="font-weight: 600; color: #363636; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                    ${key === 'products' ? '📦 产品' : '🎁 团购'} ${idx + 1}
+                                </div>
+                                ${entries.map(([k, v]) => `
+                                    <div style="display: flex; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                        <span style="color: #7a7a7a; min-width: 100px;">${k}:</span>
+                                        <span style="color: #363636; flex: 1;">${v}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // 如果需要折叠，添加展开/收起功能
+                    if (shouldCollapse) {
+                        html += `
+                            <div id="${collapseId}" style="display: none;">
+                                ${hiddenItems.map((item, idx) => {
+                                    const entries = Object.entries(item);
+                                    return `
+                                        <div style="background: #f9f9f9; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 3px solid #3273dc;">
+                                            <div style="font-weight: 600; color: #363636; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                                ${key === 'products' ? '📦 产品' : '🎁 团购'} ${idx + 6}
+                                            </div>
+                                            ${entries.map(([k, v]) => `
+                                                <div style="display: flex; margin-bottom: 0.25rem; font-size: 0.875rem;">
+                                                    <span style="color: #7a7a7a; min-width: 100px;">${k}:</span>
+                                                    <span style="color: #363636; flex: 1;">${v}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div style="text-align: center; margin-top: 0.5rem;">
+                                <button class="button is-small is-light" onclick="toggleCollapse('${collapseId}', this)" style="font-size: 0.8rem;">
+                                    <span class="icon is-small"><i class="fas fa-chevron-down"></i></span>
+                                    <span>显示更多 (${hiddenItems.length} 个)</span>
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                    return html;
                 }
                 // 对于简单类型数组，使用join
                 return value.join(', ');
