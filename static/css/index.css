@@ -482,9 +482,9 @@ code {
   box-shadow: var(--shadow-md);
 }
 
-/* 折叠按钮箭头动画（模仿 More Works） */
+/* 折叠按钮箭头动画 - 模仿 More Works 按钮 */
 .toggle-btn .toggle-arrow {
-  transition: transform 0.3s ease;
+  transition: var(--transition);
   font-size: 0.8rem;
 }
 

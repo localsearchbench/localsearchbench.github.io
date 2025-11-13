@@ -183,10 +183,11 @@ function toggleRAGResults() {
     const content = document.getElementById('rag-results-content');
     const button = document.getElementById('rag-toggle-btn');
     const resultsArea = document.getElementById('rag-results');
-    const text = button ? button.querySelector('span:last-child') : null;
+    const text = button ? button.querySelector('span') : null;
     
     console.log('toggleRAGResults called, content:', content, 'button:', button);
     console.log('Text:', text);
+    console.log('Button classes:', button ? button.className : 'no button');
     console.log('Results area display:', resultsArea ? resultsArea.style.display : 'not found');
     
     // 检查必要的元素是否存在
