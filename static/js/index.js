@@ -212,10 +212,10 @@ function toggleRAGResults() {
         text.textContent = 'Expand';
         console.log('Folded RAG results');
         
-        // 收起后，滚动到 Search Results 标题位置
+        // 收起后，滚动到 Search Results 标题上方一点
         const resultsHeader = resultsArea.querySelector('.results-header h3');
         if (resultsHeader) {
-            resultsHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            resultsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     } else {
         // 当前是收起状态，点击后展开
