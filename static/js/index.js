@@ -754,7 +754,7 @@ function displayRAGResults(response) {
         return `
             <div class="box" style="margin-bottom: 1.5rem; border-left: 4px solid #3273dc; position: relative;">
                 <div style="position: absolute; top: 10px; right: 10px;">
-                    <span class="tag is-primary is-medium">Score: ${doc.score.toFixed(4)}</span>
+                    <span class="tag is-primary is-medium">Rank ${index + 1}</span>
                 </div>
                 
                 <p class="title is-5" style="margin-bottom: 1rem; padding-right: 120px;">
