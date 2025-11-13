@@ -211,6 +211,12 @@ function toggleRAGResults() {
         button.classList.add('collapsed');  // 添加 collapsed 类，触发 CSS 旋转
         text.textContent = 'Expand';
         console.log('Folded RAG results');
+        
+        // 收起后，滚动到 Search Results 标题位置
+        const resultsHeader = resultsArea.querySelector('.results-header h3');
+        if (resultsHeader) {
+            resultsHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     } else {
         // 当前是收起状态，点击后展开
         content.style.display = 'block';
