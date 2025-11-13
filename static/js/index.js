@@ -186,16 +186,23 @@ function toggleRAGResults() {
     const icon = button.querySelector('i');
     const text = button.querySelector('span:last-child');
     
-    if (content.style.display === 'none') {
-        // 展开内容
-        content.style.display = 'block';
-        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
-        text.textContent = 'Collapse';
-    } else {
-        // 收起内容
+    console.log('toggleRAGResults called, content:', content, 'button:', button);
+    
+    // 检查当前状态：如果没有设置 display 或者是 block，说明是展开状态
+    const isExpanded = content.style.display !== 'none';
+    
+    if (isExpanded) {
+        // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
+        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
         text.textContent = 'Expand';
+        console.log('Collapsed RAG results');
+    } else {
+        // 当前是收起状态，点击后展开
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        text.textContent = 'Collapse';
+        console.log('Expanded RAG results');
     }
 }
 
@@ -206,16 +213,23 @@ function toggleWebResults() {
     const icon = button.querySelector('i');
     const text = button.querySelector('span:last-child');
     
-    if (content.style.display === 'none') {
-        // 展开内容
-        content.style.display = 'block';
-        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
-        text.textContent = 'Collapse';
-    } else {
-        // 收起内容
+    console.log('toggleWebResults called, content:', content, 'button:', button);
+    
+    // 检查当前状态：如果没有设置 display 或者是 block，说明是展开状态
+    const isExpanded = content.style.display !== 'none';
+    
+    if (isExpanded) {
+        // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
+        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
         text.textContent = 'Expand';
+        console.log('Collapsed Web results');
+    } else {
+        // 当前是收起状态，点击后展开
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        text.textContent = 'Collapse';
+        console.log('Expanded Web results');
     }
 }
 
@@ -226,16 +240,23 @@ function toggleAgenticResults() {
     const icon = button.querySelector('i');
     const text = button.querySelector('span:last-child');
     
-    if (content.style.display === 'none') {
-        // 展开内容
-        content.style.display = 'block';
-        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
-        text.textContent = 'Collapse';
-    } else {
-        // 收起内容
+    console.log('toggleAgenticResults called, content:', content, 'button:', button);
+    
+    // 检查当前状态：如果没有设置 display 或者是 block，说明是展开状态
+    const isExpanded = content.style.display !== 'none';
+    
+    if (isExpanded) {
+        // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
+        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
         text.textContent = 'Expand';
+        console.log('Collapsed Agentic results');
+    } else {
+        // 当前是收起状态，点击后展开
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        text.textContent = 'Collapse';
+        console.log('Expanded Agentic results');
     }
 }
 
