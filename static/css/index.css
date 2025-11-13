@@ -482,6 +482,15 @@ code {
   box-shadow: var(--shadow-md);
 }
 
+/* 折叠按钮箭头动画 */
+.toggle-btn .icon i {
+  transition: transform 0.3s ease;
+}
+
+.toggle-btn.collapsed .icon i {
+  transform: rotate(180deg);
+}
+
 /* More Works Dropdown */
 .more-works-container {
   position: fixed;

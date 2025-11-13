@@ -209,13 +209,13 @@ function toggleRAGResults() {
     if (isExpanded) {
         // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
+        button.classList.add('collapsed');  // 添加 collapsed 类，触发 CSS 旋转
         text.textContent = 'Expand';
         console.log('Collapsed RAG results');
     } else {
         // 当前是收起状态，点击后展开
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        button.classList.remove('collapsed');  // 移除 collapsed 类，恢复原始状态
         text.textContent = 'Collapse';
         console.log('Expanded RAG results');
     }
@@ -236,13 +236,13 @@ function toggleWebResults() {
     if (isExpanded) {
         // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
+        button.classList.add('collapsed');  // 添加 collapsed 类，触发 CSS 旋转
         text.textContent = 'Expand';
         console.log('Collapsed Web results');
     } else {
         // 当前是收起状态，点击后展开
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        button.classList.remove('collapsed');  // 移除 collapsed 类，恢复原始状态
         text.textContent = 'Collapse';
         console.log('Expanded Web results');
     }
@@ -263,13 +263,13 @@ function toggleAgenticResults() {
     if (isExpanded) {
         // 当前是展开状态，点击后收起
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';  // 收起后显示向下箭头（表示可以展开）
+        button.classList.add('collapsed');  // 添加 collapsed 类，触发 CSS 旋转
         text.textContent = 'Expand';
         console.log('Collapsed Agentic results');
     } else {
         // 当前是收起状态，点击后展开
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';    // 展开后显示向上箭头（表示可以收起）
+        button.classList.remove('collapsed');  // 移除 collapsed 类，恢复原始状态
         text.textContent = 'Collapse';
         console.log('Expanded Agentic results');
     }
