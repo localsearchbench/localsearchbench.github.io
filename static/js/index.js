@@ -187,12 +187,14 @@ function toggleRAGResults() {
     const text = button.querySelector('span:last-child');
     
     if (content.style.display === 'none') {
+        // 展开内容
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
+        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
         text.textContent = 'Collapse';
     } else {
+        // 收起内容
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
+        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
         text.textContent = 'Expand';
     }
 }
@@ -205,12 +207,14 @@ function toggleWebResults() {
     const text = button.querySelector('span:last-child');
     
     if (content.style.display === 'none') {
+        // 展开内容
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
+        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
         text.textContent = 'Collapse';
     } else {
+        // 收起内容
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
+        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
         text.textContent = 'Expand';
     }
 }
@@ -223,12 +227,14 @@ function toggleAgenticResults() {
     const text = button.querySelector('span:last-child');
     
     if (content.style.display === 'none') {
+        // 展开内容
         content.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
+        icon.className = 'fas fa-chevron-down';  // 展开后显示向下箭头（表示可以收起）
         text.textContent = 'Collapse';
     } else {
+        // 收起内容
         content.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
+        icon.className = 'fas fa-chevron-up';    // 收起后显示向上箭头（表示可以展开）
         text.textContent = 'Expand';
     }
 }
