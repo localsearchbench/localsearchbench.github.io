@@ -25,22 +25,21 @@ function setButtonLoadingState(button) {
 }
 
 /**
- * 切换折叠/展开状态
+ * 切换折叠/展开状态（产品/团购折叠）
  */
 function toggleFold(foldId, button) {
     const foldDiv = document.getElementById(foldId);
-    const icon = button.querySelector('i');
     const textSpan = button.querySelector('span:last-child');
     
     if (foldDiv.style.display === 'none') {
         // 展开
         foldDiv.style.display = 'block';
-        icon.className = 'fas fa-chevron-up';
+        button.classList.add('collapsed');  // 使用 CSS 类控制箭头旋转
         textSpan.textContent = '收起';
     } else {
         // 收起
         foldDiv.style.display = 'none';
-        icon.className = 'fas fa-chevron-down';
+        button.classList.remove('collapsed');  // 恢复原始箭头方向
         const hiddenCount = foldDiv.children.length;
         textSpan.textContent = `显示更多 (${hiddenCount} 个)`;
     }
@@ -706,7 +705,7 @@ function displayRAGResults(response) {
                                 }).join('')}
                             </div>
                             <div style="text-align: center; margin-top: 0.5rem;">
-                                <button class="button is-small is-light" onclick="toggleFold('${foldId}', this)" style="font-size: 0.8rem;">
+                                <button class="button is-small is-light toggle-btn" onclick="toggleFold('${foldId}', this)" style="font-size: 0.8rem;">
                                     <span class="icon is-small"><i class="fas fa-chevron-down"></i></span>
                                     <span>显示更多 (${hiddenItems.length} 个)</span>
                                 </button>
