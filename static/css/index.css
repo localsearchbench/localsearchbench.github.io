@@ -593,15 +593,19 @@ code {
 }
 
 .work-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: block;
   padding: 1rem;
   border-radius: var(--border-radius);
   text-decoration: none;
   color: inherit;
   transition: var(--transition);
   margin-bottom: 0.5rem;
+  cursor: default;
+}
+
+.work-info {
+  display: block;
+  width: 100%;
 }
 
 .work-item:hover {
@@ -614,6 +618,16 @@ code {
   font-size: 1rem;
   font-weight: 500;
   color: var(--text-primary);
+}
+
+.work-info h5 a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.work-info h5 a:hover {
+  color: var(--primary-color);
 }
 
 .work-info p {
@@ -629,11 +643,17 @@ code {
   font-style: italic;
 }
 
+.work-venue a {
+  font-size: inherit;
+  font-style: inherit;
+  display: inline;
+}
+
 .work-item .fas {
   color: var(--text-light);
   font-size: 0.9rem;
+  float: right;
   margin-top: 0.2rem;
-  flex-shrink: 0;
 }
 
 
