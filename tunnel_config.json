@@ -1,7 +1,7 @@
 {
-  "rag_server_url": "https://port-festival-conducting-cookies.trycloudflare.com",
+  "rag_server_url": "https://mpg-chorus-chem-contributing.trycloudflare.com",
   "tunnel_type": "temporary",
-  "updated_at": "2025-11-13T07:45:12Z",
+  "updated_at": "2025-11-17T02:06:30Z",
   "target": "http://10.148.24.17:8000",
-  "pid": 67267
+  "pid": 4911
 }
