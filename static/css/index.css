@@ -647,6 +647,8 @@ code {
   font-size: inherit;
   font-style: inherit;
   display: inline;
+  color: inherit;
+  text-decoration: none;
 }
 
 .work-item .fas {

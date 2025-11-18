@@ -9,8 +9,8 @@
 ### 1. 代理服务器状态
 
 - **监听地址**: `0.0.0.0:8410`
-- **Mac IP**: `172.31.3.48`
-- **代理 URL**: `http://172.31.3.48:8410`
+- **Mac IP**: `11.45.22.196`
+- **代理 URL**: `http://11.45.22.196:8410`
 - **防火墙**: 已关闭 ✅
 
 ### 2. 检查代理服务器
@@ -87,14 +87,14 @@ chmod +x setup_proxy.sh
 
 ```bash
 # 1. 测试连接
-nc -zv 172.31.3.48 8410
+nc -zv 11.45.22.196 8410
 
 # 2. 测试代理
-curl -x http://172.31.3.48:8410 -I http://www.baidu.com
+curl -x http://11.45.22.196:8410 -I http://www.baidu.com
 
 # 3. 设置环境变量（临时）
-export http_proxy=http://172.31.3.48:8410
-export https_proxy=http://172.31.3.48:8410
+export http_proxy=http://11.45.22.196:8410
+export https_proxy=http://11.45.22.196:8410
 
 # 4. 测试是否生效
 curl -I http://www.baidu.com
@@ -102,10 +102,10 @@ curl -I http://www.baidu.com
 # 5. 永久配置（添加到 ~/.bashrc 或 ~/.zshrc）
 cat >> ~/.bashrc << 'BASHRC'
 # Mac Proxy Configuration
-export http_proxy=http://172.31.3.48:8410
-export https_proxy=http://172.31.3.48:8410
-export HTTP_PROXY=http://172.31.3.48:8410
-export HTTPS_PROXY=http://172.31.3.48:8410
+export http_proxy=http://11.45.22.196:8410
+export https_proxy=http://11.45.22.196:8410
+export HTTP_PROXY=http://11.45.22.196:8410
+export HTTPS_PROXY=http://11.45.22.196:8410
 export no_proxy=localhost,127.0.0.1,::1
 export NO_PROXY=localhost,127.0.0.1,::1
 # End Mac Proxy
@@ -122,7 +122,7 @@ source ~/.bashrc
 ```bash
 # 测试 1: 检查环境变量
 echo $http_proxy
-# 应该显示: http://172.31.3.48:8410
+# 应该显示: http://11.45.22.196:8410
 
 # 测试 2: 访问百度
 curl -I http://www.baidu.com
@@ -144,7 +144,7 @@ curl -o /dev/null -w "下载速度: %{speed_download} bytes/sec\n" http://www.ba
 # 在 Mac 上: 系统偏好设置 → 安全性与隐私 → 防火墙
 
 # 检查网络连通性
-ping 172.31.3.48
+ping 11.45.22.196
 ```
 
 ### 2. 代理不生效
@@ -187,7 +187,7 @@ tail -f ~/proxy_server.log
 netstat -an | grep 8410
 
 # 服务器上
-netstat -an | grep 172.31.3.48:8410
+netstat -an | grep 11.45.22.196:8410
 ```
 
 ## 🔒 安全建议

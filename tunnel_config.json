@@ -1,7 +1,7 @@
 {
-  "rag_server_url": "https://mpg-chorus-chem-contributing.trycloudflare.com",
+  "rag_server_url": "https://pipes-essentials-geneva-confidence.trycloudflare.com",
   "tunnel_type": "temporary",
-  "updated_at": "2025-11-17T02:06:30Z",
+  "updated_at": "2025-11-18T02:19:35Z",
   "target": "http://10.148.24.17:8000",
-  "pid": 4911
+  "pid": 2217
 }
