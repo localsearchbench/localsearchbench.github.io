@@ -1,7 +1,7 @@
 {
-  "rag_server_url": "https://tagged-household-fact-tile.trycloudflare.com",
+  "rag_server_url": "https://lucky-awarded-targeted-discrete.trycloudflare.com",
   "tunnel_type": "temporary",
-  "updated_at": "2025-11-19T01:59:54Z",
+  "updated_at": "2025-11-20T02:24:04Z",
   "target": "http://10.148.24.17:8000",
-  "pid": 62850
+  "pid": 99821
 }
