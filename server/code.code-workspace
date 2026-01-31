@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/634243a952aa619ce3d2daf4b72d1fce/Message/MessageTemp/9e20f478899dc29eb19741386f9343c8/File/echarts-map-master"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

@@ -3,7 +3,7 @@
 ============================================================
 🚀 CORS 代理服务器启动
 ============================================================
-📡 目标 RAG 服务器: http://10.164.243.10:8000
+📡 目标 RAG 服务器: http://10.164.132.13:8000
 🌐 本地代理地址: http://localhost:8001
 📝 用法: python3 proxy_server.py [RAG服务器地址]
 ============================================================
@@ -15,97 +15,4 @@
  * Running on http://127.0.0.1:8001
  * Running on http://11.248.54.153:8001
 [33mPress CTRL+C to quit[0m
-127.0.0.1 - - [06/Nov/2025 17:29:08] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:29:08] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:29:08] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:29:08] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:29:21] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:29:29] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:17] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:17] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:18] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:18] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:53] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:53] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:43:54] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:45:11] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:45:14] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:45:15] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:54:35] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:54:55] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:54:56] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:54:56] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:55:08] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:55:08] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 17:55:09] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:00:35] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:00:35] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:00:36] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:27:50] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:27:51] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:27:51] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:31:25] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:31:25] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:31:26] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:46] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:47] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:48] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:51] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:52] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:32:53] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:34:37] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:34:38] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:34:38] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 18:34:39] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:07] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:08] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:08] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:08] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:24] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:25] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:43:26] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:46:43] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:46:44] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:47:50] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:47:51] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 19:47:52] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:01:57] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:02:15] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:11:19] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:11:28] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:17:12] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:17:18] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:27:30] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:27:30] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:27:31] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:27:58] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:28:07] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:28:42] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:28:50] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:30:56] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:31:02] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:36:16] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:36:26] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:38:02] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:38:12] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:39:05] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:39:13] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:39:45] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:39:55] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:46:41] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:46:41] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:46:41] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:46:42] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:46:55] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:47:01] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:50:27] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 20:50:35] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:00:17] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:00:26] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:01:06] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:01:24] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:11:59] "OPTIONS /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:12:08] "POST /api/rag/search HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:20:24] "OPTIONS /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:20:24] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [06/Nov/2025 21:20:25] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [13/Nov/2025 15:37:10] "[35m[1mGET /health HTTP/1.1[0m" 503 -

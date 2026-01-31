@@ -1,0 +1,150 @@
+/**
+ * LocalSearchBench Configuration
+ * 
+ * 配置说明：
+ * 1. RAG_SERVER_URL 会在页面加载时动态从 tunnel_config.json 获取
+ * 2. 如果动态加载失败，会使用这里的默认值作为后备
+ * 3. 确保 RAG 服务器已配置 CORS 允许来自 GitHub Pages 的请求
+ */
+
+const CONFIG = {
+    // RAG Server Configuration
+    // 这个 URL 会在运行时被动态配置覆盖
+    RAG_SERVER_URL: 'https://mpg-chorus-chem-contributing.trycloudflare.com',
+    
+    // 动态配置文件路径（相对于网站根目录）
+    DYNAMIC_CONFIG_URL: './tunnel_config.json',
+    
+    // API Endpoints
+    API_ENDPOINTS: {
+        RAG_SEARCH: '/api/rag/search',
+        WEB_SEARCH: '/api/web/search',
+        AGENTIC_SEARCH: '/api/agentic/search',
+        HEALTH_CHECK: '/health'
+    },
+    
+    // Default Parameters
+    DEFAULTS: {
+        TOP_K: 20,
+        RETRIEVER_MODEL: 'Qwen3-Embedding-8B',
+        RERANKER_MODEL: 'Qwen3-Reranker-8B',
+        LLM_MODEL: 'gpt-4',
+        USE_RERANKER: true,
+        GENERATE_ANSWER: true
+    },
+    
+    // Timeout settings (milliseconds)
+    TIMEOUT: {
+        RAG_SEARCH: 120000,     // 120 seconds (2 minutes) - 增加以支持 LLM 精排
+    }
+};
+
+/**
+ * 动态加载 RAG 服务器配置
+ * 从 tunnel_config.json 获取最新的隧道 URL
+ */
+async function loadDynamicConfig() {
+    try {
+        // 添加时间戳防止缓存
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${CONFIG.DYNAMIC_CONFIG_URL}?t=${timestamp}`, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+            }
+        });
+        
+        if (response.ok) {
+            const dynamicConfig = await response.json();
+            if (dynamicConfig.rag_server_url) {
+                const oldUrl = CONFIG.RAG_SERVER_URL;
+                CONFIG.RAG_SERVER_URL = dynamicConfig.rag_server_url;
+                
+                // 检测 URL 是否变化
+                const urlChanged = oldUrl !== dynamicConfig.rag_server_url;
+                
+                console.log('✅ 动态配置加载成功:', CONFIG.RAG_SERVER_URL);
+                console.log('📅 配置更新时间:', dynamicConfig.updated_at || '未知');
+                
+                if (dynamicConfig.tunnel_type === 'temporary') {
+                    console.warn('⚠️  当前使用临时隧道，URL 可能会在重启后变化');
+                }
+                
+                // 如果 URL 变化，显示通知
+                if (urlChanged && oldUrl !== 'https://phrases-election-integrating-brand.trycloudflare.com') {
+                    showUrlChangeNotification(oldUrl, dynamicConfig.rag_server_url);
+                }
+                
+                return true;
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️  动态配置加载失败，使用默认配置:', error.message);
+    }
+    return false;
+}
+
+/**
+ * 显示 URL 变化通知
+ */
+function showUrlChangeNotification(oldUrl, newUrl) {
+    console.log('🔄 隧道 URL 已更新:');
+    console.log('   旧: ' + oldUrl);
+    console.log('   新: ' + newUrl);
+    
+    // 触发自定义事件，让页面显示通知
+    window.dispatchEvent(new CustomEvent('tunnelUrlChanged', { 
+        detail: { oldUrl, newUrl } 
+    }));
+}
+
+/**
+ * 定期检查配置更新（用于临时隧道自动重启场景）
+ */
+function startConfigPolling(intervalSeconds = 60) {
+    if (window.configPollingInterval) {
+        clearInterval(window.configPollingInterval);
+    }
+    
+    window.configPollingInterval = setInterval(async () => {
+        console.log('🔍 检查配置更新...');
+        const success = await loadDynamicConfig();
+        if (success) {
+            // 触发配置更新事件
+            window.dispatchEvent(new CustomEvent('configUpdated', { detail: CONFIG }));
+        }
+    }, intervalSeconds * 1000);
+    
+    console.log(`✅ 已启动配置轮询，间隔 ${intervalSeconds} 秒`);
+}
+
+/**
+ * 停止配置轮询
+ */
+function stopConfigPolling() {
+    if (window.configPollingInterval) {
+        clearInterval(window.configPollingInterval);
+        window.configPollingInterval = null;
+        console.log('⏹️  已停止配置轮询');
+    }
+}
+
+// 在页面加载时自动加载动态配置
+if (typeof window !== 'undefined') {
+    // 立即加载动态配置
+    loadDynamicConfig().then(() => {
+        // 触发自定义事件，通知配置已更新
+        window.dispatchEvent(new CustomEvent('configLoaded', { detail: CONFIG }));
+        
+        // 启动配置轮询（每60秒检查一次）
+        // 这样当临时隧道重启时，前端可以自动获取新的 URL
+        startConfigPolling(60);
+    });
+}
+
+// Export for use in other scripts
+window.CONFIG = CONFIG;
+window.loadDynamicConfig = loadDynamicConfig;
+window.startConfigPolling = startConfigPolling;
+window.stopConfigPolling = stopConfigPolling;
