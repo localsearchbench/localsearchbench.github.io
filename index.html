@@ -769,141 +769,212 @@
         <h2 class="title is-3">🏆 Leaderboard</h2>
         <div class="content has-text-justified">
           <p style="text-align: justify;">
-            Performance of various models on LocalSearchBench. Evaluated on correctness, completeness, fluency, faithfulness, and safety.
+            Performance of various models on LocalSearchBench. Evaluated on answer quality and trajectory effectiveness.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Leaderboard Table -->
-    <div class="table-container">
-      <table class="table is-striped is-hoverable is-fullwidth leaderboard-table" id="leaderboard-table">
-        <thead>
-          <tr>
-            <th>Model</th>
-            <th class="sortable" data-column="0" data-type="number">Avg. tool calls <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="1" data-type="number">Avg. rounds <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="2" data-type="number">Correctness (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="3" data-type="number">Completeness (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="4" data-type="number">Fluency (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="5" data-type="number">Faithfulness (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="6" data-type="number">Safety (%) <span class="sort-arrow"></span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-values='[1.72, 2.70, 26.76, 75.42, 71.54, 72.63, 81.00]'>
-            <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1</strong></td>
-            <td>1.72</td>
-            <td>2.70</td>
-            <td>26.76</td>
-            <td>75.42</td>
-            <td>71.54</td>
-            <td>72.63</td>
-            <td>81.00</td>
-          </tr>
-          <tr data-values='[1.89, 2.86, 26.09, 77.93, 73.50, 78.26, 83.81]'>
-            <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro</strong></td>
-            <td>1.89</td>
-            <td>2.86</td>
-            <td>26.09</td>
-            <td>77.93</td>
-            <td>73.50</td>
-            <td>78.26</td>
-            <td>83.81</td>
-          </tr>
-          <tr data-values='[2.59, 3.12, 32.79, 80.94, 73.65, 68.68, 83.14]'>
-            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen-Plus-Latest</strong></td>
-            <td>2.59</td>
-            <td>3.12</td>
-            <td>32.79</td>
-            <td>80.94</td>
-            <td>73.65</td>
-            <td>68.68</td>
-            <td>83.14</td>
-          </tr>
-          <tr data-values='[2.73, 3.22, 33.19, 80.51, 73.40, 60.80, 81.14]'>
-            <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Large-32K</strong></td>
-            <td>2.73</td>
-            <td>3.22</td>
-            <td>33.19</td>
-            <td>80.51</td>
-            <td>73.40</td>
-            <td>60.80</td>
-            <td>81.14</td>
-          </tr>
-          <tr data-values='[2.30, 3.15, 32.94, 80.59, 73.00, 63.77, 84.71]'>
-            <td><img src="static/images/logo/ai_hunyuan.png" alt="Hunyuan" class="model-logo"> <strong>Hunyuan-T1</strong></td>
-            <td>2.30</td>
-            <td>3.15</td>
-            <td>32.94</td>
-            <td>80.59</td>
-            <td>73.00</td>
-            <td>63.77</td>
-            <td>84.71</td>
-          </tr>
-          <tr data-values='[2.04, 2.85, 26.42, 76.25, 70.97, 48.54, 81.54]'>
-            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B</strong></td>
-            <td>2.04</td>
-            <td>2.85</td>
-            <td>26.42</td>
-            <td>76.25</td>
-            <td>70.97</td>
-            <td>48.54</td>
-            <td>81.54</td>
-          </tr>
-          <tr data-values='[2.48, 2.89, 24.75, 71.37, 70.17, 40.84, 81.34]'>
-            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B</strong></td>
-            <td>2.48</td>
-            <td>2.89</td>
-            <td>24.75</td>
-            <td>71.37</td>
-            <td>70.17</td>
-            <td>40.84</td>
-            <td>81.34</td>
-          </tr>
-          <tr data-values='[2.35, 2.81, 28.43, 73.48, 70.54, 52.43, 81.67]'>
-            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B</strong></td>
-            <td>2.35</td>
-            <td>2.81</td>
-            <td>28.43</td>
-            <td>73.48</td>
-            <td>70.54</td>
-            <td>52.43</td>
-            <td>81.67</td>
-          </tr>
-          <tr data-values='[2.73, 3.66, 33.78, 76.76, 71.81, 73.12, 76.66]'>
-            <td><img src="static/images/logo/logo_chatglm.png" alt="ChatGLM" class="model-logo"> <strong>GLM-4.5</strong></td>
-            <td>2.73</td>
-            <td>3.66</td>
-            <td>33.78</td>
-            <td>76.76</td>
-            <td>71.81</td>
-            <td>73.12</td>
-            <td>76.66</td>
-          </tr>
-          <tr data-values='[3.43, 4.02, 34.34, 80.00, 72.39, 60.80, 81.48]'>
-            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.1</strong></td>
-            <td>3.43</td>
-            <td>4.02</td>
-            <td>34.34</td>
-            <td>80.00</td>
-            <td>72.39</td>
-            <td>60.80</td>
-            <td>81.48</td>
-          </tr>
-          <!-- Average -->
-          <tr data-values='[2.43, 3.13, 29.95, 77.33, 72.10, 61.99, 81.65]' class="average-row">
-            <td><strong>Average</strong></td>
-            <td>2.43</td>
-            <td>3.13</td>
-            <td>29.95</td>
-            <td>77.33</td>
-            <td>72.10</td>
-            <td>61.99</td>
-            <td>81.65</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Answer Evaluation Metrics -->
+    <div class="content" style="margin-top: 1.5rem;">
+      <h3 class="title is-4 has-text-centered" style="margin-bottom: 1rem;">📝 Answer Evaluation Metrics</h3>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth leaderboard-table" id="leaderboard-table-answer">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th class="sortable" data-column="0" data-type="number">Avg. tool calls <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="1" data-type="number">Avg. rounds <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="2" data-type="number">Correctness (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="3" data-type="number">Completeness (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="4" data-type="number">Fluency (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="5" data-type="number">Safety (%) <span class="sort-arrow"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-values='[1.72, 2.70, 26.76, 75.42, 71.54, 81.00]'>
+              <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1</strong></td>
+              <td>1.72</td>
+              <td>2.70</td>
+              <td>26.76</td>
+              <td>75.42</td>
+              <td>71.54</td>
+              <td>81.00</td>
+            </tr>
+            <tr data-values='[1.89, 2.86, 26.09, 77.93, 73.50, 83.81]'>
+              <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro</strong></td>
+              <td>1.89</td>
+              <td>2.86</td>
+              <td>26.09</td>
+              <td>77.93</td>
+              <td>73.50</td>
+              <td>83.81</td>
+            </tr>
+            <tr data-values='[2.59, 3.12, 32.79, 80.94, 73.65, 83.14]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen-Plus-Latest</strong></td>
+              <td>2.59</td>
+              <td>3.12</td>
+              <td>32.79</td>
+              <td>80.94</td>
+              <td>73.65</td>
+              <td>83.14</td>
+            </tr>
+            <tr data-values='[2.73, 3.22, 33.19, 80.51, 73.40, 81.14]'>
+              <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Large-32K</strong></td>
+              <td>2.73</td>
+              <td>3.22</td>
+              <td>33.19</td>
+              <td>80.51</td>
+              <td>73.40</td>
+              <td>81.14</td>
+            </tr>
+            <tr data-values='[2.30, 3.15, 32.94, 80.59, 73.00, 84.71]'>
+              <td><img src="static/images/logo/ai_hunyuan.png" alt="Hunyuan" class="model-logo"> <strong>Hunyuan-T1</strong></td>
+              <td>2.30</td>
+              <td>3.15</td>
+              <td>32.94</td>
+              <td>80.59</td>
+              <td>73.00</td>
+              <td>84.71</td>
+            </tr>
+            <tr data-values='[2.04, 2.85, 26.42, 76.25, 70.97, 81.54]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B</strong></td>
+              <td>2.04</td>
+              <td>2.85</td>
+              <td>26.42</td>
+              <td>76.25</td>
+              <td>70.97</td>
+              <td>81.54</td>
+            </tr>
+            <tr data-values='[2.48, 2.89, 24.75, 71.37, 70.17, 81.34]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B</strong></td>
+              <td>2.48</td>
+              <td>2.89</td>
+              <td>24.75</td>
+              <td>71.37</td>
+              <td>70.17</td>
+              <td>81.34</td>
+            </tr>
+            <tr data-values='[2.35, 2.81, 28.43, 73.48, 70.54, 81.67]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B</strong></td>
+              <td>2.35</td>
+              <td>2.81</td>
+              <td>28.43</td>
+              <td>73.48</td>
+              <td>70.54</td>
+              <td>81.67</td>
+            </tr>
+            <tr data-values='[2.73, 3.66, 33.78, 76.76, 71.81, 76.66]'>
+              <td><img src="static/images/logo/logo_chatglm.png" alt="ChatGLM" class="model-logo"> <strong>GLM-4.5</strong></td>
+              <td>2.73</td>
+              <td>3.66</td>
+              <td>33.78</td>
+              <td>76.76</td>
+              <td>71.81</td>
+              <td>76.66</td>
+            </tr>
+            <tr data-values='[3.43, 4.02, 34.34, 80.00, 72.39, 81.48]'>
+              <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.1</strong></td>
+              <td>3.43</td>
+              <td>4.02</td>
+              <td>34.34</td>
+              <td>80.00</td>
+              <td>72.39</td>
+              <td>81.48</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Trajectory Evaluation Metrics -->
+    <div class="content" style="margin-top: 2rem;">
+      <h3 class="title is-4 has-text-centered" style="margin-bottom: 1rem;">🔄 Trajectory Evaluation Metrics</h3>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth leaderboard-table" id="leaderboard-table-trajectory">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th class="sortable" data-column="0" data-type="number">Action Relevance (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="1" data-type="number">Evidence Sufficiency (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="2" data-type="number">Causal Coherence (%) <span class="sort-arrow"></span></th>
+              <th class="sortable" data-column="3" data-type="number">Search Efficiency (%) <span class="sort-arrow"></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-values='[72.63, 85.21, 72.43, 67.33]'>
+              <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1</strong></td>
+              <td>72.63</td>
+              <td>85.21</td>
+              <td>72.43</td>
+              <td>67.33</td>
+            </tr>
+            <tr data-values='[78.26, 87.21, 77.56, 70.43]'>
+              <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro</strong></td>
+              <td>78.26</td>
+              <td>87.21</td>
+              <td>77.56</td>
+              <td>70.43</td>
+            </tr>
+            <tr data-values='[68.68, 84.43, 67.54, 74.25]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen-Plus-Latest</strong></td>
+              <td>68.68</td>
+              <td>84.43</td>
+              <td>67.54</td>
+              <td>74.25</td>
+            </tr>
+            <tr data-values='[60.80, 83.21, 64.35, 76.32]'>
+              <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Large-32K</strong></td>
+              <td>60.80</td>
+              <td>83.21</td>
+              <td>64.35</td>
+              <td>76.32</td>
+            </tr>
+            <tr data-values='[63.77, 83.47, 65.12, 72.89]'>
+              <td><img src="static/images/logo/ai_hunyuan.png" alt="Hunyuan" class="model-logo"> <strong>Hunyuan-T1</strong></td>
+              <td>63.77</td>
+              <td>83.47</td>
+              <td>65.12</td>
+              <td>72.89</td>
+            </tr>
+            <tr data-values='[48.54, 79.89, 53.26, 71.45]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B</strong></td>
+              <td>48.54</td>
+              <td>79.89</td>
+              <td>53.26</td>
+              <td>71.45</td>
+            </tr>
+            <tr data-values='[40.84, 78.34, 49.85, 73.68]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B</strong></td>
+              <td>40.84</td>
+              <td>78.34</td>
+              <td>49.85</td>
+              <td>73.68</td>
+            </tr>
+            <tr data-values='[52.43, 81.56, 57.93, 74.12]'>
+              <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B</strong></td>
+              <td>52.43</td>
+              <td>81.56</td>
+              <td>57.93</td>
+              <td>74.12</td>
+            </tr>
+            <tr data-values='[73.12, 86.75, 74.21, 69.87]'>
+              <td><img src="static/images/logo/logo_chatglm.png" alt="ChatGLM" class="model-logo"> <strong>GLM-4.5</strong></td>
+              <td>73.12</td>
+              <td>86.75</td>
+              <td>74.21</td>
+              <td>69.87</td>
+            </tr>
+            <tr data-values='[60.80, 84.28, 63.47, 79.25]'>
+              <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.1</strong></td>
+              <td>60.80</td>
+              <td>84.28</td>
+              <td>63.47</td>
+              <td>79.25</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="content has-text-centered" style="margin-top: 1.5rem;">
