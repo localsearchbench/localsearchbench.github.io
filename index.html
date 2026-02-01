@@ -775,9 +775,10 @@
       </div>
     </div>
 
-    <!-- Leaderboard Table -->
+    <!-- Answer Quality Table -->
     <div class="table-container">
-      <table class="table is-striped is-hoverable is-fullwidth leaderboard-table" id="leaderboard-table">
+      <h4 class="title is-5" style="text-align: left; margin-bottom: 1rem;">📊 Answer Quality Metrics</h4>
+      <table class="table is-striped is-hoverable is-fullwidth" id="leaderboard-table-quality">
         <thead>
           <tr>
             <th>Model</th>
@@ -788,15 +789,11 @@
             <th class="sortable" data-column="4" data-type="number">Fluency (%) <span class="sort-arrow"></span></th>
             <th class="sortable" data-column="5" data-type="number">Faithfulness (%) <span class="sort-arrow"></span></th>
             <th class="sortable" data-column="6" data-type="number">Safety (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="7" data-type="number">Action Relevance (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="8" data-type="number">Evidence Sufficiency (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="9" data-type="number">Causal Coherence (%) <span class="sort-arrow"></span></th>
-            <th class="sortable" data-column="10" data-type="number">Search Efficiency (%) <span class="sort-arrow"></span></th>
           </tr>
         </thead>
         <tbody>
           <!-- Qwen3 Series -->
-          <tr data-values='[3.21, 4.20, 35.60, 77.56, 72.39, 39.78, 81.48, 60.80, 84.28, 63.47, 54.83]'>
+          <tr data-values='[3.21, 4.20, 35.60, 77.56, 72.39, 39.78, 81.48]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/ thinking)</strong></td>
             <td>3.21</td>
             <td>4.20</td>
@@ -805,12 +802,8 @@
             <td>72.39</td>
             <td>39.78</td>
             <td>81.48</td>
-            <td>60.80</td>
-            <td>84.28</td>
-            <td>63.47</td>
-            <td>54.83</td>
           </tr>
-          <tr data-values='[2.35, 2.81, 28.43, 73.48, 71.58, 52.43, 81.67, 52.43, 81.56, 57.93, 74.12]'>
+          <tr data-values='[2.35, 2.81, 28.43, 73.48, 71.58, 52.43, 81.67]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/o thinking)</strong></td>
             <td>2.35</td>
             <td>2.81</td>
@@ -819,12 +812,8 @@
             <td>71.58</td>
             <td>52.43</td>
             <td>81.67</td>
-            <td>52.43</td>
-            <td>81.56</td>
-            <td>57.93</td>
-            <td>74.12</td>
           </tr>
-          <tr data-values='[2.92, 3.79, 30.65, 75.43, 72.08, 36.65, 80.68, 50.83, 82.14, 52.35, 65.23]'>
+          <tr data-values='[2.92, 3.79, 30.65, 75.43, 72.08, 36.65, 80.68]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/ thinking)</strong></td>
             <td>2.92</td>
             <td>3.79</td>
@@ -833,12 +822,8 @@
             <td>72.08</td>
             <td>36.65</td>
             <td>80.68</td>
-            <td>50.83</td>
-            <td>82.14</td>
-            <td>52.35</td>
-            <td>65.23</td>
           </tr>
-          <tr data-values='[2.48, 2.89, 24.75, 71.37, 70.17, 40.84, 81.34, 40.84, 78.34, 49.85, 73.68]'>
+          <tr data-values='[2.48, 2.89, 24.75, 71.37, 70.17, 40.84, 81.34]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/o thinking)</strong></td>
             <td>2.48</td>
             <td>2.89</td>
@@ -847,12 +832,8 @@
             <td>70.17</td>
             <td>40.84</td>
             <td>81.34</td>
-            <td>40.84</td>
-            <td>78.34</td>
-            <td>49.85</td>
-            <td>73.68</td>
           </tr>
-          <tr data-values='[2.58, 3.39, 27.89, 74.12, 71.23, 35.12, 80.85, 48.56, 80.35, 51.26, 68.45]'>
+          <tr data-values='[2.58, 3.39, 27.89, 74.12, 71.23, 35.12, 80.85]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/ thinking)</strong></td>
             <td>2.58</td>
             <td>3.39</td>
@@ -861,12 +842,8 @@
             <td>71.23</td>
             <td>35.12</td>
             <td>80.85</td>
-            <td>48.56</td>
-            <td>80.35</td>
-            <td>51.26</td>
-            <td>68.45</td>
           </tr>
-          <tr data-values='[2.04, 2.85, 26.42, 76.25, 70.97, 48.54, 81.54, 48.54, 79.89, 53.26, 71.45]'>
+          <tr data-values='[2.04, 2.85, 26.42, 76.25, 70.97, 48.54, 81.54]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/o thinking)</strong></td>
             <td>2.04</td>
             <td>2.85</td>
@@ -875,14 +852,10 @@
             <td>70.97</td>
             <td>48.54</td>
             <td>81.54</td>
-            <td>48.54</td>
-            <td>79.89</td>
-            <td>53.26</td>
-            <td>71.45</td>
           </tr>
           
           <!-- GPT Series -->
-          <tr data-values='[1.73, 2.31, 18.50, 73.25, 71.25, 55.65, 80.35, 55.65, 83.25, 54.35, 64.25]'>
+          <tr data-values='[1.73, 2.31, 18.50, 73.25, 71.25, 55.65, 80.35]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1 (w/o thinking)</strong></td>
             <td>1.73</td>
             <td>2.31</td>
@@ -891,12 +864,8 @@
             <td>71.25</td>
             <td>55.65</td>
             <td>80.35</td>
-            <td>55.65</td>
-            <td>83.25</td>
-            <td>54.35</td>
-            <td>64.25</td>
           </tr>
-          <tr data-values='[2.15, 3.15, 31.50, 76.85, 72.15, 38.25, 82.15, 58.25, 85.15, 55.35, 68.15]'>
+          <tr data-values='[2.15, 3.15, 31.50, 76.85, 72.15, 38.25, 82.15]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="o3" class="model-logo"> <strong>o3 (high) (w/ thinking)</strong></td>
             <td>2.15</td>
             <td>3.15</td>
@@ -905,14 +874,10 @@
             <td>72.15</td>
             <td>38.25</td>
             <td>82.15</td>
-            <td>58.25</td>
-            <td>85.15</td>
-            <td>55.35</td>
-            <td>68.15</td>
           </tr>
           
           <!-- Gemini Series -->
-          <tr data-values='[2.18, 3.25, 30.15, 75.35, 72.85, 36.85, 81.25, 56.85, 84.25, 53.18, 69.25]'>
+          <tr data-values='[2.18, 3.25, 30.15, 75.35, 72.85, 36.85, 81.25]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash (w/ thinking)</strong></td>
             <td>2.18</td>
             <td>3.25</td>
@@ -921,12 +886,8 @@
             <td>72.85</td>
             <td>36.85</td>
             <td>81.25</td>
-            <td>56.85</td>
-            <td>84.25</td>
-            <td>53.18</td>
-            <td>69.25</td>
           </tr>
-          <tr data-values='[1.95, 2.85, 25.85, 74.15, 71.15, 45.15, 80.15, 45.15, 82.15, 52.18, 72.15]'>
+          <tr data-values='[1.95, 2.85, 25.85, 74.15, 71.15, 45.15, 80.15]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash (w/o thinking)</strong></td>
             <td>1.95</td>
             <td>2.85</td>
@@ -935,12 +896,8 @@
             <td>71.15</td>
             <td>45.15</td>
             <td>80.15</td>
-            <td>45.15</td>
-            <td>82.15</td>
-            <td>52.18</td>
-            <td>72.15</td>
           </tr>
-          <tr data-values='[2.35, 3.45, 32.30, 76.25, 73.15, 37.15, 82.32, 57.15, 85.32, 54.25, 70.32]'>
+          <tr data-values='[2.35, 3.45, 32.30, 76.25, 73.15, 37.15, 82.32]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro (w/ thinking)</strong></td>
             <td>2.35</td>
             <td>3.45</td>
@@ -949,12 +906,8 @@
             <td>73.15</td>
             <td>37.15</td>
             <td>82.32</td>
-            <td>57.15</td>
-            <td>85.32</td>
-            <td>54.25</td>
-            <td>70.32</td>
           </tr>
-          <tr data-values='[1.89, 2.86, 26.09, 77.93, 73.50, 78.26, 83.81, 78.26, 87.21, 77.56, 70.43]'>
+          <tr data-values='[1.89, 2.86, 26.09, 77.93, 73.50, 78.26, 83.81]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro (w/o thinking)</strong></td>
             <td>1.89</td>
             <td>2.86</td>
@@ -963,14 +916,10 @@
             <td>73.50</td>
             <td>78.26</td>
             <td>83.81</td>
-            <td>78.26</td>
-            <td>87.21</td>
-            <td>77.56</td>
-            <td>70.43</td>
           </tr>
           
           <!-- LongCat Series -->
-          <tr data-values='[2.68, 3.55, 31.15, 75.85, 72.35, 38.85, 83.61, 58.85, 84.61, 53.18, 71.61]'>
+          <tr data-values='[2.68, 3.55, 31.15, 75.85, 72.35, 38.85, 83.61]'>
             <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Chat (w/ thinking)</strong></td>
             <td>2.68</td>
             <td>3.55</td>
@@ -979,12 +928,8 @@
             <td>72.35</td>
             <td>38.85</td>
             <td>83.61</td>
-            <td>58.85</td>
-            <td>84.61</td>
-            <td>53.18</td>
-            <td>71.61</td>
           </tr>
-          <tr data-values='[2.35, 3.15, 27.15, 74.35, 71.25, 48.85, 82.35, 48.85, 83.35, 52.15, 74.35]'>
+          <tr data-values='[2.35, 3.15, 27.15, 74.35, 71.25, 48.85, 82.35]'>
             <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Chat (w/o thinking)</strong></td>
             <td>2.35</td>
             <td>3.15</td>
@@ -993,12 +938,8 @@
             <td>71.25</td>
             <td>48.85</td>
             <td>82.35</td>
-            <td>48.85</td>
-            <td>83.35</td>
-            <td>52.15</td>
-            <td>74.35</td>
           </tr>
-          <tr data-values='[2.85, 3.75, 32.15, 76.25, 72.85, 39.25, 82.85, 59.25, 85.25, 60.18, 72.85]'>
+          <tr data-values='[2.85, 3.75, 32.15, 76.25, 72.85, 39.25, 82.85]'>
             <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Thinking (w/ thinking)</strong></td>
             <td>2.85</td>
             <td>3.75</td>
@@ -1007,12 +948,8 @@
             <td>72.85</td>
             <td>39.25</td>
             <td>82.85</td>
-            <td>59.25</td>
-            <td>85.25</td>
-            <td>60.18</td>
-            <td>72.85</td>
           </tr>
-          <tr data-values='[2.73, 3.22, 33.19, 80.51, 73.40, 60.80, 81.14, 60.80, 83.21, 64.35, 76.32]'>
+          <tr data-values='[2.73, 3.22, 33.19, 80.51, 73.40, 60.80, 81.14]'>
             <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Thinking (w/o thinking)</strong></td>
             <td>2.73</td>
             <td>3.22</td>
@@ -1021,14 +958,10 @@
             <td>73.40</td>
             <td>60.80</td>
             <td>81.14</td>
-            <td>60.80</td>
-            <td>83.21</td>
-            <td>64.35</td>
-            <td>76.32</td>
           </tr>
           
           <!-- GLM Series -->
-          <tr data-values='[2.78, 3.65, 30.25, 74.85, 71.65, 36.85, 80.65, 56.85, 83.65, 52.35, 69.65]'>
+          <tr data-values='[2.78, 3.65, 30.25, 74.85, 71.65, 36.85, 80.65]'>
             <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/ thinking)</strong></td>
             <td>2.78</td>
             <td>3.65</td>
@@ -1037,12 +970,8 @@
             <td>71.65</td>
             <td>36.85</td>
             <td>80.65</td>
-            <td>56.85</td>
-            <td>83.65</td>
-            <td>52.35</td>
-            <td>69.65</td>
           </tr>
-          <tr data-values='[2.73, 3.66, 33.78, 76.76, 71.81, 73.12, 76.66, 73.12, 86.75, 74.21, 69.87]'>
+          <tr data-values='[2.73, 3.66, 33.78, 76.76, 71.81, 73.12, 76.66]'>
             <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/o thinking)</strong></td>
             <td>2.73</td>
             <td>3.66</td>
@@ -1051,14 +980,10 @@
             <td>71.81</td>
             <td>73.12</td>
             <td>76.66</td>
-            <td>73.12</td>
-            <td>86.75</td>
-            <td>74.21</td>
-            <td>69.87</td>
           </tr>
           
           <!-- Deepseek Series -->
-          <tr data-values='[3.21, 4.20, 35.60, 77.56, 72.39, 39.78, 81.48, 60.80, 84.28, 63.47, 54.83]'>
+          <tr data-values='[3.21, 4.20, 35.60, 77.56, 72.39, 39.78, 81.48]'>
             <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/ thinking)</strong></td>
             <td>3.21</td>
             <td>4.20</td>
@@ -1067,12 +992,8 @@
             <td>72.39</td>
             <td>39.78</td>
             <td>81.48</td>
-            <td>60.80</td>
-            <td>84.28</td>
-            <td>63.47</td>
-            <td>54.83</td>
           </tr>
-          <tr data-values='[2.45, 3.12, 29.15, 75.25, 72.15, 45.25, 80.25, 55.25, 84.25, 55.35, 72.25]'>
+          <tr data-values='[2.45, 3.12, 29.15, 75.25, 72.15, 45.25, 80.25]'>
             <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/o thinking)</strong></td>
             <td>2.45</td>
             <td>3.12</td>
@@ -1081,6 +1002,171 @@
             <td>72.15</td>
             <td>45.25</td>
             <td>80.25</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Trajectory Effectiveness Table -->
+    <div class="table-container" style="margin-top: 2rem;">
+      <h4 class="title is-5" style="text-align: left; margin-bottom: 1rem;">🎯 Trajectory Effectiveness Metrics</h4>
+      <table class="table is-striped is-hoverable is-fullwidth" id="leaderboard-table-trajectory">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th class="sortable" data-column="0" data-type="number">Action Relevance (%) <span class="sort-arrow"></span></th>
+            <th class="sortable" data-column="1" data-type="number">Evidence Sufficiency (%) <span class="sort-arrow"></span></th>
+            <th class="sortable" data-column="2" data-type="number">Causal Coherence (%) <span class="sort-arrow"></span></th>
+            <th class="sortable" data-column="3" data-type="number">Search Efficiency (%) <span class="sort-arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Qwen3 Series -->
+          <tr data-values='[60.80, 84.28, 63.47, 54.83]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/ thinking)</strong></td>
+            <td>60.80</td>
+            <td>84.28</td>
+            <td>63.47</td>
+            <td>54.83</td>
+          </tr>
+          <tr data-values='[52.43, 81.56, 57.93, 74.12]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/o thinking)</strong></td>
+            <td>52.43</td>
+            <td>81.56</td>
+            <td>57.93</td>
+            <td>74.12</td>
+          </tr>
+          <tr data-values='[50.83, 82.14, 52.35, 65.23]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/ thinking)</strong></td>
+            <td>50.83</td>
+            <td>82.14</td>
+            <td>52.35</td>
+            <td>65.23</td>
+          </tr>
+          <tr data-values='[40.84, 78.34, 49.85, 73.68]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/o thinking)</strong></td>
+            <td>40.84</td>
+            <td>78.34</td>
+            <td>49.85</td>
+            <td>73.68</td>
+          </tr>
+          <tr data-values='[48.56, 80.35, 51.26, 68.45]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/ thinking)</strong></td>
+            <td>48.56</td>
+            <td>80.35</td>
+            <td>51.26</td>
+            <td>68.45</td>
+          </tr>
+          <tr data-values='[48.54, 79.89, 53.26, 71.45]'>
+            <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/o thinking)</strong></td>
+            <td>48.54</td>
+            <td>79.89</td>
+            <td>53.26</td>
+            <td>71.45</td>
+          </tr>
+          
+          <!-- GPT Series -->
+          <tr data-values='[55.65, 83.25, 54.35, 64.25]'>
+            <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1 (w/o thinking)</strong></td>
+            <td>55.65</td>
+            <td>83.25</td>
+            <td>54.35</td>
+            <td>64.25</td>
+          </tr>
+          <tr data-values='[58.25, 85.15, 55.35, 68.15]'>
+            <td><img src="static/images/logo/icon-chatgpt (1).png" alt="o3" class="model-logo"> <strong>o3 (high) (w/ thinking)</strong></td>
+            <td>58.25</td>
+            <td>85.15</td>
+            <td>55.35</td>
+            <td>68.15</td>
+          </tr>
+          
+          <!-- Gemini Series -->
+          <tr data-values='[56.85, 84.25, 53.18, 69.25]'>
+            <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash (w/ thinking)</strong></td>
+            <td>56.85</td>
+            <td>84.25</td>
+            <td>53.18</td>
+            <td>69.25</td>
+          </tr>
+          <tr data-values='[45.15, 82.15, 52.18, 72.15]'>
+            <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash (w/o thinking)</strong></td>
+            <td>45.15</td>
+            <td>82.15</td>
+            <td>52.18</td>
+            <td>72.15</td>
+          </tr>
+          <tr data-values='[57.15, 85.32, 54.25, 70.32]'>
+            <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro (w/ thinking)</strong></td>
+            <td>57.15</td>
+            <td>85.32</td>
+            <td>54.25</td>
+            <td>70.32</td>
+          </tr>
+          <tr data-values='[78.26, 87.21, 77.56, 70.43]'>
+            <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro (w/o thinking)</strong></td>
+            <td>78.26</td>
+            <td>87.21</td>
+            <td>77.56</td>
+            <td>70.43</td>
+          </tr>
+          
+          <!-- LongCat Series -->
+          <tr data-values='[58.85, 84.61, 53.18, 71.61]'>
+            <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Chat (w/ thinking)</strong></td>
+            <td>58.85</td>
+            <td>84.61</td>
+            <td>53.18</td>
+            <td>71.61</td>
+          </tr>
+          <tr data-values='[48.85, 83.35, 52.15, 74.35]'>
+            <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Chat (w/o thinking)</strong></td>
+            <td>48.85</td>
+            <td>83.35</td>
+            <td>52.15</td>
+            <td>74.35</td>
+          </tr>
+          <tr data-values='[59.25, 85.25, 60.18, 72.85]'>
+            <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Thinking (w/ thinking)</strong></td>
+            <td>59.25</td>
+            <td>85.25</td>
+            <td>60.18</td>
+            <td>72.85</td>
+          </tr>
+          <tr data-values='[60.80, 83.21, 64.35, 76.32]'>
+            <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Thinking (w/o thinking)</strong></td>
+            <td>60.80</td>
+            <td>83.21</td>
+            <td>64.35</td>
+            <td>76.32</td>
+          </tr>
+          
+          <!-- GLM Series -->
+          <tr data-values='[56.85, 83.65, 52.35, 69.65]'>
+            <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/ thinking)</strong></td>
+            <td>56.85</td>
+            <td>83.65</td>
+            <td>52.35</td>
+            <td>69.65</td>
+          </tr>
+          <tr data-values='[73.12, 86.75, 74.21, 69.87]'>
+            <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/o thinking)</strong></td>
+            <td>73.12</td>
+            <td>86.75</td>
+            <td>74.21</td>
+            <td>69.87</td>
+          </tr>
+          
+          <!-- Deepseek Series -->
+          <tr data-values='[60.80, 84.28, 63.47, 54.83]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/ thinking)</strong></td>
+            <td>60.80</td>
+            <td>84.28</td>
+            <td>63.47</td>
+            <td>54.83</td>
+          </tr>
+          <tr data-values='[55.25, 84.25, 55.35, 72.25]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/o thinking)</strong></td>
             <td>55.25</td>
             <td>84.25</td>
             <td>55.35</td>
@@ -1089,6 +1175,14 @@
         </tbody>
       </table>
     </div>
+
+    <div class="content has-text-centered" style="margin-top: 1.5rem;">
+      <p class="is-size-7">
+        <em>Note: Results are based on our evaluation framework. See paper for detailed methodology.</em>
+      </p>
+    </div>
+  </div>
+</section>
 
     <div class="content has-text-centered" style="margin-top: 1.5rem;">
       <p class="is-size-7">
