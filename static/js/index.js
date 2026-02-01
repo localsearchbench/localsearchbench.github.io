@@ -1043,33 +1043,35 @@ function displayAgenticResults(response) {
 
 // Leaderboard Table Sorting
 function initLeaderboardSorting() {
-    const table = document.getElementById('leaderboard-table');
-    if (!table) return;
+    // Support both the original single table and multiple tables
+    const tables = document.querySelectorAll('.leaderboard-table');
     
-    const headers = table.querySelectorAll('thead th.sortable');
-    let currentSort = { column: null, direction: null };
-    
-    headers.forEach(header => {
-        header.addEventListener('click', function() {
-            const column = parseInt(this.getAttribute('data-column'));
-            
-            // Determine sort direction
-            let direction = 'desc'; // Default to descending (higher values first)
-            if (currentSort.column === column) {
-                direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
-            }
-            
-            // Update current sort state
-            currentSort = { column, direction };
-            
-            // Update header styles
-            headers.forEach(h => {
-                h.classList.remove('asc', 'desc');
+    tables.forEach(table => {
+        const headers = table.querySelectorAll('thead th.sortable');
+        let currentSort = { column: null, direction: null };
+        
+        headers.forEach(header => {
+            header.addEventListener('click', function() {
+                const column = parseInt(this.getAttribute('data-column'));
+                
+                // Determine sort direction
+                let direction = 'desc'; // Default to descending (higher values first)
+                if (currentSort.column === column) {
+                    direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
+                }
+                
+                // Update current sort state
+                currentSort = { column, direction };
+                
+                // Update header styles
+                headers.forEach(h => {
+                    h.classList.remove('asc', 'desc');
+                });
+                this.classList.add(direction);
+                
+                // Sort the table
+                sortTable(table, column, direction);
             });
-            this.classList.add(direction);
-            
-            // Sort the table
-            sortTable(table, column, direction);
         });
     });
 }
