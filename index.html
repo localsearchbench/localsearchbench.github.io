@@ -398,7 +398,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Recent advances in large reasoning models (<i>LRM</i>s) have enabled <i>agentic search</i> systems to perform complex multi-step reasoning across multiple sources. However, most studies focus on general information retrieval and rarely explores vertical domains with unique challenges. In this work, we focus on local life services and introduce <b>LocalSearchBench</b>, which encompass diverse and complex business scenarios. Real-world queries in this domain are often ambiguous and require multi-hop reasoning across merchants and products, remaining challenging and not fully addressed. As the first comprehensive benchmark for <i>agentic search</i> in local life services, <b>LocalSearchBench</b> comprises a database of over <b>1.3M</b> merchant entries across <b>6</b> service categories and <b>9</b> major cities, and <b>900</b> multi-hop QA tasks from real user queries that require multi-step reasoning. We also developed <b>LocalPlayground</b>, a unified environment integrating multiple tools for <i>LRM</i>s interaction. Experiments show that even state-of-the-art <i>LRM</i>s struggle on <b>LocalSearchBench</b>: the best model (DeepSeek-V3.2) achieves only <b>32.93%</b> correctness, and most models have issues with completeness (average <b>60.32%</b>) and faithfulness (average <b>30.72%</b>). This highlights the need for specialized benchmarks and domain-specific agent training in local life services.
+            Recent advances in large reasoning models (<i>LRM</i>s) have enabled <i>agentic search</i> systems to perform complex multi-step reasoning across multiple sources. However, most studies focus on general information retrieval and rarely explore vertical domains with unique challenges. In this work, we focus on local life services and introduce <b>LocalSearchBench</b>, which encompasses diverse and complex business scenarios. Real-world queries in this domain are often ambiguous and require multi-hop reasoning across merchants and products, remaining challenging and not fully addressed. As the first comprehensive benchmark for <i>agentic search</i> in local life services, <b>LocalSearchBench</b> comprises a database of over <b>1.3M</b> merchant entries across <b>6</b> service categories and <b>9</b> major cities, and <b>900</b> multi-hop QA tasks from real user queries that require multi-step reasoning. We also developed <b>LocalPlayground</b>, a unified environment integrating multiple tools for <i>LRM</i>s interaction. Experiments show that even state-of-the-art <i>LRM</i>s struggle on <b>LocalSearchBench</b>: the best model (DeepSeek-V3.2) achieves only <b>35.60%</b> correctness, and most models have issues with completeness (average <b>60.32%</b>) and faithfulness (average <b>30.72%</b>). This highlights the need for specialized benchmarks and domain-specific agent training in local life services. Code, Benchmark, and Leaderboard are available at <a href="https://localsearchbench.github.io">localsearchbench.github.io</a>.
           </p>
         </div>
       </div>
@@ -855,45 +855,45 @@
           </tr>
           
           <!-- Mainstream Models -->
-          <tr data-values='[1.73, 2.42, 18.56, 45.44, 66.02, 28.85, 77.47]'>
+          <tr data-values='[1.73, 2.42, 18.47, 45.37, 65.93, 28.76, 77.38]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1</strong></td>
             <td>1.73</td>
             <td>2.42</td>
-            <td>18.56</td>
-            <td>45.44</td>
-            <td>66.02</td>
-            <td>28.85</td>
-            <td>77.47</td>
+            <td>18.47</td>
+            <td>45.37</td>
+            <td>65.93</td>
+            <td>28.76</td>
+            <td>77.38</td>
           </tr>
-          <tr data-values='[2.91, 3.38, 31.60, 69.71, 70.80, 33.98, 81.96]'>
+          <tr data-values='[2.91, 3.38, 31.53, 69.64, 70.72, 33.89, 81.87]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="o3" class="model-logo"> <strong>o3(high)</strong></td>
             <td>2.91</td>
             <td>3.38</td>
-            <td>31.60</td>
-            <td>69.71</td>
-            <td>70.80</td>
-            <td>33.98</td>
-            <td>81.96</td>
+            <td>31.53</td>
+            <td>69.64</td>
+            <td>70.72</td>
+            <td>33.89</td>
+            <td>81.87</td>
           </tr>
-          <tr data-values='[1.84, 2.51, 21.04, 58.51, 68.13, 35.81, 79.79]'>
+          <tr data-values='[1.84, 2.51, 20.97, 58.44, 68.04, 35.72, 79.70]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash</strong></td>
             <td>1.84</td>
             <td>2.51</td>
-            <td>21.04</td>
-            <td>58.51</td>
-            <td>68.13</td>
-            <td>35.81</td>
-            <td>79.79</td>
+            <td>20.97</td>
+            <td>58.44</td>
+            <td>68.04</td>
+            <td>35.72</td>
+            <td>79.70</td>
           </tr>
-          <tr data-values='[2.75, 3.10, 32.41, 71.10, 71.21, 35.02, 82.41]'>
+          <tr data-values='[2.75, 3.10, 32.34, 71.03, 71.12, 34.93, 82.32]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro</strong></td>
             <td>2.75</td>
             <td>3.10</td>
-            <td>32.41</td>
-            <td>71.10</td>
-            <td>71.21</td>
-            <td>35.02</td>
-            <td>82.41</td>
+            <td>32.34</td>
+            <td>71.03</td>
+            <td>71.12</td>
+            <td>34.93</td>
+            <td>82.32</td>
           </tr>
           
           <!-- LongCat Series -->
@@ -941,25 +941,25 @@
           </tr>
           
           <!-- Deepseek Series -->
-          <tr data-values='[3.21, 4.20, 32.93, 77.63, 71.01, 39.87, 81.22]'>
-            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/ thinking)</strong></td>
+          <tr data-values='[3.21, 4.20, 35.60, 77.56, 70.92, 39.78, 81.13]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>DeepSeek-V3.2 (w/ thinking)</strong></td>
             <td>3.21</td>
             <td>4.20</td>
-            <td>32.93</td>
-            <td>77.63</td>
-            <td>71.01</td>
-            <td>39.87</td>
-            <td>81.22</td>
+            <td>35.60</td>
+            <td>77.56</td>
+            <td>70.92</td>
+            <td>39.78</td>
+            <td>81.13</td>
           </tr>
-          <tr data-values='[3.12, 4.11, 32.81, 77.15, 70.21, 36.05, 81.61]'>
-            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/o thinking)</strong></td>
+          <tr data-values='[3.12, 4.11, 32.74, 77.08, 70.12, 35.96, 81.52]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>DeepSeek-V3.2 (w/o thinking)</strong></td>
             <td>3.12</td>
             <td>4.11</td>
-            <td>32.81</td>
-            <td>77.15</td>
-            <td>70.21</td>
-            <td>36.05</td>
-            <td>81.61</td>
+            <td>32.74</td>
+            <td>77.08</td>
+            <td>70.12</td>
+            <td>35.96</td>
+            <td>81.52</td>
           </tr>
         </tbody>
       </table>
@@ -980,83 +980,83 @@
         </thead>
         <tbody>
           <!-- Qwen3 Series -->
-          <tr data-values='[80.40, 45.75, 52.04, 48.63]'>
+          <tr data-values='[80.42, 45.75, 52.04, 48.63]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/ thinking)</strong></td>
-            <td>80.40</td>
+            <td>80.42</td>
             <td>45.75</td>
             <td>52.04</td>
             <td>48.63</td>
           </tr>
-          <tr data-values='[75.20, 43.61, 50.68, 45.99]'>
+          <tr data-values='[75.22, 43.61, 50.68, 45.99]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-235B-A22B (w/o thinking)</strong></td>
-            <td>75.20</td>
+            <td>75.22</td>
             <td>43.61</td>
             <td>50.68</td>
             <td>45.99</td>
           </tr>
-          <tr data-values='[75.00, 46.99, 48.87, 49.13]'>
+          <tr data-values='[75.06, 46.99, 48.87, 49.13]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/ thinking)</strong></td>
-            <td>75.00</td>
+            <td>75.06</td>
             <td>46.99</td>
             <td>48.87</td>
             <td>49.13</td>
           </tr>
-          <tr data-values='[74.60, 46.52, 48.82, 49.84]'>
+          <tr data-values='[74.67, 46.52, 48.82, 49.84]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-32B (w/o thinking)</strong></td>
-            <td>74.60</td>
+            <td>74.67</td>
             <td>46.52</td>
             <td>48.82</td>
             <td>49.84</td>
           </tr>
-          <tr data-values='[81.70, 47.24, 52.52, 51.65]'>
+          <tr data-values='[81.19, 47.24, 52.52, 51.65]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/ thinking)</strong></td>
-            <td>81.70</td>
+            <td>81.19</td>
             <td>47.24</td>
             <td>52.52</td>
             <td>51.65</td>
           </tr>
-          <tr data-values='[80.40, 46.44, 50.96, 50.02]'>
+          <tr data-values='[80.46, 46.44, 50.96, 50.02]'>
             <td><img src="static/images/logo/qwen.png" alt="Qwen" class="model-logo"> <strong>Qwen3-14B (w/o thinking)</strong></td>
-            <td>80.40</td>
+            <td>80.46</td>
             <td>46.44</td>
             <td>50.96</td>
             <td>50.02</td>
           </tr>
           
           <!-- Mainstream Models -->
-          <tr data-values='[68.40, 38.62, 45.83, 42.29]'>
+          <tr data-values='[68.47, 38.62, 45.83, 42.29]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="GPT" class="model-logo"> <strong>GPT-4.1</strong></td>
-            <td>68.40</td>
+            <td>68.47</td>
             <td>38.62</td>
             <td>45.83</td>
             <td>42.29</td>
           </tr>
-          <tr data-values='[75.90, 44.71, 51.78, 42.96]'>
+          <tr data-values='[75.93, 44.71, 51.78, 42.96]'>
             <td><img src="static/images/logo/icon-chatgpt (1).png" alt="o3" class="model-logo"> <strong>o3(high)</strong></td>
-            <td>75.90</td>
+            <td>75.93</td>
             <td>44.71</td>
             <td>51.78</td>
             <td>42.96</td>
           </tr>
-          <tr data-values='[70.50, 41.61, 48.94, 46.91]'>
+          <tr data-values='[70.58, 41.61, 48.94, 46.91]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Flash</strong></td>
-            <td>70.50</td>
+            <td>70.58</td>
             <td>41.61</td>
             <td>48.94</td>
             <td>46.91</td>
           </tr>
-          <tr data-values='[77.30, 45.73, 52.87, 41.78]'>
+          <tr data-values='[77.31, 45.73, 52.87, 41.78]'>
             <td><img src="static/images/logo/google.png" alt="Gemini" class="model-logo"> <strong>Gemini-2.5-Pro</strong></td>
-            <td>77.30</td>
+            <td>77.31</td>
             <td>45.73</td>
             <td>52.87</td>
             <td>41.78</td>
           </tr>
           
           <!-- LongCat Series -->
-          <tr data-values='[77.80, 47.33, 50.86, 52.29]'>
+          <tr data-values='[77.78, 47.33, 50.86, 52.29]'>
             <td><img src="static/images/logo/longcat.png" alt="LongCat" class="model-logo"> <strong>LongCat-Flash-Chat</strong></td>
-            <td>77.80</td>
+            <td>77.78</td>
             <td>47.33</td>
             <td>50.86</td>
             <td>52.29</td>
@@ -1070,32 +1070,32 @@
           </tr>
           
           <!-- GLM Series -->
-          <tr data-values='[77.70, 48.90, 52.67, 54.43]'>
+          <tr data-values='[77.66, 48.90, 52.67, 54.43]'>
             <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/ thinking)</strong></td>
-            <td>77.70</td>
+            <td>77.66</td>
             <td>48.90</td>
             <td>52.67</td>
             <td>54.43</td>
           </tr>
-          <tr data-values='[74.30, 48.44, 50.79, 52.76]'>
+          <tr data-values='[74.28, 48.44, 50.79, 52.76]'>
             <td><img src="static/images/logo/logo_chatglm.png" alt="GLM" class="model-logo"> <strong>GLM-4.6 (w/o thinking)</strong></td>
-            <td>74.30</td>
+            <td>74.28</td>
             <td>48.44</td>
             <td>50.79</td>
             <td>52.76</td>
           </tr>
           
           <!-- Deepseek Series -->
-          <tr data-values='[75.60, 48.86, 52.62, 54.83]'>
-            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/ thinking)</strong></td>
-            <td>75.60</td>
+          <tr data-values='[75.58, 48.86, 52.62, 54.83]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>DeepSeek-V3.2 (w/ thinking)</strong></td>
+            <td>75.58</td>
             <td>48.86</td>
             <td>52.62</td>
             <td>54.83</td>
           </tr>
-          <tr data-values='[75.50, 48.49, 52.23, 54.33]'>
-            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>Deepseek-V3.2 (w/o thinking)</strong></td>
-            <td>75.50</td>
+          <tr data-values='[75.51, 48.49, 52.23, 54.33]'>
+            <td><img src="static/images/logo/deepseek.png" alt="Deepseek" class="model-logo"> <strong>DeepSeek-V3.2 (w/o thinking)</strong></td>
+            <td>75.51</td>
             <td>48.49</td>
             <td>52.23</td>
             <td>54.33</td>
